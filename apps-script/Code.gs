@@ -135,6 +135,18 @@ function doGet(e) {
         result = markDocumentRead({ id: e.parameter.id, email: auth.email });
         break;
 
+      case 'saveConsent': {
+        let items = {};
+        try { items = JSON.parse(e.parameter.items || '{}'); } catch (err) {}
+        result = saveConsent({
+          email: auth.email,
+          version: e.parameter.version,
+          items: items,
+          userAgent: e.parameter.userAgent || ''
+        });
+        break;
+      }
+
       case 'legalText':
         // Devuelve los textos legales actuales (pública, sin auth)
         result = getLegalText();
