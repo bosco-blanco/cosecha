@@ -230,6 +230,85 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg2
 @keyframes tI{from{opacity:0;transform:translateY(-12px)}to{opacity:1;transform:translateY(0)}}
 @keyframes tO{from{opacity:1}to{opacity:0}}
 input[type="file"]{display:none}
+
+/* ===== CRM EXTENSIONS ===== */
+/* Sync indicator */
+.sync-b{position:fixed;top:calc(var(--safe-t) + 10px);right:12px;z-index:250;display:none;align-items:center;gap:6px;padding:6px 10px;border-radius:var(--r-full);background:var(--bg);border:1px solid var(--border);font-size:11px;font-weight:600;color:var(--t3);box-shadow:var(--shadow)}
+.sync-b.show{display:inline-flex}
+.sync-b .sd{width:6px;height:6px;border-radius:50%;background:var(--green);animation:bk 1.4s infinite}
+.sync-b.off .sd{background:var(--t3);animation:none}
+.sync-b.err .sd{background:var(--red)}
+
+/* Dashboard */
+.dash{padding:14px 16px 90px}
+.dash-h{font-size:22px;font-weight:800;letter-spacing:-0.4px;margin-bottom:2px}
+.dash-s{font-size:13px;color:var(--t3);margin-bottom:18px}
+.kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px}
+.kpi{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:14px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:2.5px}
+.kpi.k-wine::before{background:var(--wine)}.kpi.k-green::before{background:var(--green)}.kpi.k-blue::before{background:var(--blue)}.kpi.k-gold::before{background:var(--gold)}
+.kpi-ic{font-size:18px;margin-bottom:6px}
+.kpi-v{font-size:24px;font-weight:800;letter-spacing:-0.5px;line-height:1}
+.kpi-l{font-size:11px;color:var(--t3);font-weight:600;margin-top:4px;text-transform:uppercase;letter-spacing:.4px}
+.kpi-d{font-size:10px;color:var(--green);font-weight:700;margin-top:3px}
+.kpi-d.down{color:var(--red)}
+.dash-sec{margin-bottom:24px}
+.dash-st{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.dash-tt{font-size:12px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.8px}
+.dash-lnk{font-size:12px;color:var(--wine);font-weight:600;cursor:pointer;background:none;border:none;font-family:'Inter',sans-serif}
+.up-ev{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:12px;box-shadow:var(--shadow);cursor:pointer}
+.up-dt{flex-shrink:0;width:44px;text-align:center;padding:6px 0;border-radius:var(--r-sm);background:var(--wine-soft);color:var(--wine)}
+.up-day{font-size:18px;font-weight:800;line-height:1}
+.up-mon{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;margin-top:1px}
+.up-inf{flex:1;min-width:0}
+.up-t{font-size:14px;font-weight:600;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.up-m{font-size:11px;color:var(--t3)}
+
+/* Tabs (internal) */
+.tabs{display:flex;gap:4px;padding:0 16px 12px;border-bottom:1px solid var(--border);margin-bottom:14px}
+.tab{flex:1;padding:10px 8px;background:none;border:none;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;color:var(--t3);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s}
+.tab.on{color:var(--wine);border-bottom-color:var(--wine)}
+
+/* Search bar */
+.srch-bar{padding:0 16px 12px}
+.srch{width:100%;padding:11px 14px 11px 38px;border:1.5px solid var(--border);border-radius:var(--r-full);font-family:'Inter',sans-serif;font-size:14px;background:var(--bg) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='2.5' stroke-linecap='round'><circle cx='11' cy='11' r='8'/><path d='M21 21l-4.35-4.35'/></svg>") no-repeat 14px center;color:var(--t1)}
+.srch:focus{outline:none;border-color:var(--wine);box-shadow:0 0 0 3px var(--wine-soft)}
+
+/* Contact card */
+.ctc{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:8px;cursor:pointer;box-shadow:var(--shadow);display:flex;align-items:center;gap:12px}
+.ctc:active{transform:scale(.99)}
+.ctc-av{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#fff;flex-shrink:0}
+.ctc-inf{flex:1;min-width:0}
+.ctc-n{font-size:15px;font-weight:600;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ctc-m{font-size:12px;color:var(--t3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ctc-tg{display:inline-block;font-size:9px;font-weight:700;padding:2px 7px;border-radius:var(--r-full);text-transform:uppercase;letter-spacing:.3px;margin-top:4px}
+.ct-cliente{background:var(--green-soft);color:var(--green)}.ct-proveedor{background:var(--orange-soft);color:var(--orange)}.ct-partner{background:var(--purple-soft);color:var(--purple)}.ct-lead{background:var(--blue-soft);color:var(--blue)}
+
+/* Pipeline/deals */
+.deal-stg{display:flex;gap:10px;overflow-x:auto;padding:0 16px 20px;scroll-snap-type:x mandatory;scrollbar-width:none}
+.deal-stg::-webkit-scrollbar{display:none}
+.dstg{min-width:260px;max-width:260px;scroll-snap-align:start;flex-shrink:0}
+.dstg-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;padding:0 2px}
+.dstg-l{display:flex;align-items:center;gap:8px}
+.dstg-b{width:3px;height:22px;border-radius:2px}
+.dstg-n{font-size:14px;font-weight:700;letter-spacing:-0.2px}
+.dstg-v{font-size:10px;font-weight:700;color:var(--t3);background:var(--bg3);padding:3px 8px;border-radius:var(--r-full)}
+.deal-c{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:12px;margin-bottom:8px;cursor:pointer;box-shadow:var(--shadow)}
+.deal-c:active{transform:scale(.98)}
+.deal-t{font-size:14px;font-weight:600;margin-bottom:4px;line-height:1.3}
+.deal-co{font-size:11px;color:var(--t3);margin-bottom:8px}
+.deal-ft{display:flex;align-items:center;justify-content:space-between}
+.deal-val{font-size:14px;font-weight:800;color:var(--wine)}
+.deal-pr{font-size:10px;color:var(--t3);font-weight:600}
+
+/* Empty states */
+.empty{text-align:center;padding:48px 20px;color:var(--t3)}
+.empty-ic{font-size:42px;margin-bottom:10px;opacity:.5}
+.empty-t{font-size:14px;font-weight:600;color:var(--t2);margin-bottom:4px}
+.empty-s{font-size:12px;margin-bottom:16px}
+
+/* Placeholder badge */
+.soon{display:inline-block;font-size:9px;font-weight:700;padding:2px 7px;border-radius:var(--r-full);background:var(--gold-soft);color:var(--gold);text-transform:uppercase;letter-spacing:.3px;margin-left:6px;vertical-align:middle}
 </style>
 </head>
 <body>
@@ -242,9 +321,60 @@ input[type="file"]{display:none}
   <div class="pills" id="pills"></div>
 </header>
 
-<div id="v-board" class="view active"><div class="cdots" id="dots"></div><div class="ctrack" id="track"></div></div>
-<div id="v-my" class="view" style="padding:14px 0 90px"><div class="sec"><div class="sec-t">Mis tareas</div><div id="myL"></div></div></div>
-<div id="v-meet" class="view" style="padding:14px 0 90px"><div class="sec"><div class="sec-t">Reuniones</div><div id="meetL"></div></div></div>
+<!-- Sync indicator -->
+<div class="sync-b" id="syncB"><span class="sd"></span><span id="syncT">Sincronizado</span></div>
+
+<!-- DASHBOARD -->
+<div id="v-dash" class="view active"><div class="dash">
+  <div class="dash-h">Hola, Bosco 👋</div>
+  <div class="dash-s" id="dashSub">Aquí tienes el resumen de hoy</div>
+  <div class="kpi-grid" id="kpiGrid"></div>
+  <div class="dash-sec">
+    <div class="dash-st"><div class="dash-tt">Próximos eventos</div><button class="dash-lnk" onclick="go('agenda')">Ver todo →</button></div>
+    <div id="upcomingL"></div>
+  </div>
+  <div class="dash-sec">
+    <div class="dash-st"><div class="dash-tt">Pipeline activo</div><button class="dash-lnk" onclick="go('crm');setCrmTab('pipeline')">Ver pipeline →</button></div>
+    <div id="dashPipe"></div>
+  </div>
+  <div class="dash-sec">
+    <div class="dash-st"><div class="dash-tt">Actividad reciente</div><button class="dash-lnk" onclick="go('mas')">Ver todo →</button></div>
+    <div id="dashAct"></div>
+  </div>
+</div></div>
+
+<!-- CRM (Contactos + Pipeline) -->
+<div id="v-crm" class="view">
+  <div class="tabs"><button class="tab on" data-ct="contactos" onclick="setCrmTab('contactos')">👥 Contactos</button><button class="tab" data-ct="pipeline" onclick="setCrmTab('pipeline')">💰 Pipeline</button></div>
+  <div id="ct-contactos" class="ct-pane">
+    <div class="srch-bar"><input class="srch" id="ctSrch" placeholder="Buscar contactos..." oninput="rContacts()"></div>
+    <div class="tabs" style="border:none;padding:0 16px 10px;margin-bottom:4px"><button class="pill on" data-cf="all" onclick="setCtFilter('all')">Todos</button><button class="pill" data-cf="cliente" onclick="setCtFilter('cliente')">Clientes</button><button class="pill" data-cf="proveedor" onclick="setCtFilter('proveedor')">Proveedores</button><button class="pill" data-cf="partner" onclick="setCtFilter('partner')">Partners</button><button class="pill" data-cf="lead" onclick="setCtFilter('lead')">Leads</button></div>
+    <div class="sec" style="padding-bottom:90px"><div id="contactsL"></div></div>
+  </div>
+  <div id="ct-pipeline" class="ct-pane" style="display:none">
+    <div style="padding:0 16px 12px;display:flex;align-items:center;justify-content:space-between">
+      <div><div style="font-size:20px;font-weight:800" id="pipeTotal">0 €</div><div style="font-size:11px;color:var(--t3);font-weight:600;text-transform:uppercase;letter-spacing:.4px">Valor pipeline</div></div>
+      <div style="text-align:right"><div style="font-size:20px;font-weight:800;color:var(--wine)" id="pipeWeight">0 €</div><div style="font-size:11px;color:var(--t3);font-weight:600;text-transform:uppercase;letter-spacing:.4px">Ponderado</div></div>
+    </div>
+    <div class="deal-stg" id="dealTrack"></div>
+  </div>
+</div>
+
+<!-- AGENDA (Calendario + Tablero + Reuniones) -->
+<div id="v-agenda" class="view">
+  <div class="tabs"><button class="tab on" data-at="board" onclick="setAgTab('board')">📋 Tablero</button><button class="tab" data-at="meet" onclick="setAgTab('meet')">🎙️ Reuniones</button><button class="tab" data-at="cal" onclick="setAgTab('cal')">📅 Calendar<span class="soon">pronto</span></button></div>
+  <div id="ag-board" class="ag-pane"><div class="cdots" id="dots"></div><div class="ctrack" id="track"></div></div>
+  <div id="ag-meet" class="ag-pane" style="display:none;padding:0 0 90px"><div class="sec"><div class="sec-t">Reuniones</div><div id="meetL"></div></div></div>
+  <div id="ag-cal" class="ag-pane" style="display:none;padding:0 16px 90px"><div class="empty"><div class="empty-ic">📅</div><div class="empty-t">Calendario próximamente</div><div class="empty-s">Se sincronizará con Google Calendar vía el backend de Apps Script</div></div></div>
+</div>
+
+<!-- MÁS -->
+<div id="v-mas" class="view" style="padding:14px 16px 90px">
+  <div class="sec-t">Mis tareas</div><div id="myL"></div>
+  <div class="sec-t" style="margin-top:20px">Actividad</div><div id="actL"></div>
+</div>
+
+<div id="v-board-legacy" class="view" style="display:none"></div>
 <div id="v-rec" class="view"><div class="rec-scr" id="recScr">
   <div class="rec-bar" id="recBar"><span class="rdot"></span><span id="recBarTxt">GRABANDO</span></div>
   <div class="rec-tmr" id="recTimer">00:00</div>
@@ -254,18 +384,57 @@ input[type="file"]{display:none}
   <div class="rec-ctrl"><button class="rc rc-act" onclick="addBM()">🔖</button><button class="rc rc-mic" id="micBtn" onclick="togMic()">🎙️</button><button class="rc rc-end" onclick="openSh('end-sh')">⏹️</button></div>
   <div class="qp"><div class="qp-c"><div class="qp-t">📌 Notas</div><textarea id="qN" placeholder="Notas..."></textarea></div><div class="qp-c"><div class="qp-t">✅ Acciones</div><div id="aiL"></div><div class="ai-add"><input id="aiIn" placeholder="Acción..." onkeydown="if(event.key==='Enter')addAi()"><button class="btn btn-p btn-sm" onclick="addAi()" style="padding:7px 10px;width:auto;">+</button></div></div></div>
 </div></div>
-<div id="v-act" class="view" style="padding:14px 16px 90px"><div class="sec-t">Actividad</div><div id="actL"></div></div>
-
 <nav class="bnav">
-  <button class="nb on" data-v="board" onclick="go('board')"><span class="ni">📊</span>Tablero</button>
-  <button class="nb" data-v="my" onclick="go('my')"><span class="ni">✅</span>Tareas</button>
+  <button class="nb on" data-v="dash" onclick="go('dash')"><span class="ni">🏠</span>Inicio</button>
+  <button class="nb" data-v="crm" onclick="go('crm')"><span class="ni">👥</span>CRM</button>
   <button class="fab" onclick="openSh('fab-sh')">＋</button>
-  <button class="nb" data-v="meet" onclick="go('meet')"><span class="ni">🎙️</span>Reuniones</button>
-  <button class="nb" data-v="act" onclick="go('act')"><span class="ni">📣</span>Actividad</button>
+  <button class="nb" data-v="agenda" onclick="go('agenda')"><span class="ni">📅</span>Agenda</button>
+  <button class="nb" data-v="mas" onclick="go('mas')"><span class="ni">⋯</span>Más</button>
 </nav>
 
 <!-- SHEETS -->
-<div class="sh-bg" id="fab-sh"><div class="sh" style="max-height:auto"><div class="sh-bar"></div><div class="sh-tl">Crear</div><div class="sh-sb">¿Qué quieres añadir?</div><button class="btn btn-p" style="margin-bottom:8px" onclick="closeSh('fab-sh');openSh('newtask-sh')">📋 Nueva tarea</button><button class="btn btn-g" style="margin-bottom:8px;border-color:var(--wine);color:var(--wine)" onclick="closeSh('fab-sh');openSh('newmeet-sh')">🎙️ Nueva reunión</button><button class="btn btn-g" onclick="closeSh('fab-sh')">Cancelar</button></div></div>
+<div class="sh-bg" id="fab-sh"><div class="sh" style="max-height:auto"><div class="sh-bar"></div><div class="sh-tl">Crear</div><div class="sh-sb">¿Qué quieres añadir?</div>
+<button class="btn btn-p" style="margin-bottom:8px" onclick="closeSh('fab-sh');openSh('newcontact-sh')">👤 Nuevo contacto</button>
+<button class="btn btn-g" style="margin-bottom:8px;border-color:var(--wine);color:var(--wine)" onclick="closeSh('fab-sh');openSh('newdeal-sh')">💰 Nueva oportunidad</button>
+<button class="btn btn-g" style="margin-bottom:8px" onclick="closeSh('fab-sh');openSh('newtask-sh')">📋 Nueva tarea</button>
+<button class="btn btn-g" style="margin-bottom:8px" onclick="closeSh('fab-sh');openSh('newmeet-sh')">🎙️ Nueva reunión</button>
+<button class="btn btn-g" onclick="closeSh('fab-sh')">Cancelar</button></div></div>
+
+<!-- Nuevo contacto -->
+<div class="sh-bg" id="newcontact-sh"><div class="sh"><div class="sh-bar"></div><div class="sh-tl">Nuevo contacto</div><div class="sh-sb">Añade a tu CRM</div>
+  <div class="fg"><label class="fl">Nombre completo</label><input class="fi" id="ncN" placeholder="Ej: Laura Martínez"></div>
+  <div class="fg"><label class="fl">Email</label><input class="fi" id="ncE" type="email" placeholder="laura@empresa.com"></div>
+  <div class="fg"><label class="fl">Teléfono</label><input class="fi" id="ncP" type="tel" placeholder="+34 600 000 000"></div>
+  <div class="fg"><label class="fl">Empresa</label><input class="fi" id="ncCo" placeholder="Empresa S.L."></div>
+  <div class="fg"><label class="fl">Tipo</label>
+    <div class="pri-row" id="ncT">
+      <div class="po" data-t="cliente" onclick="sCt(this,'cliente')">🟢 Cliente</div>
+      <div class="po" data-t="proveedor" onclick="sCt(this,'proveedor')">🟠 Proveedor</div>
+      <div class="po" data-t="partner" onclick="sCt(this,'partner')">🟣 Partner</div>
+      <div class="po" data-t="lead" onclick="sCt(this,'lead')">🔵 Lead</div>
+    </div>
+  </div>
+  <div class="fg"><label class="fl">Notas</label><textarea class="fta" id="ncNo" placeholder="Información relevante..."></textarea></div>
+  <button class="btn btn-p" onclick="createContact()">👤 Crear contacto</button>
+  <button class="btn btn-g" style="margin-top:8px" onclick="closeSh('newcontact-sh')">Cancelar</button>
+</div></div>
+
+<!-- Nueva oportunidad -->
+<div class="sh-bg" id="newdeal-sh"><div class="sh"><div class="sh-bar"></div><div class="sh-tl">Nueva oportunidad</div><div class="sh-sb">Añade al pipeline</div>
+  <div class="fg"><label class="fl">Título</label><input class="fi" id="ndT" placeholder="Ej: Catering corporativo AZCA"></div>
+  <div class="fg"><label class="fl">Contacto</label><select class="fsel" id="ndC"><option value="">Seleccionar contacto</option></select></div>
+  <div class="fg"><label class="fl">Valor (€)</label><input class="fi" id="ndV" type="number" placeholder="0"></div>
+  <div class="fg"><label class="fl">Etapa</label><select class="fsel" id="ndS"><option value="lead">🌱 Lead</option><option value="calificado">✨ Calificado</option><option value="propuesta">📄 Propuesta</option><option value="negociacion">🤝 Negociación</option><option value="cerrado-ganado">🏆 Cerrado (ganado)</option><option value="cerrado-perdido">❌ Cerrado (perdido)</option></select></div>
+  <div class="fg"><label class="fl">Probabilidad (%)</label><input class="fi" id="ndP" type="number" min="0" max="100" placeholder="50"></div>
+  <div class="fg"><label class="fl">Cierre esperado</label><input class="fi" id="ndD" type="date"></div>
+  <div class="fg"><label class="fl">Notas</label><textarea class="fta" id="ndNo" placeholder="Detalles..."></textarea></div>
+  <button class="btn btn-p" onclick="createDeal()">💰 Crear oportunidad</button>
+  <button class="btn btn-g" style="margin-top:8px" onclick="closeSh('newdeal-sh')">Cancelar</button>
+</div></div>
+
+<!-- Detalle contacto -->
+<div class="sh-bg" id="ctdet-sh"><div class="sh" id="ctdetC"></div></div>
+<div class="sh-bg" id="ddet-sh"><div class="sh" id="ddetC"></div></div>
 
 <div class="sh-bg" id="newtask-sh"><div class="sh"><div class="sh-bar"></div><div class="sh-tl">Nueva tarea</div><div class="sh-sb">Añade a la cosecha</div>
   <div class="fg"><label class="fl">Título</label><input class="fi" id="ntT" placeholder="¿Qué hay que hacer?"></div>
@@ -302,7 +471,13 @@ input[type="file"]{display:none}
 <div class="sh-bg" id="det-sh"><div class="sh" id="detC"></div></div>
 <div class="sh-bg" id="msum-sh"><div class="sh" id="msC"></div></div>
 <div class="sh-bg" id="notif-sh"><div class="sh"><div class="sh-bar"></div><div class="sh-tl">Notificaciones</div><div id="notL"></div><button class="btn btn-g" style="margin-top:14px" onclick="closeSh('notif-sh')">Cerrar</button></div></div>
-<div class="sh-bg" id="settings-sh"><div class="sh"><div class="sh-bar"></div><div class="sh-tl">Integraciones</div><div class="sh-sb">Notificaciones automáticas</div>
+<div class="sh-bg" id="settings-sh"><div class="sh"><div class="sh-bar"></div><div class="sh-tl">Configuración</div><div class="sh-sb">Conecta tu backend y Slack</div>
+  <div class="fg"><label class="fl">🔗 URL Backend (Apps Script)</label><input class="fi" id="cfgApi" placeholder="https://script.google.com/macros/s/.../exec"><div style="font-size:11px;color:var(--t3);margin-top:4px">Despliega apps-script/ en script.google.com</div></div>
+  <div class="fg"><label class="fl">💬 Webhook Slack (opcional)</label><input class="fi" id="cfgSlack" placeholder="https://hooks.slack.com/services/..."></div>
+  <button class="btn btn-p" onclick="saveCfg()">💾 Guardar configuración</button>
+  <button class="btn btn-g" style="margin-top:8px" onclick="testSync()">🔄 Probar conexión</button>
+  <div style="height:1px;background:var(--border);margin:20px 0"></div>
+  <div class="sh-sb">Integraciones automáticas</div>
   <div class="gw-row"><div class="gw-ic" style="background:var(--red-soft)">✉️</div><div class="gw-inf"><div class="gw-nm">Gmail</div><div class="gw-st">Email al completar/finalizar</div></div><button class="tog on" onclick="this.classList.toggle('on')"></button></div>
   <div class="gw-row"><div class="gw-ic" style="background:var(--purple-soft)">💬</div><div class="gw-inf"><div class="gw-nm">Slack</div><div class="gw-st">Notificaciones a canales</div></div><button class="tog on" onclick="this.classList.toggle('on')"></button></div>
   <div class="gw-row"><div class="gw-ic" style="background:var(--blue-soft)">📅</div><div class="gw-inf"><div class="gw-nm">Calendar</div><div class="gw-st">Fechas y reuniones</div></div><button class="tog on" onclick="this.classList.toggle('on')"></button></div>
@@ -323,8 +498,26 @@ let acts=[{ic:'✅',bg:'var(--green-soft)',w:'Saúl',a:'completó',wh:'Menú eje
 let nots=[{ic:'✅',msg:'<b>Saúl</b> completó "Menú ejecutivo"',tm:'2h'},{ic:'🎙️',msg:'Reunión <b>Revisión semanal</b> transcrita',tm:'4h'},{ic:'⚠️',msg:'Oferta gestor vence mañana',tm:'6h'}];
 let mS={atts:[],ais:[],transcript:[],isRec:false,isPaused:false,recognition:null,timer:null,start:null,wakeLock:null,cur:null};
 let ntPri='medium',ntLbl='',ntTm=[],ntPh=[];
+
+// CRM state
+let contacts=[];
+let deals=[];
+let ncType='lead';
+let ctFilter='all';
+let crmTab='contactos';
+let agTab='board';
+let cfg={apiUrl:'',slackWebhook:''};
+const DEAL_STAGES=[
+  {id:'lead',n:'Lead',e:'🌱',c:'#8B7355'},
+  {id:'calificado',n:'Calificado',e:'✨',c:'#2B7BD4'},
+  {id:'propuesta',n:'Propuesta',e:'📄',c:'#C4952E'},
+  {id:'negociacion',n:'Negociación',e:'🤝',c:'#D97C1E'},
+  {id:'cerrado-ganado',n:'Ganado',e:'🏆',c:'#1B9E5A'},
+  {id:'cerrado-perdido',n:'Perdido',e:'❌',c:'#D93B3B'}
+];
+const LS_KEY='cosecha_data_v1';
 function $(id){return document.getElementById(id)}
-function R(){rPills();rBoard();rDots();rMy();rMeet();rAct();rNot();rTmP();}
+function R(){rPills();rBoard();rDots();rMy();rMeet();rAct();rNot();rTmP();rDash();rContacts();rDeals();}
 function rPills(){$('pills').innerHTML=PJ.map(p=>`<button class="pill ${p.id===cP?'on':''}" onclick="cP='${p.id}';R()">${p.e} ${p.n}</button>`).join('');}
 function rBoard(){const pt=tasks.filter(x=>x.pj===cP);$('track').innerHTML=CO.map(col=>{const ct=pt.filter(x=>x.col===col.id);return`<div class="col"><div class="col-hd"><div class="col-l"><div class="col-bar" style="background:${col.c}"></div><span class="col-nm">${col.n}</span><span class="col-ct">${ct.length}</span></div><button class="col-add" onclick="$('ntC').value='${col.id}';openSh('newtask-sh')">＋</button></div>${ct.map(cH).join('')}</div>`;}).join('');}
 function cH(t){const dn=t.sub.filter(s=>s.d).length,tot=t.sub.length,pct=tot?Math.round(dn/tot*100):0;const avs=t.tm.map(id=>TM.find(m=>m.id===id)).filter(Boolean);const isD=t.col==='completado';let dc='due-ok';if(t.due){const d=(new Date(t.due)-new Date())/864e5;if(d<0)dc='due-over';else if(d<3)dc='due-soon';}const dT=t.due?new Date(t.due).toLocaleDateString('es-ES',{day:'numeric',month:'short'}):'';return`<div class="card p-${t.pri} ${isD?'done':''}" onclick="openDet(${t.id})">${t.lbl?`<div class="cl l-${t.lbl}">${t.lbl}</div>`:''}<div class="c-t">${t.t}</div>${t.d?`<div class="c-d">${t.d}</div>`:''}${t.ph.length?`<div class="c-ph">${t.ph.map(p=>`<div class="c-thb">${p}</div>`).join('')}</div>`:''}${tot?`<div class="pb-r"><div class="pb"><div class="pf" style="width:${pct}%"></div></div><span class="pt">${dn}/${tot}</span></div>`:''}<div class="c-ft"><div class="c-meta">${dT?`<span class="due ${dc}">📅 ${dT}</span>`:''}${t.ph.length?`<span style="font-size:11px;color:var(--t3)">📷${t.ph.length}</span>`:''}</div><div class="avs">${avs.map(a=>`<div class="av" style="background:${a.c}">${a.i}</div>`).join('')}</div></div></div>`;}
@@ -366,12 +559,120 @@ function endMeet(){closeSh('end-sh');mS.isRec=false;if(mS.recognition){mS.recogn
 
 function openMS(id){const m=meetings.find(x=>x.id===id);if(!m)return;$('msC').innerHTML=`<div class="sh-bar"></div><div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px"><span class="sum-bdg sb-mail">✉️ Gmail</span><span class="sum-bdg sb-drive">📁 Drive</span><span class="sum-bdg sb-cal">📅 Calendar</span><span class="sum-bdg sb-slack">💬 ${m.ch}</span></div><div class="sh-tl">${m.title}</div><div class="sh-sb">${new Date(m.date).toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long'})} · ${m.dur} · ${m.loc}</div><div class="det-sec"><div class="det-l">Asistentes</div><div class="avs" style="gap:6px">${m.atts.map(a=>`<div style="display:flex;align-items:center;gap:6px"><div class="av" style="background:${a.c};margin:0;width:28px;height:28px;font-size:10px">${a.i}</div><span style="font-size:13px">${a.n}</span></div>`).join('')}</div></div><div class="det-sec"><div class="det-l">Resumen</div><div style="font-size:14px;line-height:1.6;color:var(--t2)">${m.summary}</div></div><div class="det-sec"><div class="det-l">Puntos clave</div>${m.kp.map(p=>`<div style="display:flex;gap:8px;padding:7px 0;font-size:13px;line-height:1.5;border-bottom:1px solid var(--border)"><div style="width:5px;height:5px;border-radius:50%;background:var(--wine);margin-top:6px;flex-shrink:0"></div><div>${p}</div></div>`).join('')}</div>${m.ais.length?`<div class="det-sec"><div class="det-l">Acciones</div>${m.ais.map(a=>`<div style="font-size:13px;padding:4px 0">• ${a.t} <em style="color:var(--t3)">→ ${a.a}</em></div>`).join('')}</div>`:''}<div class="det-sec"><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;text-align:center"><div><div style="font-size:22px;font-weight:800;color:var(--wine)">${m.dur}</div><div style="font-size:10px;color:var(--t3)">Duración</div></div><div><div style="font-size:22px;font-weight:800;color:var(--wine)">${m.words.toLocaleString()}</div><div style="font-size:10px;color:var(--t3)">Palabras</div></div><div><div style="font-size:22px;font-weight:800;color:var(--wine)">${m.atts.length}</div><div style="font-size:10px;color:var(--t3)">Asistentes</div></div></div></div><div style="display:flex;gap:6px;margin-top:8px"><button class="btn btn-p btn-sm" onclick="toast('📁 Exportado')">📁 Drive</button><button class="btn btn-g btn-sm" onclick="toast('✉️ Reenviado')">✉️ Mail</button><button class="btn btn-g btn-sm" onclick="toast('💬 Slack')">💬 Slack</button></div><button class="btn btn-g" style="margin-top:14px" onclick="closeSh('msum-sh')">Cerrar</button>`;openSh('msum-sh');}
 
-function go(v){document.querySelectorAll('.view').forEach(el=>el.classList.remove('active'));$(`v-${v}`).classList.add('active');document.querySelectorAll('.nb').forEach(b=>b.classList.remove('on'));const btn=document.querySelector(`.nb[data-v="${v}"]`);if(btn)btn.classList.add('on');}
+function go(v){const el=$(`v-${v}`);if(!el)return;document.querySelectorAll('.view').forEach(e=>e.classList.remove('active'));el.classList.add('active');document.querySelectorAll('.nb').forEach(b=>b.classList.remove('on'));const btn=document.querySelector(`.nb[data-v="${v}"]`);if(btn)btn.classList.add('on');window.scrollTo(0,0);}
 function openSh(id){$(id).classList.add('open')}
 function closeSh(id){$(id).classList.remove('open')}
 document.querySelectorAll('.sh-bg').forEach(el=>el.addEventListener('click',e=>{if(e.target===el)el.classList.remove('open')}));
 function toast(msg){const t=document.createElement('div');t.className='toast';t.textContent=msg;$('tw').appendChild(t);setTimeout(()=>t.remove(),4000);}
+
+// ===== DASHBOARD =====
+function fmtEur(n){return (n||0).toLocaleString('es-ES',{style:'currency',currency:'EUR',maximumFractionDigits:0});}
+function rDash(){
+  const openDeals=deals.filter(d=>!d.etapa||(d.etapa!=='cerrado-ganado'&&d.etapa!=='cerrado-perdido'));
+  const pipeTot=openDeals.reduce((s,d)=>s+(+d.valor||0),0);
+  const pipeWt=openDeals.reduce((s,d)=>s+(+d.valor||0)*((+d.probabilidad||0)/100),0);
+  const openTasks=tasks.filter(t=>t.col!=='completado').length;
+  const weekMeetings=meetings.filter(m=>{const d=new Date(m.date);return (Date.now()-d)<7*864e5;}).length;
+  const wonMonth=deals.filter(d=>d.etapa==='cerrado-ganado').reduce((s,d)=>s+(+d.valor||0),0);
+  const kpis=[
+    {ic:'💰',v:fmtEur(pipeTot),l:'Pipeline',d:openDeals.length+' oportunidades',c:'wine'},
+    {ic:'🎯',v:fmtEur(pipeWt),l:'Ponderado',d:'Probabilidad × valor',c:'green'},
+    {ic:'📋',v:openTasks,l:'Tareas activas',d:'En curso',c:'blue'},
+    {ic:'🎙️',v:weekMeetings,l:'Reuniones 7d',d:contacts.length+' contactos',c:'gold'}
+  ];
+  $('kpiGrid').innerHTML=kpis.map(k=>`<div class="kpi k-${k.c}"><div class="kpi-ic">${k.ic}</div><div class="kpi-v">${k.v}</div><div class="kpi-l">${k.l}</div><div class="kpi-d">${k.d}</div></div>`).join('');
+  // Próximos eventos (tareas con fecha + reuniones recientes)
+  const upcoming=[];
+  tasks.filter(t=>t.due&&t.col!=='completado').forEach(t=>{const d=new Date(t.due);if(d>=new Date()-864e5)upcoming.push({type:'task',d,t:t.t,m:'📋 Tarea',id:t.id});});
+  const up=upcoming.sort((a,b)=>a.d-b.d).slice(0,4);
+  $('upcomingL').innerHTML=up.length?up.map(e=>{const d=e.d;const day=d.getDate();const mon=d.toLocaleDateString('es-ES',{month:'short'}).replace('.','').toUpperCase();return`<div class="up-ev" onclick="openDet(${e.id})"><div class="up-dt"><div class="up-day">${day}</div><div class="up-mon">${mon}</div></div><div class="up-inf"><div class="up-t">${e.t}</div><div class="up-m">${e.m}</div></div></div>`;}).join(''):'<div style="color:var(--t3);font-size:13px;padding:14px 0">Sin eventos próximos</div>';
+  // Pipeline resumen
+  const pipeBreak=DEAL_STAGES.filter(s=>!s.id.startsWith('cerrado')).map(s=>{const sd=deals.filter(d=>d.etapa===s.id);const sv=sd.reduce((x,d)=>x+(+d.valor||0),0);return{...s,count:sd.length,val:sv};});
+  $('dashPipe').innerHTML=pipeBreak.every(p=>p.count===0)?'<div style="color:var(--t3);font-size:13px;padding:14px 0">Aún no tienes oportunidades. Pulsa ＋ para crear la primera.</div>':pipeBreak.map(p=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)"><div style="display:flex;align-items:center;gap:10px"><div style="width:3px;height:22px;border-radius:2px;background:${p.c}"></div><div><div style="font-size:13px;font-weight:600">${p.e} ${p.n}</div><div style="font-size:11px;color:var(--t3)">${p.count} oportunidades</div></div></div><div style="font-size:13px;font-weight:700">${fmtEur(p.val)}</div></div>`).join('');
+  // Actividad reciente
+  $('dashAct').innerHTML=acts.slice(0,3).map(a=>`<div class="act-i"><div class="act-ic" style="background:${a.bg}">${a.ic}</div><div><div class="act-txt"><span class="act-b">${a.w}</span> ${a.a} <span class="act-b">${a.wh}</span></div><div class="act-tm">Hace ${a.tm}</div></div></div>`).join('');
+}
+
+// ===== CONTACTOS =====
+function rContacts(){
+  const q=($('ctSrch')?.value||'').toLowerCase();
+  let list=contacts.filter(c=>{
+    if(ctFilter!=='all'&&c.tipo!==ctFilter)return false;
+    if(q&&!(c.nombre||'').toLowerCase().includes(q)&&!(c.empresa||'').toLowerCase().includes(q)&&!(c.email||'').toLowerCase().includes(q))return false;
+    return true;
+  });
+  if(!list.length){$('contactsL').innerHTML=`<div class="empty"><div class="empty-ic">👥</div><div class="empty-t">${contacts.length?'Sin resultados':'Aún no tienes contactos'}</div><div class="empty-s">${contacts.length?'Prueba otro filtro':'Pulsa ＋ para añadir el primero'}</div></div>`;return;}
+  const cols=['#9B2C3E','#1B9E5A','#2B7BD4','#7B5EA7','#D97C1E','#C4952E'];
+  $('contactsL').innerHTML=list.map((c,i)=>{const ini=(c.nombre||'').split(' ').map(w=>w[0]).filter(Boolean).slice(0,2).join('').toUpperCase()||'?';const col=cols[i%cols.length];return`<div class="ctc" onclick="openCtDet('${c.id}')"><div class="ctc-av" style="background:${col}">${ini}</div><div class="ctc-inf"><div class="ctc-n">${c.nombre||'—'}</div><div class="ctc-m">${c.empresa||c.email||'—'}</div><div class="ctc-tg ct-${c.tipo||'lead'}">${c.tipo||'lead'}</div></div></div>`;}).join('');
+  // Actualizar select de deals
+  const sel=$('ndC');if(sel){sel.innerHTML='<option value="">Seleccionar contacto</option>'+contacts.map(c=>`<option value="${c.id}">${c.nombre} ${c.empresa?'· '+c.empresa:''}</option>`).join('');}
+}
+function setCtFilter(f){ctFilter=f;document.querySelectorAll('[data-cf]').forEach(b=>b.classList.toggle('on',b.dataset.cf===f));rContacts();}
+function sCt(el,t){ncType=t;document.querySelectorAll('#ncT .po').forEach(e=>e.className='po');el.className='po s-'+(t==='cliente'?'low':t==='proveedor'?'medium':t==='partner'?'high':'low');}
+function createContact(){
+  const n=$('ncN').value.trim();if(!n)return toast('Nombre requerido');
+  const c={id:'c_'+Date.now(),nombre:n,email:$('ncE').value.trim(),telefono:$('ncP').value.trim(),empresa:$('ncCo').value.trim(),tipo:ncType,notas:$('ncNo').value.trim(),creado:new Date().toISOString()};
+  contacts.unshift(c);
+  acts.unshift({ic:'👤',bg:'var(--blue-soft)',w:'Bosco',a:'añadió contacto',wh:n,dt:c.empresa||'',tm:'Ahora'});
+  ['ncN','ncE','ncP','ncCo','ncNo'].forEach(id=>$(id).value='');ncType='lead';
+  closeSh('newcontact-sh');persist();R();toast('👤 Contacto añadido');pushApi('contact',c);
+}
+function openCtDet(id){
+  const c=contacts.find(x=>x.id===id);if(!c)return;
+  const ini=(c.nombre||'').split(' ').map(w=>w[0]).filter(Boolean).slice(0,2).join('').toUpperCase();
+  const cDeals=deals.filter(d=>d.contactoId===id);
+  $('ctdetC').innerHTML=`<div class="sh-bar"></div><div style="display:flex;align-items:center;gap:14px;margin-bottom:16px"><div class="ctc-av" style="background:var(--wine);width:56px;height:56px;font-size:18px">${ini}</div><div><div style="font-size:20px;font-weight:800">${c.nombre}</div><div style="font-size:12px;color:var(--t3)">${c.empresa||''}</div><div class="ctc-tg ct-${c.tipo}" style="margin-top:6px">${c.tipo}</div></div></div>${c.email?`<div class="det-sec"><div class="det-l">Email</div><a href="mailto:${c.email}" style="font-size:14px;color:var(--wine);text-decoration:none">${c.email}</a></div>`:''}${c.telefono?`<div class="det-sec"><div class="det-l">Teléfono</div><a href="tel:${c.telefono}" style="font-size:14px;color:var(--wine);text-decoration:none">${c.telefono}</a></div>`:''}${c.notas?`<div class="det-sec"><div class="det-l">Notas</div><div style="font-size:14px;line-height:1.6;color:var(--t2)">${c.notas}</div></div>`:''}<div class="det-sec"><div class="det-l">Oportunidades (${cDeals.length})</div>${cDeals.length?cDeals.map(d=>`<div style="padding:8px 0;display:flex;justify-content:space-between;font-size:13px"><span>${d.titulo}</span><span style="font-weight:700">${fmtEur(d.valor)}</span></div>`).join(''):'<div style="font-size:13px;color:var(--t3)">Sin oportunidades</div>'}</div><button class="btn btn-d" style="margin-top:14px" onclick="delContact('${id}')">🗑️ Eliminar</button><button class="btn btn-g" style="margin-top:8px" onclick="closeSh('ctdet-sh')">Cerrar</button>`;
+  openSh('ctdet-sh');
+}
+function delContact(id){if(!confirm('¿Eliminar contacto?'))return;contacts=contacts.filter(c=>c.id!==id);closeSh('ctdet-sh');persist();R();toast('Contacto eliminado');}
+
+// ===== DEALS / PIPELINE =====
+function rDeals(){
+  const openDeals=deals.filter(d=>!d.etapa||(d.etapa!=='cerrado-ganado'&&d.etapa!=='cerrado-perdido'));
+  const tot=openDeals.reduce((s,d)=>s+(+d.valor||0),0);
+  const wt=openDeals.reduce((s,d)=>s+(+d.valor||0)*((+d.probabilidad||0)/100),0);
+  if($('pipeTotal'))$('pipeTotal').textContent=fmtEur(tot);
+  if($('pipeWeight'))$('pipeWeight').textContent=fmtEur(wt);
+  const track=$('dealTrack');if(!track)return;
+  track.innerHTML=DEAL_STAGES.map(s=>{
+    const sd=deals.filter(d=>d.etapa===s.id);
+    const sv=sd.reduce((x,d)=>x+(+d.valor||0),0);
+    return`<div class="dstg"><div class="dstg-h"><div class="dstg-l"><div class="dstg-b" style="background:${s.c}"></div><span class="dstg-n">${s.e} ${s.n}</span></div><span class="dstg-v">${sd.length} · ${fmtEur(sv)}</span></div>${sd.length?sd.map(d=>{const co=contacts.find(c=>c.id===d.contactoId);return`<div class="deal-c" onclick="openDDet('${d.id}')"><div class="deal-t">${d.titulo}</div><div class="deal-co">${co?co.nombre:(d.contactoNombre||'Sin contacto')}</div><div class="deal-ft"><div class="deal-val">${fmtEur(d.valor)}</div><div class="deal-pr">${d.probabilidad||0}%</div></div></div>`;}).join(''):'<div style="font-size:11px;color:var(--t3);padding:12px;text-align:center;border:1px dashed var(--border2);border-radius:var(--r-sm)">Vacío</div>'}</div>`;
+  }).join('');
+}
+function createDeal(){
+  const t=$('ndT').value.trim();if(!t)return toast('Título requerido');
+  const cId=$('ndC').value;const co=contacts.find(c=>c.id===cId);
+  const d={id:'d_'+Date.now(),titulo:t,contactoId:cId,contactoNombre:co?.nombre||'',valor:+$('ndV').value||0,etapa:$('ndS').value,probabilidad:+$('ndP').value||0,cierreEsperado:$('ndD').value,notas:$('ndNo').value.trim(),creado:new Date().toISOString()};
+  deals.unshift(d);
+  acts.unshift({ic:'💰',bg:'var(--gold-soft)',w:'Bosco',a:'creó oportunidad',wh:t,dt:fmtEur(d.valor),tm:'Ahora'});
+  ['ndT','ndV','ndP','ndD','ndNo'].forEach(id=>$(id).value='');
+  closeSh('newdeal-sh');persist();R();toast('💰 Oportunidad creada');pushApi('deal',d);
+}
+function openDDet(id){
+  const d=deals.find(x=>x.id===id);if(!d)return;
+  const co=contacts.find(c=>c.id===d.contactoId);
+  $('ddetC').innerHTML=`<div class="sh-bar"></div><div class="sh-tl">${d.titulo}</div><div class="sh-sb">${co?co.nombre+(co.empresa?' · '+co.empresa:''):'Sin contacto'}</div><div class="det-sec"><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><div><div class="det-l">Valor</div><div style="font-size:22px;font-weight:800;color:var(--wine)">${fmtEur(d.valor)}</div></div><div><div class="det-l">Ponderado</div><div style="font-size:22px;font-weight:800">${fmtEur((+d.valor||0)*((+d.probabilidad||0)/100))}</div></div></div></div><div class="det-sec"><div class="det-l">Probabilidad</div><div class="pb" style="height:6px"><div class="pf" style="width:${d.probabilidad||0}%"></div></div><div style="font-size:11px;color:var(--t3);margin-top:4px">${d.probabilidad||0}%</div></div>${d.cierreEsperado?`<div class="det-sec"><div class="det-l">Cierre esperado</div><div style="font-size:14px">📅 ${new Date(d.cierreEsperado).toLocaleDateString('es-ES',{day:'numeric',month:'long',year:'numeric'})}</div></div>`:''}${d.notas?`<div class="det-sec"><div class="det-l">Notas</div><div style="font-size:14px;line-height:1.6;color:var(--t2)">${d.notas}</div></div>`:''}<div class="det-sec"><div class="det-l">Mover a etapa</div><div class="mv-row">${DEAL_STAGES.map(s=>`<button class="mv-c ${s.id===d.etapa?'cur':''}" onclick="mvDeal('${id}','${s.id}')">${s.e} ${s.n}</button>`).join('')}</div></div><button class="btn btn-d" style="margin-top:14px" onclick="delDeal('${id}')">🗑️ Eliminar</button><button class="btn btn-g" style="margin-top:8px" onclick="closeSh('ddet-sh')">Cerrar</button>`;
+  openSh('ddet-sh');
+}
+function mvDeal(id,stg){const d=deals.find(x=>x.id===id);if(!d)return;const fr=DEAL_STAGES.find(s=>s.id===d.etapa)?.n,to=DEAL_STAGES.find(s=>s.id===stg)?.n;d.etapa=stg;acts.unshift({ic:'🔄',bg:'var(--orange-soft)',w:'Bosco',a:'movió oportunidad',wh:d.titulo,dt:`${fr||'—'} → ${to}`,tm:'Ahora'});openDDet(id);persist();R();toast(`Movido a ${to}`);pushApi('deal',d);}
+function delDeal(id){if(!confirm('¿Eliminar oportunidad?'))return;deals=deals.filter(d=>d.id!==id);closeSh('ddet-sh');persist();R();toast('Oportunidad eliminada');}
+
+// ===== TABS INTERNOS =====
+function setCrmTab(t){crmTab=t;document.querySelectorAll('[data-ct]').forEach(b=>b.classList.toggle('on',b.dataset.ct===t));$('ct-contactos').style.display=t==='contactos'?'':'none';$('ct-pipeline').style.display=t==='pipeline'?'':'none';}
+function setAgTab(t){agTab=t;document.querySelectorAll('[data-at]').forEach(b=>b.classList.toggle('on',b.dataset.at===t));$('ag-board').style.display=t==='board'?'':'none';$('ag-meet').style.display=t==='meet'?'':'none';$('ag-cal').style.display=t==='cal'?'':'none';}
+
+// ===== CONFIG + SYNC =====
+function loadCfg(){try{const c=JSON.parse(localStorage.getItem('cosecha_cfg')||'{}');cfg={apiUrl:c.apiUrl||'',slackWebhook:c.slackWebhook||''};}catch(e){}if($('cfgApi'))$('cfgApi').value=cfg.apiUrl;if($('cfgSlack'))$('cfgSlack').value=cfg.slackWebhook;}
+function saveCfg(){cfg.apiUrl=$('cfgApi').value.trim();cfg.slackWebhook=$('cfgSlack').value.trim();localStorage.setItem('cosecha_cfg',JSON.stringify(cfg));toast('✅ Configuración guardada');if(cfg.apiUrl)testSync();}
+function persist(){try{localStorage.setItem(LS_KEY,JSON.stringify({contacts,deals,tasks,meetings,acts,nots}));}catch(e){}}
+function restore(){try{const d=JSON.parse(localStorage.getItem(LS_KEY)||'null');if(d){contacts=d.contacts||[];deals=d.deals||[];if(d.tasks&&d.tasks.length)tasks=d.tasks;if(d.meetings&&d.meetings.length)meetings=d.meetings;if(d.acts)acts=d.acts;if(d.nots)nots=d.nots;}}catch(e){}}
+function showSync(state,txt){const b=$('syncB');b.classList.remove('off','err');if(state==='off')b.classList.add('off');if(state==='err')b.classList.add('err');$('syncT').textContent=txt;b.classList.add('show');setTimeout(()=>b.classList.remove('show'),2500);}
+async function testSync(){if(!cfg.apiUrl){toast('Configura la URL del backend');return;}showSync('ok','Conectando...');try{const r=await fetch(cfg.apiUrl+'?action=dashboard',{method:'GET'});if(r.ok){const d=await r.json();showSync('ok','Conectado ✓');toast('✅ Backend OK');}else{throw new Error('bad');}}catch(e){showSync('err','Sin conexión');toast('⚠️ No se pudo conectar');}}
+async function pushApi(action,data){if(!cfg.apiUrl)return;try{await fetch(cfg.apiUrl+'?action='+action,{method:'POST',body:JSON.stringify(data),mode:'no-cors'});showSync('ok','Guardado ✓');}catch(e){showSync('err','Error sync');}}
+
 R();
+restore();loadCfg();R();
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
 </script>
 </body>
