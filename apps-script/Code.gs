@@ -259,6 +259,12 @@ function doPost(e) {
         result = sendDocument(body);
         break;
 
+      case 'uploadDoc':
+        if (auth.rol !== 'admin') { result = { error: true, message: 'Solo admin' }; break; }
+        body.enviadoPor = auth.email;
+        result = uploadDocToDrive(body);
+        break;
+
       case 'markDocRead':
         body.email = auth.email;
         result = markDocumentRead(body);

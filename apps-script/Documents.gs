@@ -17,6 +17,67 @@
  * ============================================================
  */
 
+// ─── Admin: subir archivo directamente a Drive ──────────────
+
+/**
+ * Sube un archivo a Google Drive en la carpeta del empleado y
+ * registra el documento en la pestaña Documentos.
+ *
+ * @param {Object} body {
+ *   userEmail, titulo, tipo, fileName, base64, mimeType, nota, enviadoPor
+ * }
+ */
+function uploadDocToDrive(body) {
+  const userEmail = String(body.userEmail || '').toLowerCase().trim();
+  const titulo    = String(body.titulo || '').trim();
+  if (!userEmail) return { success: false, error: 'Destinatario requerido' };
+  if (!titulo)    return { success: false, error: 'Título requerido' };
+  if (!body.base64) return { success: false, error: 'Archivo vacío' };
+
+  // Crear blob del archivo
+  let blob;
+  try {
+    blob = Utilities.newBlob(
+      Utilities.base64Decode(body.base64),
+      body.mimeType || 'application/octet-stream',
+      body.fileName || 'documento'
+    );
+  } catch (e) {
+    return { success: false, error: 'Error decodificando el archivo: ' + e.message };
+  }
+
+  // Estructura de carpetas: "Cosecha" > "Documentos" > "{email}"
+  const rootFolder = getOrCreateFolder_(DriveApp, 'Cosecha');
+  const docsFolder = getOrCreateFolderInside_(rootFolder, 'Documentos');
+  const userFolder = getOrCreateFolderInside_(docsFolder, userEmail);
+
+  const file = userFolder.createFile(blob);
+  if (body.nota) file.setDescription(body.nota);
+
+  // Registrar metadata en pestaña Documentos
+  return sendDocument({
+    userEmail: userEmail,
+    titulo: titulo,
+    tipo: body.tipo || 'comunicado',
+    driveFileId: file.getId(),
+    driveUrl: file.getUrl(),
+    nota: body.nota || '',
+    enviadoPor: body.enviadoPor || ''
+  });
+}
+
+function getOrCreateFolder_(driveOrFolder, name) {
+  const folders = driveOrFolder.getFoldersByName(name);
+  if (folders.hasNext()) return folders.next();
+  return driveOrFolder.createFolder(name);
+}
+
+function getOrCreateFolderInside_(parent, name) {
+  const folders = parent.getFoldersByName(name);
+  if (folders.hasNext()) return folders.next();
+  return parent.createFolder(name);
+}
+
 // ─── Admin: enviar documento ────────────────────────────────
 
 /**

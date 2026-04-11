@@ -145,7 +145,7 @@ body,*{-webkit-overflow-scrolling:touch}
 @keyframes pulseRing{0%{box-shadow:0 0 0 0 rgba(155,44,62,0.4)}70%{box-shadow:0 0 0 12px rgba(155,44,62,0)}100%{box-shadow:0 0 0 0 rgba(155,44,62,0)}}
 @keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
 
-.stagger > *{animation:slideUp .42s var(--ease-out) both}
+.stagger > *{animation:slideUp .5s cubic-bezier(0.16, 1, 0.3, 1) both}
 .stagger > *:nth-child(1){animation-delay:.02s}
 .stagger > *:nth-child(2){animation-delay:.06s}
 .stagger > *:nth-child(3){animation-delay:.10s}
@@ -652,7 +652,7 @@ body,*{-webkit-overflow-scrolling:touch}
 .cal-events{padding:14px 16px}
 .cal-ev-t{font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px}
 
-input[type="file"]{display:none}
+input[type="file"]:not(#sdFile){display:none}
 
 /* === ONBOARDING TOUR (tooltips con spotlight) === */
 .tour-ov{position:fixed;inset:0;z-index:380;display:none;pointer-events:none}
@@ -1252,7 +1252,7 @@ input[type="file"]{display:none}
     </div>
   </div>
 </header>
-<div class="v-badge" id="vBadge">v15 · drag&drop</div>
+<div class="v-badge" id="vBadge">v16 · full ux</div>
 
 <!-- Sync indicator -->
 <div class="sync-b" id="syncB"><span class="sd"></span><span id="syncT">Sincronizado</span></div>
@@ -1306,7 +1306,11 @@ input[type="file"]{display:none}
 <div id="v-agenda" class="view">
   <div class="tabs"><button class="tab on" data-at="meet" onclick="setAgTab('meet')">🎙️ Reuniones</button><button class="tab" data-at="cal" onclick="setAgTab('cal')">📅 Calendario<span class="soon">pronto</span></button></div>
   <div id="ag-meet" class="ag-pane" style="padding:0 0 90px"><div class="sec" style="padding-top:14px"><div id="meetL"></div></div></div>
-  <div id="ag-cal" class="ag-pane" style="display:none;padding:0 16px 90px"><div class="empty"><div class="empty-ic">📅</div><div class="empty-t">Calendario próximamente</div><div class="empty-s">Se sincronizará con Google Calendar vía el backend de Apps Script</div></div></div>
+  <div id="ag-cal" class="ag-pane" style="display:none;padding:0 0 90px">
+    <div class="cal-nav"><button class="cal-nav-b" onclick="calPrev()">‹</button><div class="cal-nav-t" id="calTitle">—</div><button class="cal-nav-b" onclick="calNext()">›</button></div>
+    <div style="padding:0 16px"><div class="cal-grid" id="calGrid"></div></div>
+    <div class="cal-events" id="calEvents"></div>
+  </div>
 </div>
 
 <!-- MÁS -->
@@ -1468,7 +1472,7 @@ input[type="file"]{display:none}
 
 <!-- Enviar documento (admin) -->
 <div class="sh-bg" id="senddoc-sh"><div class="sh"><div class="sh-bar"></div>
-  <div class="sh-tl">📄 Enviar documento</div><div class="sh-sb">Lo recibirá el empleado por email y en la app</div>
+  <div class="sh-tl">📄 Enviar documento</div><div class="sh-sb">Sube directamente a Drive o pega un enlace</div>
   <div class="fg"><label class="fl">Empleado</label><select class="fsel" id="sdEm"></select></div>
   <div class="fg"><label class="fl">Tipo</label>
     <div class="pri-row">
@@ -1478,7 +1482,11 @@ input[type="file"]{display:none}
     </div>
   </div>
   <div class="fg"><label class="fl">Título</label><input class="fi" id="sdT" placeholder="Ej: Nómina abril 2026"></div>
-  <div class="fg"><label class="fl">Enlace de Google Drive</label><input class="fi" id="sdU" placeholder="https://drive.google.com/file/d/..."><div style="font-size:11px;color:var(--t3);margin-top:4px">Sube el archivo a Drive, compártelo con el empleado y pega aquí el enlace</div></div>
+  <div class="fg"><label class="fl">📎 Archivo (PDF, Word, Excel, imagen…)</label>
+    <input type="file" id="sdFile" accept=".pdf,.doc,.docx,.xls,.xlsx,.txt,image/*" onchange="sdFileChange(this)" style="display:block;padding:14px;border:2px dashed var(--border);border-radius:14px;width:100%;background:var(--fill-4);color:var(--t2);font-size:13px;cursor:pointer">
+    <div id="sdFileInfo" style="font-size:11px;color:var(--t3);margin-top:6px"></div>
+  </div>
+  <div class="fg"><label class="fl">— o enlace de Drive (si ya está subido)</label><input class="fi" id="sdU" placeholder="https://drive.google.com/file/d/..."></div>
   <div class="fg"><label class="fl">Nota (opcional)</label><textarea class="fta" id="sdN" placeholder="Para firma antes del viernes..."></textarea></div>
   <button class="btn btn-p" onclick="sendDocPost()">📤 Enviar al empleado</button>
   <button class="btn btn-g" style="margin-top:8px" onclick="closeSh('senddoc-sh')">Cancelar</button>
@@ -1639,8 +1647,8 @@ function cH(t){
   </div>`;
 }
 function rDots(){$('dots').innerHTML=CO.map((_,i)=>`<div class="cdot ${i===0?'on':''}"></div>`).join('');const tr=$('track');tr.onscroll=()=>{const i=Math.round(tr.scrollLeft/(tr.scrollWidth/CO.length));document.querySelectorAll('.cdot').forEach((d,j)=>d.classList.toggle('on',j===i));};}
-function rMy(){const my=tasks.filter(x=>x.tm.includes('bosco')&&x.col!=='completado');$('myL').innerHTML=my.length?my.map(t=>{const col=CO.find(c=>c.id===t.col);return`<div class="myc" onclick="openDet(${t.id})"><div style="display:flex;align-items:center;gap:10px"><div style="width:3px;height:28px;border-radius:2px;background:${col.c};flex-shrink:0"></div><div><div class="myc-t">${t.t}</div><div class="myc-s">${col.e} ${col.n} ${t.due?'· 📅 '+new Date(t.due).toLocaleDateString('es-ES',{day:'numeric',month:'short'}):''}</div></div></div></div>`;}).join(''):'<div style="text-align:center;padding:36px;color:var(--t3)">🎉 Sin tareas</div>';}
-function rMeet(){$('meetL').innerHTML=meetings.map(m=>{const d=new Date(m.date);return`<div class="myc" onclick="openMS(${m.id})"><div class="rec-bdg">🎙️ Reunión</div><div class="myc-t">${m.title}</div><div class="myc-s">📅 ${d.toLocaleDateString('es-ES',{weekday:'short',day:'numeric',month:'short'})} · ⏱️ ${m.dur} · 📍 ${m.loc} · 📝 ${m.words.toLocaleString()} pal.</div><div class="avs" style="margin-top:8px">${m.atts.map(a=>`<div class="av" style="background:${a.c}">${a.i}</div>`).join('')}</div></div>`;}).join('')||'<div style="text-align:center;padding:36px;color:var(--t3)">No hay reuniones</div>';}
+function rMy(){const my=tasks.filter(x=>x.tm.includes('bosco')&&x.col!=='completado');$('myL').innerHTML=my.length?'<div class="stagger">'+my.map(t=>{const col=CO.find(c=>c.id===t.col);return`<div class="myc" data-task-id="${t.id}" onclick="openDet(${t.id})"><div style="display:flex;align-items:center;gap:10px"><div style="width:3px;height:28px;border-radius:2px;background:${col.c};flex-shrink:0"></div><div><div class="myc-t">${t.t}</div><div class="myc-s">${col.e} ${col.n} ${t.due?'· 📅 '+new Date(t.due).toLocaleDateString('es-ES',{day:'numeric',month:'short'}):''}</div></div></div></div>`;}).join('')+'</div>':'<div class="ios-empty"><div class="ios-empty-ic">🎉</div><div class="ios-empty-t">Todo al día</div><div class="ios-empty-s">No tienes tareas pendientes. ¡Disfruta del momento!</div></div>';}
+function rMeet(){$('meetL').innerHTML=meetings.length?'<div class="stagger">'+meetings.map(m=>{const d=new Date(m.date);return`<div class="myc" onclick="openMS(${m.id})"><div class="rec-bdg">🎙️ Reunión</div><div class="myc-t">${m.title}</div><div class="myc-s">📅 ${d.toLocaleDateString('es-ES',{weekday:'short',day:'numeric',month:'short'})} · ⏱️ ${m.dur} · 📍 ${m.loc} · 📝 ${m.words.toLocaleString()} pal.</div><div class="avs" style="margin-top:8px">${m.atts.map(a=>`<div class="av" style="background:${a.c}">${a.i}</div>`).join('')}</div></div>`;}).join('')+'</div>':'<div class="ios-empty"><div class="ios-empty-ic">🎙️</div><div class="ios-empty-t">Sin reuniones aún</div><div class="ios-empty-s">Graba tu primera reunión para tener transcripción automática, resumen y acciones clave.</div><button class="btn btn-p" onclick="openSh(\'newmeet-sh\')">🎙️ Nueva reunión</button></div>';}
 function rAct(){$('actL').innerHTML=acts.map(a=>`<div class="act-i"><div class="act-ic" style="background:${a.bg}">${a.ic}</div><div><div class="act-txt"><span class="act-b">${a.w}</span> ${a.a} <span class="act-b">${a.wh}</span> ${a.dt}</div><div class="act-tm">Hace ${a.tm}</div></div></div>`).join('');}
 function rNot(){$('notL').innerHTML=nots.map(n=>`<div class="act-i"><div class="act-ic" style="background:var(--bg2)">${n.ic}</div><div><div class="act-txt">${n.msg}</div><div class="act-tm">Hace ${n.tm}</div></div></div>`).join('');}
 function rTmP(){$('ntTm').innerHTML=TM.map(m=>`<div class="tm-pill ${ntTm.includes(m.id)?'sel':''}" onclick="togTm('${m.id}',this)"><div class="av" style="background:${m.c}">${m.i}</div>${m.n}</div>`).join('');}
@@ -1811,6 +1819,7 @@ function rDash(){
     {ic:'📋',v:openTasks,l:'Tareas activas',d:'En curso',c:'blue'},
     {ic:'🎙️',v:weekMeetings,l:'Reuniones 7d',d:contacts.length+' contactos',c:'gold'}
   ];
+  $('kpiGrid').className='kpi-grid stagger';
   $('kpiGrid').innerHTML=kpis.map(k=>`<div class="kpi k-${k.c}"><div class="kpi-ic">${k.ic}</div><div class="kpi-v">${k.v}</div><div class="kpi-l">${k.l}</div><div class="kpi-d">${k.d}</div></div>`).join('');
   // Próximos eventos (tareas con fecha + reuniones recientes)
   const upcoming=[];
@@ -2110,16 +2119,45 @@ function renderCiState(){
     $('ciEntryTime').textContent='Entrada a las '+new Date(st.entrada.time).toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'});
   }else{
     $('ciDone').style.display='';
-    const hrs=((new Date(st.salida.time)-new Date(st.entrada.time))/3600000).toFixed(1);
-    $('ciHours').textContent='Trabajaste '+hrs+' horas hoy';
+    // Capar siempre a 8 horas máximo (jornada legal)
+    let ms=new Date(st.salida.time)-new Date(st.entrada.time);
+    if(ms>WORKDAY_MS)ms=WORKDAY_MS;
+    const hrs=(ms/3600000).toFixed(1);
+    const autoTxt=st.salida.auto?' (auto-salida al cumplir 8h)':'';
+    $('ciHours').textContent='Trabajaste '+hrs+' horas hoy'+autoTxt;
   }
 }
+const WORKDAY_MS=8*60*60*1000; // 8 horas máximo por jornada
 function getLocalCi(){
   try{
     const all=JSON.parse(localStorage.getItem(CI_KEY)||'{}');
     const today=new Date().toISOString().slice(0,10);
-    return all[today]||null;
+    const st=all[today]||null;
+    return enforceWorkdayLimit(st);
   }catch(e){return null;}
+}
+function enforceWorkdayLimit(st){
+  if(!st||!st.entrada||st.salida)return st;
+  const entryMs=new Date(st.entrada.time).getTime();
+  const elapsed=Date.now()-entryMs;
+  if(elapsed>=WORKDAY_MS){
+    // Auto-salida al cumplir 8h exactas desde la entrada
+    const autoSalida={
+      tipo:'salida',
+      time:new Date(entryMs+WORKDAY_MS).toISOString(),
+      lat:null,lng:null,direccion:'Auto-salida al cumplir 8h',
+      auto:true
+    };
+    st.salida=autoSalida;
+    // Guardar en localStorage
+    try{
+      const all=JSON.parse(localStorage.getItem(CI_KEY)||'{}');
+      const today=new Date(entryMs).toISOString().slice(0,10);
+      all[today]=st;
+      localStorage.setItem(CI_KEY,JSON.stringify(all));
+    }catch(e){}
+  }
+  return st;
 }
 function setLocalCi(data){
   try{
@@ -2614,14 +2652,48 @@ async function sigCommit(id){
 
 // Admin enviar documento
 let sdType='comunicado';
+let sdFileBase64=null,sdFileName=null,sdFileMime=null;
 function setDocType(el,t){sdType=t;document.querySelectorAll('[data-dt]').forEach(e=>e.className='po');el.className='po s-'+(t==='nomina'?'medium':t==='contrato'?'low':'high');}
+function sdFileChange(input){
+  const f=input.files[0];if(!f){sdFileBase64=null;return;}
+  if(f.size>2*1024*1024){toast('⚠️ Máximo 2 MB');input.value='';return;}
+  const reader=new FileReader();
+  reader.onload=()=>{
+    sdFileBase64=reader.result.split(',')[1];
+    sdFileName=f.name;sdFileMime=f.type;
+    $('sdFileInfo').textContent='✓ '+f.name+' ('+(f.size/1024).toFixed(0)+' KB)';
+    // Pre-rellenar título con el nombre del archivo si está vacío
+    if(!$('sdT').value.trim())$('sdT').value=f.name.replace(/\.[^.]+$/,'');
+  };
+  reader.readAsDataURL(f);
+}
 function sendDocPost(){
   const em=$('sdEm').value,t=$('sdT').value.trim(),u=$('sdU').value.trim(),n=$('sdN').value.trim();
   if(!em||!t)return toast('Empleado y título requeridos');
+  if(!u&&!sdFileBase64)return toast('Sube un archivo o pega un enlace');
+
+  const isUpload=!!sdFileBase64;
   const body={userEmail:em,tipo:sdType,titulo:t,driveUrl:u,nota:n};
-  if(cfg.apiUrl&&!user.token.startsWith('demo-'))fetch(cfg.apiUrl+'?action=sendDocument',{method:'POST',body:JSON.stringify({...body,token:user.token}),headers:{'Content-Type':'text/plain'}}).catch(()=>{});
+  if(isUpload){Object.assign(body,{base64:sdFileBase64,fileName:sdFileName,mimeType:sdFileMime});}
+
+  if(cfg.apiUrl&&user&&!user.token.startsWith('local-')&&!user.token.startsWith('demo-')){
+    const action=isUpload?'uploadDoc':'sendDocument';
+    toast('⏳ '+(isUpload?'Subiendo a Drive…':'Enviando…'));
+    fetch(cfg.apiUrl+'?action='+action,{method:'POST',body:JSON.stringify({...body,token:user.token}),headers:{'Content-Type':'text/plain'}}).catch(()=>{});
+  }
+
+  // Añadir a la lista local de documentos del destinatario (para que lo vea en demo)
+  try{
+    const doc={id:'d_'+Date.now(),email:em,titulo:t,tipo:sdType,driveUrl:u||'#',estado:'pendiente',enviadoEn:new Date().toISOString(),nota:n};
+    // Si el destinatario es el usuario actual, añadirlo a myDocs
+    if(em===user.email){myDocs.unshift(doc);renderMyDocs();}
+  }catch(e){}
+
+  // Reset form
   ['sdT','sdU','sdN'].forEach(id=>$(id).value='');
-  closeSh('senddoc-sh');toast('📤 Documento enviado a '+em);
+  $('sdFile').value='';$('sdFileInfo').textContent='';sdFileBase64=null;sdFileName=null;sdFileMime=null;
+  closeSh('senddoc-sh');
+  toast(isUpload?'📤 Archivo subido y enviado':'📤 Enviado');
 }
 // Hooks al abrir sheets
 const _origOpenSh=openSh;
@@ -2878,6 +2950,162 @@ function onDragEnd(e){
   dragState=null;
 }
 
+// ===== CALENDAR VIEW =====
+let calDate=new Date();
+function rCal(){
+  const el=$('calGrid');if(!el)return;
+  const y=calDate.getFullYear(),m=calDate.getMonth();
+  const first=new Date(y,m,1);
+  const startDay=(first.getDay()+6)%7; // lunes=0
+  const daysInMonth=new Date(y,m+1,0).getDate();
+  const daysInPrev=new Date(y,m,0).getDate();
+  const titleEl=$('calTitle');
+  if(titleEl)titleEl.textContent=calDate.toLocaleDateString('es-ES',{month:'long',year:'numeric'});
+
+  // Eventos del mes (tareas con fecha + reuniones)
+  const monthEvents={};
+  tasks.forEach(t=>{
+    if(!t.due)return;
+    const d=new Date(t.due);
+    if(d.getFullYear()===y&&d.getMonth()===m){
+      const k=d.getDate();
+      if(!monthEvents[k])monthEvents[k]=[];
+      monthEvents[k].push({type:'task',title:t.t,id:t.id});
+    }
+  });
+  meetings.forEach(mt=>{
+    const d=new Date(mt.date);
+    if(d.getFullYear()===y&&d.getMonth()===m){
+      const k=d.getDate();
+      if(!monthEvents[k])monthEvents[k]=[];
+      monthEvents[k].push({type:'meet',title:mt.title,id:mt.id});
+    }
+  });
+
+  const today=new Date();
+  const isToday=(dd)=>today.getFullYear()===y&&today.getMonth()===m&&today.getDate()===dd;
+  const days=['L','M','X','J','V','S','D'];
+  let html=days.map(d=>`<div class="cal-h">${d}</div>`).join('');
+
+  // Días del mes anterior
+  for(let i=startDay-1;i>=0;i--){
+    const d=daysInPrev-i;
+    html+=`<div class="cal-d other"><div class="cal-n">${d}</div></div>`;
+  }
+  // Días del mes actual
+  for(let d=1;d<=daysInMonth;d++){
+    const evs=monthEvents[d]||[];
+    const dots=evs.slice(0,3).map(e=>`<div class="cal-dot ${e.type}"></div>`).join('');
+    html+=`<div class="cal-d${isToday(d)?' today':''}" onclick="calShowDay(${d})"><div class="cal-n">${d}</div><div class="cal-dots">${dots}</div></div>`;
+  }
+  // Días del mes siguiente para completar la rejilla
+  const total=startDay+daysInMonth;
+  const remaining=(7-(total%7))%7;
+  for(let d=1;d<=remaining;d++){
+    html+=`<div class="cal-d other"><div class="cal-n">${d}</div></div>`;
+  }
+  el.innerHTML=html;
+
+  // Lista de eventos de este mes
+  const evsEl=$('calEvents');
+  const upcoming=[];
+  Object.keys(monthEvents).forEach(k=>{
+    monthEvents[k].forEach(e=>upcoming.push({day:parseInt(k),...e}));
+  });
+  upcoming.sort((a,b)=>a.day-b.day);
+  if(upcoming.length){
+    evsEl.innerHTML='<div class="cal-ev-t">Eventos de este mes</div><div class="stagger">'+upcoming.map(e=>{
+      const ic=e.type==='meet'?'🎙️':'📋';
+      return`<div class="up-ev"><div class="up-dt"><div class="up-day">${e.day}</div><div class="up-mon">${calDate.toLocaleDateString('es-ES',{month:'short'}).replace('.','').toUpperCase()}</div></div><div class="up-inf"><div class="up-t">${e.title}</div><div class="up-m">${ic} ${e.type==='meet'?'Reunión':'Tarea'}</div></div></div>`;
+    }).join('')+'</div>';
+  }else{
+    evsEl.innerHTML='<div class="ios-empty"><div class="ios-empty-ic">📅</div><div class="ios-empty-t">Sin eventos</div><div class="ios-empty-s">Crea tareas con fecha o graba reuniones para verlas aquí.</div></div>';
+  }
+}
+function calPrev(){calDate=new Date(calDate.getFullYear(),calDate.getMonth()-1,1);rCal();}
+function calNext(){calDate=new Date(calDate.getFullYear(),calDate.getMonth()+1,1);rCal();}
+function calShowDay(d){
+  const date=new Date(calDate.getFullYear(),calDate.getMonth(),d);
+  toast('📅 '+date.toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long'}));
+}
+
+// Hook: al entrar en tab Calendar, renderizarlo
+const _origSetAgTab=setAgTab;
+setAgTab=function(t){_origSetAgTab(t);if(t==='cal')rCal();};
+
+// ===== SWIPE ACTIONS (en las "myc" de Mis tareas / reuniones) =====
+let swipeState=null;
+function initSwipe(){
+  document.addEventListener('touchstart',onSwipeStart,{passive:true});
+  document.addEventListener('touchmove',onSwipeMove,{passive:false});
+  document.addEventListener('touchend',onSwipeEnd);
+}
+function onSwipeStart(e){
+  const row=e.target.closest('.myc,.doc-row,.ctc');
+  if(!row||e.target.closest('button,a,input'))return;
+  const t=e.touches[0];
+  swipeState={el:row,startX:t.clientX,startY:t.clientY,dx:0,active:false};
+}
+function onSwipeMove(e){
+  if(!swipeState)return;
+  const t=e.touches[0];
+  const dx=t.clientX-swipeState.startX;
+  const dy=t.clientY-swipeState.startY;
+  if(!swipeState.active){
+    // Solo activar si hay movimiento horizontal claro
+    if(Math.abs(dx)>10&&Math.abs(dy)<15){swipeState.active=true;}
+    else if(Math.abs(dy)>15){swipeState=null;return;}
+    else return;
+  }
+  if(e.cancelable)e.preventDefault();
+  swipeState.dx=dx;
+  swipeState.el.style.transform='translateX('+dx+'px)';
+  swipeState.el.style.transition='none';
+  // Fondo de color
+  if(!swipeState.bg){
+    const bg=document.createElement('div');
+    bg.style.cssText='position:absolute;inset:0;display:flex;align-items:center;justify-content:'+(dx>0?'flex-start':'flex-end')+';padding:0 24px;font-size:22px;font-weight:700;color:#fff;border-radius:14px;'+(dx>0?'background:var(--green)':'background:var(--red)');
+    bg.textContent=dx>0?'✓ Completar':'🗑️ Eliminar';
+    const parent=swipeState.el.parentElement;
+    parent.style.position='relative';
+    parent.insertBefore(bg,swipeState.el);
+    swipeState.bg=bg;
+  }else{
+    swipeState.bg.style.justifyContent=dx>0?'flex-start':'flex-end';
+    swipeState.bg.style.background=dx>0?'var(--green)':'var(--red)';
+    swipeState.bg.textContent=dx>0?'✓ Completar':'🗑️ Eliminar';
+  }
+}
+function onSwipeEnd(){
+  if(!swipeState||!swipeState.active){swipeState=null;return;}
+  const threshold=100;
+  const el=swipeState.el;
+  const dx=swipeState.dx;
+  el.style.transition='transform .3s var(--ease-ios)';
+  if(Math.abs(dx)>threshold){
+    el.style.transform='translateX('+(dx>0?'100%':'-100%')+')';
+    setTimeout(()=>{
+      const taskId=parseInt(el.dataset.taskId||'0');
+      const task=tasks.find(t=>t.id===taskId);
+      if(dx>0&&task){
+        task.col='completado';
+        acts.unshift({ic:'✅',bg:'var(--green-soft)',w:user?.name?.split(' ')[0]||'Bosco',a:'completó',wh:task.t,dt:'',tm:'Ahora'});
+        toast('✅ Completada');
+      }else if(task){
+        tasks=tasks.filter(t=>t.id!==taskId);
+        toast('🗑️ Eliminada');
+      }
+      if(swipeState&&swipeState.bg)swipeState.bg.remove();
+      persist();R();
+      swipeState=null;
+    },250);
+  }else{
+    el.style.transform='';
+    if(swipeState.bg)swipeState.bg.remove();
+    swipeState=null;
+  }
+}
+
 // ===== PULL TO REFRESH =====
 let ptrState=null;
 function initPullToRefresh(){
@@ -2916,9 +3144,9 @@ function triggerRefresh(){
   setTimeout(()=>{R();toast('✅ Actualizado');hidePtr();},700);
 }
 
-restore();loadCfg();authBoot().then(()=>{R();initDragDrop();initPullToRefresh();});
+restore();loadCfg();authBoot().then(()=>{R();initDragDrop();initPullToRefresh();initSwipe();});
 // Service worker con auto-reload al detectar nueva versión + purga agresiva
-const APP_VERSION='v15';
+const APP_VERSION='v16';
 const storedVer=localStorage.getItem('cosecha_app_version');
 if(storedVer&&storedVer!==APP_VERSION){
   // Versión cambió → purgar caches + reload una sola vez
