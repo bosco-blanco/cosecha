@@ -1047,15 +1047,42 @@ input[type="file"]{display:none}
     <div class="auth-brand">Cosecha</div>
     <div class="auth-sub">EN COPA DE BALÓN</div>
 
-    <div class="auth-step" id="authStep1">
+    <!-- ═══ Paso 1: Email ═══ -->
+    <div class="auth-step" id="aStep1">
       <div class="auth-title">Bienvenido</div>
-      <div class="auth-desc">Inicia sesión con tu email corporativo<br>y tu código personal de 6 dígitos.</div>
+      <div class="auth-desc">Inicia sesión con tu email corporativo</div>
       <div class="auth-err" id="authErr"></div>
-      <div class="auth-field"><input class="auth-input" id="authEmail" type="email" placeholder="tu@encopadebalon.com" autocomplete="email" inputmode="email"></div>
-      <div class="auth-field" style="margin-top:12px"><input class="auth-input auth-code" id="authCode" type="text" placeholder="······" maxlength="6" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" onkeydown="if(event.key==='Enter')authVerify()"></div>
-      <div class="auth-hint">La primera vez eliges tu código · después tendrá que coincidir</div>
-      <label class="auth-keep" style="margin-top:18px"><input type="checkbox" id="authKeep" checked><span>Mantener sesión activa 30 días en este dispositivo</span></label>
-      <button class="auth-btn" id="authVerifyBtn" onclick="authVerify()">Entrar →</button>
+      <div class="auth-field"><input class="auth-input" id="authEmail" type="email" placeholder="tu@encopadebalon.com" autocomplete="email" inputmode="email" onkeydown="if(event.key==='Enter')authStep1Submit()"></div>
+      <div class="auth-hint">Solo emails @encopadebalon.com</div>
+      <button class="auth-btn" style="margin-top:20px" onclick="authStep1Submit()">Continuar →</button>
+    </div>
+
+    <!-- ═══ Paso 2a: Usuario existente (login) ═══ -->
+    <div class="auth-step" id="aStep2a" style="display:none">
+      <div class="auth-title">Hola de nuevo 👋</div>
+      <div class="auth-desc">Introduce tu código personal<br><b id="aEm1" style="font-size:13px">—</b></div>
+      <div class="auth-err" id="authErr2a"></div>
+      <div class="auth-field"><input class="auth-input auth-code" id="aCodeLogin" type="text" placeholder="······" maxlength="6" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" onkeydown="if(event.key==='Enter')authLoginSubmit()"></div>
+      <label class="auth-keep" style="margin-top:18px"><input type="checkbox" id="authKeep" checked><span>Mantener sesión activa 30 días</span></label>
+      <button class="auth-btn" onclick="authLoginSubmit()">Entrar →</button>
+      <button class="auth-link" onclick="authBackToEmail()">← Cambiar email</button>
+    </div>
+
+    <!-- ═══ Paso 2b: Primera vez (crear código) ═══ -->
+    <div class="auth-step" id="aStep2b" style="display:none">
+      <div class="auth-title">Crea tu código 🔐</div>
+      <div class="auth-desc">Primera vez con <b id="aEm2" style="font-size:13px">—</b><br>Elige 6 dígitos que recordarás fácilmente.</div>
+      <div class="auth-err" id="authErr2b"></div>
+      <div class="auth-field"><input class="auth-input auth-code" id="aCodeNew" type="password" placeholder="······" maxlength="6" inputmode="numeric" pattern="[0-9]*"></div>
+      <div class="auth-hint" style="margin-bottom:16px">Elige tu código</div>
+      <div class="auth-field"><input class="auth-input auth-code" id="aCodeNew2" type="password" placeholder="······" maxlength="6" inputmode="numeric" pattern="[0-9]*" onkeydown="if(event.key==='Enter')authCreateSubmit()"></div>
+      <div class="auth-hint" style="margin-bottom:16px">Confirma los mismos 6 dígitos</div>
+      <div style="background:#FFF5E6;border:1.5px solid #FFCC66;border-radius:12px;padding:12px 14px;margin-bottom:14px;font-size:12px;color:#8C6B14;line-height:1.5;text-align:left">
+        ⚠️ <b>Guárdalo bien.</b> Solo tú conocerás tu código. Si lo olvidas, un administrador tendrá que resetearlo desde el panel.
+      </div>
+      <label class="auth-keep"><input type="checkbox" id="authKeepNew" checked><span>Mantener sesión activa 30 días</span></label>
+      <button class="auth-btn" onclick="authCreateSubmit()">Crear código y entrar →</button>
+      <button class="auth-link" onclick="authBackToEmail()">← Cambiar email</button>
     </div>
   </div>
   <div class="auth-footer">🍇 Cosecha · En Copa de Balón</div>
@@ -1862,50 +1889,99 @@ try{localStorage.removeItem('cosecha_local_codes_v1');}catch(e){}
 function getLocalCode(em){try{const c=JSON.parse(localStorage.getItem(LOCAL_CODES_KEY)||'{}');return c[em]||'';}catch(e){return '';}}
 function setLocalCode(em,code){try{const c=JSON.parse(localStorage.getItem(LOCAL_CODES_KEY)||'{}');c[em]=code;localStorage.setItem(LOCAL_CODES_KEY,JSON.stringify(c));}catch(e){}}
 
-function authVerify(){
+// ===== Flujo auth en 3 pasos =====
+// Paso 1: validar email y decidir si es primera vez o login
+function authStep1Submit(){
   const em=($('authEmail').value||'').toLowerCase().trim();
-  const code=($('authCode').value||'').trim();
-  const keep=$('authKeep').checked;
   if(!em||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em))return authErr('authErr','Introduce un email válido');
-  if(!em.endsWith('@'+AUTH_DOMAIN))return authErr('authErr','Solo emails @'+AUTH_DOMAIN);
-  if(!/^\d{4,6}$/.test(code))return authErr('authErr','El código debe ser de 4-6 dígitos');
+  if(!em.endsWith('@'+AUTH_DOMAIN))return authErr('authErr','Solo se permiten emails @'+AUTH_DOMAIN);
 
-  // Auth 100% local. El backend se usa solo para sincronizar datos después.
-  // Primera vez con un email → ese código queda registrado
-  // Siguientes veces → tiene que coincidir
   const stored=getLocalCode(em);
-  if(!stored){
-    setLocalCode(em,code);
-  }else if(stored!==code){
-    return authErr('authErr','Código incorrecto');
+  $('aEm1').textContent=em;
+  $('aEm2').textContent=em;
+  $('aStep1').style.display='none';
+  if(stored){
+    // Usuario conocido → pedir código para login
+    $('aStep2a').style.display='';
+    $('aCodeLogin').value='';
+    setTimeout(()=>$('aCodeLogin').focus(),120);
+  }else{
+    // Primera vez → crear código
+    $('aStep2b').style.display='';
+    $('aCodeNew').value='';$('aCodeNew2').value='';
+    setTimeout(()=>$('aCodeNew').focus(),120);
   }
+}
 
-  // Rol por defecto por email (bosco → admin, saul → comercial, resto → equipo)
+// Paso 2a: login de usuario conocido
+function authLoginSubmit(){
+  const em=($('authEmail').value||'').toLowerCase().trim();
+  const code=($('aCodeLogin').value||'').trim();
+  const keep=$('authKeep').checked;
+  if(!/^\d{6}$/.test(code))return authErr('authErr2a','El código debe ser de 6 dígitos');
+  const stored=getLocalCode(em);
+  if(!stored){return authErr('authErr2a','Error: reinicia la app');}
+  if(stored!==code)return authErr('authErr2a','Código incorrecto');
+  doAuthSuccess(em,keep,code);
+}
+
+// Paso 2b: primera vez, crear código
+function authCreateSubmit(){
+  const em=($('authEmail').value||'').toLowerCase().trim();
+  const c1=($('aCodeNew').value||'').trim();
+  const c2=($('aCodeNew2').value||'').trim();
+  const keep=$('authKeepNew').checked;
+  if(!/^\d{6}$/.test(c1))return authErr('authErr2b','El código debe ser exactamente 6 dígitos');
+  if(c1!==c2)return authErr('authErr2b','Los dos códigos no coinciden');
+  setLocalCode(em,c1);
+  doAuthSuccess(em,keep,c1);
+  toast('🔐 Código guardado. Recuérdalo bien!');
+}
+
+// Volver al paso 1
+function authBackToEmail(){
+  $('aStep2a').style.display='none';
+  $('aStep2b').style.display='none';
+  $('aStep1').style.display='';
+  setTimeout(()=>$('authEmail').focus(),120);
+}
+
+// Éxito común
+function doAuthSuccess(em,keep,code){
   let rol='equipo',departamento='';
   if(em==='bosco@encopadebalon.com'){rol='admin';departamento='direccion';}
   else if(em==='saul@encopadebalon.com'){rol='admin';departamento='codeba';}
-
   const name=em.split('@')[0].split(/[.\-_]/).map(p=>p.charAt(0).toUpperCase()+p.slice(1)).join(' ');
   authSuccess({
-    email:em,
-    name:name,
-    token:'local-'+Date.now(),
-    rol:rol,
-    departamento:departamento,
-    color:'#9B2C3E',
-    expiresAt:new Date(Date.now()+(keep?30*864e5:864e5)).toISOString()
+    email:em,name:name,token:'local-'+Date.now(),rol:rol,departamento:departamento,
+    color:'#9B2C3E',expiresAt:new Date(Date.now()+(keep?30*864e5:864e5)).toISOString()
   });
-
-  // En background: si hay backend configurado, intentar sincronizar datos
-  // pero sin bloquear la entrada del usuario
+  // Background sync con backend (sin bloquear)
   if(cfg.apiUrl){
     setTimeout(()=>{
-      // Push silencioso para que el backend tenga el usuario registrado
       fetch(cfg.apiUrl+'?action=verifyCode&email='+encodeURIComponent(em)+'&code='+encodeURIComponent(code)+'&keepActive='+(keep?'true':'false')).catch(()=>{});
     },500);
   }
 }
-function authRequest(){authVerify();}
+
+// Compatibilidad con HTML viejo cacheado (versión pre-3-pasos):
+// si el DOM tiene el input antiguo 'authCode' y alguien pulsa "Entrar",
+// hacemos login directo con email+código en un solo paso.
+function authVerify(){
+  const oldCodeInput=document.getElementById('authCode');
+  if(!oldCodeInput)return; // HTML nuevo, no aplica
+  const em=($('authEmail').value||'').toLowerCase().trim();
+  const code=(oldCodeInput.value||'').trim();
+  const keep=$('authKeep')?$('authKeep').checked:true;
+  if(!em||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em))return authErr('authErr','Introduce un email válido');
+  if(!em.endsWith('@'+AUTH_DOMAIN))return authErr('authErr','Solo emails @'+AUTH_DOMAIN);
+  if(!/^\d{4,6}$/.test(code))return authErr('authErr','El código debe ser de 4-6 dígitos');
+  const stored=getLocalCode(em);
+  if(!stored){setLocalCode(em,code);}
+  else if(stored!==code){return authErr('authErr','Código incorrecto');}
+  doAuthSuccess(em,keep,code);
+}
+function authRequest(){authStep1Submit&&authStep1Submit()||authVerify();}
 function isDemoMode(){return !cfg.apiUrl;}
 function authSuccess(d){
   user={email:d.email,name:d.name,token:d.token,expiresAt:d.expiresAt};
@@ -2649,7 +2725,23 @@ renderUser=function(){
 };
 
 restore();loadCfg();authBoot().then(()=>{R();});
-// Service worker con auto-reload al detectar nueva versión
+// Service worker con auto-reload al detectar nueva versión + purga agresiva
+const APP_VERSION='v13.1';
+const storedVer=localStorage.getItem('cosecha_app_version');
+if(storedVer&&storedVer!==APP_VERSION){
+  // Versión cambió → purgar caches + reload una sola vez
+  try{
+    if('caches' in window){
+      caches.keys().then(ks=>Promise.all(ks.map(k=>caches.delete(k)))).then(()=>{
+        localStorage.setItem('cosecha_app_version',APP_VERSION);
+        window.location.reload();
+      });
+    }
+  }catch(e){localStorage.setItem('cosecha_app_version',APP_VERSION);}
+}else{
+  localStorage.setItem('cosecha_app_version',APP_VERSION);
+}
+
 if('serviceWorker' in navigator){
   navigator.serviceWorker.register('./sw.js').then(reg=>{
     if(reg.waiting){reg.waiting.postMessage({type:'SKIP_WAITING'});}
@@ -2663,6 +2755,8 @@ if('serviceWorker' in navigator){
       });
     });
     document.addEventListener('visibilitychange',()=>{if(!document.hidden)reg.update();});
+    // Forzar check de updates al cargar
+    reg.update();
   }).catch(()=>{});
 }
 </script>
