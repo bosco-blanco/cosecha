@@ -285,6 +285,11 @@ function doPost(e) {
         result = deleteUser(body.email);
         break;
 
+      case 'resetUserCode':
+        if (auth.rol !== 'admin') { result = { error: true, message: 'Solo admin' }; break; }
+        result = resetUserCode(body);
+        break;
+
       // --- Sincronización completa (offline-first) ---
       case 'sync':
         result = handleSync_(body);

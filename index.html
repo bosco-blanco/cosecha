@@ -1047,35 +1047,18 @@ input[type="file"]{display:none}
     <div class="auth-brand">Cosecha</div>
     <div class="auth-sub">EN COPA DE BALÓN</div>
 
-    <!-- Banner modo demo (solo visible si no hay backend configurado) -->
-    <div id="demoBanner" style="display:none;background:var(--gold-soft);border:1.5px solid rgba(196,149,46,0.3);border-radius:var(--r);padding:12px 14px;margin-bottom:20px;text-align:left;font-size:12px;color:var(--t2);line-height:1.5">
-      <div style="font-weight:800;color:var(--gold);font-size:11px;text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px">🧪 Modo demo</div>
-      El backend aún no está desplegado. Usa cualquier email <b>@encopadebalon.com</b> y el código <b style="font-size:14px;color:var(--wine)">1234</b> para entrar.
-    </div>
-
-    <!-- Paso 1: Email -->
     <div class="auth-step" id="authStep1">
       <div class="auth-title">Bienvenido</div>
-      <div class="auth-desc">Inicia sesión con tu email corporativo.<br>Te enviaremos un código de acceso.</div>
+      <div class="auth-desc">Inicia sesión con tu email corporativo<br>y tu código personal de 6 dígitos.</div>
       <div class="auth-err" id="authErr"></div>
-      <div class="auth-field"><input class="auth-input" id="authEmail" type="email" placeholder="tu@encopadebalon.com" autocomplete="email" inputmode="email" onkeydown="if(event.key==='Enter')authRequest()"></div>
-      <div class="auth-hint">Solo emails con dominio autorizado</div>
-      <button class="auth-btn" id="authSendBtn" onclick="authRequest()" style="margin-top:20px">Enviar código →</button>
-    </div>
-
-    <!-- Paso 2: Código -->
-    <div class="auth-step" id="authStep2" style="display:none">
-      <div class="auth-title">Revisa tu email 📧</div>
-      <div class="auth-desc">Hemos enviado un código de 6 dígitos a<br><b id="authEmailConfirm"></b></div>
-      <div class="auth-err" id="authErr2"></div>
-      <div class="auth-field"><input class="auth-input auth-code" id="authCode" type="text" placeholder="····" maxlength="6" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" onkeydown="if(event.key==='Enter')authVerify()"></div>
-      <label class="auth-keep"><input type="checkbox" id="authKeep" checked><span>Mantener sesión activa en este dispositivo (30 días)</span></label>
-      <button class="auth-btn" id="authVerifyBtn" onclick="authVerify()">Verificar y entrar</button>
-      <button class="auth-link" id="authResend" onclick="authResend()">Reenviar código</button>
-      <br><button class="auth-link" onclick="authBack()">← Usar otro email</button>
+      <div class="auth-field"><input class="auth-input" id="authEmail" type="email" placeholder="tu@encopadebalon.com" autocomplete="email" inputmode="email"></div>
+      <div class="auth-field" style="margin-top:12px"><input class="auth-input auth-code" id="authCode" type="text" placeholder="······" maxlength="6" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" onkeydown="if(event.key==='Enter')authVerify()"></div>
+      <div class="auth-hint">La primera vez eliges tu código · después tendrá que coincidir</div>
+      <label class="auth-keep" style="margin-top:18px"><input type="checkbox" id="authKeep" checked><span>Mantener sesión activa 30 días en este dispositivo</span></label>
+      <button class="auth-btn" id="authVerifyBtn" onclick="authVerify()">Entrar →</button>
     </div>
   </div>
-  <div class="auth-footer">🍇 Cosecha · Passwordless login</div>
+  <div class="auth-footer">🍇 Cosecha · En Copa de Balón</div>
 </div>
 
 <!-- ============ LEGAL / CONSENTIMIENTO ============ -->
@@ -1863,70 +1846,67 @@ const AUTH_DOMAIN='encopadebalon.com';
 let user=null; // {email, name, token, expiresAt}
 let resendTimer=null;
 
-function authShow(){$('authWrap').classList.add('show');document.body.style.overflow='hidden';$('demoBanner').style.display=isDemoMode()?'block':'none';}
+function authShow(){$('authWrap').classList.add('show');document.body.style.overflow='hidden';}
 function authHide(){$('authWrap').classList.remove('show');document.body.style.overflow='';}
 function authErr(id,msg){const e=$(id);e.textContent=msg;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),5000);}
 function authBtn(id,label,disabled){const b=$(id);b.disabled=!!disabled;b.textContent=label;}
 function userIni(n){return (n||'').split(' ').map(w=>w[0]).filter(Boolean).slice(0,2).join('').toUpperCase()||'?';}
 
-function isDemoMode(){return !cfg.apiUrl;}
-function authRequest(){
-  const em=($('authEmail').value||'').toLowerCase().trim();
-  if(!em||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em))return authErr('authErr','Introduce un email válido');
-  if(!em.endsWith('@'+AUTH_DOMAIN))return authErr('authErr','Solo emails @'+AUTH_DOMAIN);
-  authBtn('authSendBtn','Enviando...',true);
-  if(isDemoMode()){
-    // Modo demo (sin backend) — permite probar el flujo localmente
-    setTimeout(()=>{
-      authBtn('authSendBtn','Enviar código →',false);
-      $('authEmailConfirm').textContent=em;
-      $('authStep1').style.display='none';$('authStep2').style.display='';
-      $('authCode').value='';$('authCode').focus();
-      startResendCountdown();
-      toast('🧪 Modo demo — código: 1234');
-    },300);
-    return;
-  }
-  fetch(cfg.apiUrl+'?action=requestCode&email='+encodeURIComponent(em))
-    .then(r=>r.json()).then(d=>{
-      authBtn('authSendBtn','Enviar código →',false);
-      if(d.success){
-        $('authEmailConfirm').textContent=em;
-        $('authStep1').style.display='none';$('authStep2').style.display='';
-        $('authCode').value='';$('authCode').focus();
-        startResendCountdown();
-      }else{authErr('authErr',d.error||'Error al enviar el código');}
-    })
-    .catch(err=>{authBtn('authSendBtn','Enviar código →',false);authErr('authErr','No se pudo contactar el backend: '+err.message);});
-}
+// Base local de códigos (se usa como fallback si backend no responde)
+const LOCAL_CODES_KEY='cosecha_local_codes_v1';
+function getLocalCode(em){try{const c=JSON.parse(localStorage.getItem(LOCAL_CODES_KEY)||'{}');return c[em]||'';}catch(e){return '';}}
+function setLocalCode(em,code){try{const c=JSON.parse(localStorage.getItem(LOCAL_CODES_KEY)||'{}');c[em]=code;localStorage.setItem(LOCAL_CODES_KEY,JSON.stringify(c));}catch(e){}}
+
 function authVerify(){
   const em=($('authEmail').value||'').toLowerCase().trim();
   const code=($('authCode').value||'').trim();
   const keep=$('authKeep').checked;
-  // En demo aceptamos 4-6 dígitos, en producción 6
-  const minLen=isDemoMode()?4:6;
-  if(!new RegExp('^\\d{'+minLen+',6}$').test(code))return authErr('authErr2','El código debe tener '+minLen+(minLen===6?'':'-6')+' dígitos');
-  authBtn('authVerifyBtn','Verificando...',true);
-  if(isDemoMode()){
-    // Modo demo: acepta 1234 (y 0000, 000000 como atajos)
-    setTimeout(()=>{
-      authBtn('authVerifyBtn','Verificar y entrar',false);
-      if(code==='1234'||code==='0000'||code==='000000'){
+  if(!em||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em))return authErr('authErr','Introduce un email válido');
+  if(!em.endsWith('@'+AUTH_DOMAIN))return authErr('authErr','Solo emails @'+AUTH_DOMAIN);
+  if(!/^\d{4,6}$/.test(code))return authErr('authErr','El código debe ser de 4-6 dígitos');
+
+  authBtn('authVerifyBtn','Entrando…',true);
+
+  const doBackend=()=>{
+    const url=cfg.apiUrl+'?action=verifyCode&email='+encodeURIComponent(em)+'&code='+encodeURIComponent(code)+'&keepActive='+(keep?'true':'false');
+    fetch(url).then(r=>r.json()).then(d=>{
+      authBtn('authVerifyBtn','Entrar →',false);
+      if(d.success){
+        setLocalCode(em,code);  // guardar para futuros logins offline
+        authSuccess(d);
+      }else{
+        authErr('authErr',d.error||'Código incorrecto');
+      }
+    }).catch(err=>{
+      // Fallback offline: usar código local guardado
+      authBtn('authVerifyBtn','Entrar →',false);
+      const stored=getLocalCode(em);
+      if(!stored){
+        // Primera vez offline → registrar
+        setLocalCode(em,code);
         const name=em.split('@')[0].split(/[.\-_]/).map(p=>p.charAt(0).toUpperCase()+p.slice(1)).join(' ');
-        authSuccess({email:em,name:name,token:'demo-'+Date.now(),expiresAt:new Date(Date.now()+(keep?30*864e5:864e5)).toISOString()});
-      }else{authErr('authErr2','Código incorrecto (modo demo: 1234)');}
-    },300);
-    return;
-  }
-  const url=cfg.apiUrl+'?action=verifyCode&email='+encodeURIComponent(em)+'&code='+encodeURIComponent(code)+'&keepActive='+(keep?'true':'false');
-  fetch(url)
-    .then(r=>r.json()).then(d=>{
-      authBtn('authVerifyBtn','Verificar y entrar',false);
-      if(d.success){authSuccess(d);}
-      else{authErr('authErr2',d.error||'Código incorrecto');}
-    })
-    .catch(err=>{authBtn('authVerifyBtn','Verificar y entrar',false);authErr('authErr2','Error de red: '+err.message);});
+        authSuccess({email:em,name:name,token:'local-'+Date.now(),rol:em==='bosco@encopadebalon.com'?'admin':'equipo',expiresAt:new Date(Date.now()+(keep?30*864e5:864e5)).toISOString()});
+      }else if(stored===code){
+        const name=em.split('@')[0].split(/[.\-_]/).map(p=>p.charAt(0).toUpperCase()+p.slice(1)).join(' ');
+        authSuccess({email:em,name:name,token:'local-'+Date.now(),rol:em==='bosco@encopadebalon.com'?'admin':'equipo',expiresAt:new Date(Date.now()+(keep?30*864e5:864e5)).toISOString()});
+      }else{
+        authErr('authErr','Código incorrecto');
+      }
+    });
+  };
+
+  if(cfg.apiUrl){doBackend();return;}
+  // Sin backend: solo local
+  authBtn('authVerifyBtn','Entrar →',false);
+  const stored=getLocalCode(em);
+  if(!stored){setLocalCode(em,code);}
+  else if(stored!==code){return authErr('authErr','Código incorrecto');}
+  const name=em.split('@')[0].split(/[.\-_]/).map(p=>p.charAt(0).toUpperCase()+p.slice(1)).join(' ');
+  authSuccess({email:em,name:name,token:'local-'+Date.now(),rol:em==='bosco@encopadebalon.com'?'admin':'equipo',expiresAt:new Date(Date.now()+(keep?30*864e5:864e5)).toISOString()});
 }
+// Compatibilidad con funciones viejas (ya no se usan pero pueden quedar refs)
+function authRequest(){authVerify();}
+function isDemoMode(){return !cfg.apiUrl;}
 function authSuccess(d){
   user={email:d.email,name:d.name,token:d.token,expiresAt:d.expiresAt};
   try{localStorage.setItem(AUTH_KEY,JSON.stringify(user));}catch(e){}
@@ -1934,13 +1914,9 @@ function authSuccess(d){
   toast('🍇 Bienvenido, '+user.name);
   R();
 }
-function authBack(){$('authStep2').style.display='none';$('authStep1').style.display='';$('authEmail').focus();if(resendTimer){clearInterval(resendTimer);resendTimer=null;}}
-function authResend(){if($('authResend').disabled)return;authRequest();}
-function startResendCountdown(){
-  let s=30;const b=$('authResend');b.disabled=true;b.textContent='Reenviar en '+s+'s';
-  if(resendTimer)clearInterval(resendTimer);
-  resendTimer=setInterval(()=>{s--;if(s<=0){clearInterval(resendTimer);b.disabled=false;b.textContent='Reenviar código';}else{b.textContent='Reenviar en '+s+'s';}},1000);
-}
+function authBack(){/* no-op en el flujo simplificado */}
+function authResend(){/* no-op en el flujo simplificado */}
+function startResendCountdown(){/* no-op */}
 function authLogout(){
   if(cfg.apiUrl&&user&&user.token&&!user.token.startsWith('demo-')){
     fetch(cfg.apiUrl+'?action=logout',{method:'POST',body:JSON.stringify({token:user.token}),headers:{'Content-Type':'text/plain'}}).catch(()=>{});
@@ -2124,7 +2100,8 @@ function openEditUser(email){
     <div class="fg"><label class="fl">Departamento</label>
       <select class="fsel" id="euDp"><option value="">— Sin asignar —</option>${deptOpts}</select>
     </div>
-    <button class="btn btn-p" onclick="saveEditUser('${u.email}')">💾 Guardar</button>
+    <button class="btn btn-p" onclick="saveEditUser('${u.email}')">💾 Guardar cambios</button>
+    <button class="btn btn-g" style="margin-top:8px" onclick="resetUserCode('${u.email}')">🔑 Resetear código de acceso</button>
     ${u.email!==user.email?'<button class="btn btn-d" style="margin-top:8px" onclick="delTeamUser(\''+u.email+'\')">🗑️ Eliminar usuario</button>':''}
     <button class="btn btn-g" style="margin-top:8px" onclick="closeSh('edituser-sh')">Cancelar</button>`;
   window._euRol=u.rol;
@@ -2137,6 +2114,16 @@ async function saveEditUser(email){
   if(idx>=0)Object.assign(teamUsers[idx],body);
   renderAdmin();closeSh('edituser-sh');toast('✅ Usuario actualizado');
   if(cfg.apiUrl&&!user.token.startsWith('demo-'))fetch(cfg.apiUrl+'?action=updateUser',{method:'POST',body:JSON.stringify({...body,token:user.token}),headers:{'Content-Type':'text/plain'}}).catch(()=>{});
+}
+async function resetUserCode(email){
+  if(!confirm('¿Resetear el código de '+email+'?\nEl usuario podrá elegir un nuevo código la próxima vez que entre.'))return;
+  try{const c=JSON.parse(localStorage.getItem(LOCAL_CODES_KEY)||'{}');delete c[email];localStorage.setItem(LOCAL_CODES_KEY,JSON.stringify(c));}catch(e){}
+  if(cfg.apiUrl&&user&&!user.token.startsWith('local-')){
+    try{
+      await fetch(cfg.apiUrl+'?action=resetUserCode',{method:'POST',body:JSON.stringify({email,token:user.token}),headers:{'Content-Type':'text/plain'}});
+    }catch(e){}
+  }
+  closeSh('edituser-sh');toast('🔑 Código reseteado');
 }
 async function delTeamUser(email){
   if(!confirm('¿Eliminar a '+email+'?'))return;

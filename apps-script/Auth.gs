@@ -22,16 +22,27 @@ const SESSION_SHORT_HOURS = 8;   // Sesión de jornada laboral (8h por defecto)
 // ─── API pública ────────────────────────────────────────────
 
 /**
- * Solicita un código de acceso por email.
- * @param {string} email - Email corporativo.
- * @returns {Object} { success, message } o { success: false, error }
+ * Verifica el código de acceso del usuario.
+ * Modelo simplificado: cada usuario tiene un código de 6 dígitos
+ * almacenado en Usuarios.loginCode. La primera vez que entra, el código
+ * introducido queda registrado como el suyo. Las siguientes veces debe
+ * coincidir.
+ *
+ * @param {string} email
+ * @param {string} code
+ * @param {boolean} keepActive - Si true, sesión larga (30 días)
+ * @returns {Object} { success, token, email, name, rol, ... }
  */
-function requestAuthCode(email) {
+function verifyAuthCode(email, code, keepActive) {
   email = String(email || '').toLowerCase().trim();
+  code  = String(code  || '').trim();
 
   // Validar formato básico
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return { success: false, error: 'Email no válido' };
+  }
+  if (!/^\d{4,6}$/.test(code)) {
+    return { success: false, error: 'El código debe ser de 4-6 dígitos' };
   }
 
   // Validar dominio corporativo
@@ -40,124 +51,119 @@ function requestAuthCode(email) {
     return { success: false, error: 'Solo se permiten emails @' + domain };
   }
 
-  // Generar código de 6 dígitos
-  const code = Math.floor(100000 + Math.random() * 900000).toString();
+  // Buscar usuario en la pestaña Usuarios
+  const userSheet = getTabSheet_('Usuarios');
+  const userData = userSheet.getDataRange().getValues();
+  // Columnas: 0 email, 1 nombre, 2 rol, 3 departamento, 4 avatar, 5 color, 6 creado, 7 ultimaActividad, 8 loginCode
+
+  let userRowIdx = -1;
+  for (let i = 1; i < userData.length; i++) {
+    if (String(userData[i][0] || '').toLowerCase().trim() === email) {
+      userRowIdx = i;
+      break;
+    }
+  }
+
+  let userObj;
+  if (userRowIdx === -1) {
+    // Primera vez: crear usuario con rol por defecto
+    userObj = getOrCreateUser_(email);
+    // Guardar el código de login recién introducido
+    const lastRow = userSheet.getLastRow();
+    userSheet.getRange(lastRow, 9).setNumberFormat('@').setValue(code);
+    userObj.loginCode = code;
+  } else {
+    // Usuario existe: comprobar código
+    const storedCode = String(userData[userRowIdx][8] || '').trim();
+    if (storedCode === '') {
+      // Tiene ficha pero sin código establecido → primera vez, lo registramos
+      userSheet.getRange(userRowIdx + 1, 9).setNumberFormat('@').setValue(code);
+    } else if (storedCode !== code) {
+      return { success: false, error: 'Código incorrecto' };
+    }
+    // Actualizar última actividad
+    userSheet.getRange(userRowIdx + 1, 8).setValue(new Date().toISOString());
+    userObj = {
+      email:        String(userData[userRowIdx][0] || '').toLowerCase().trim(),
+      nombre:       userData[userRowIdx][1] || emailToName_(email),
+      rol:          userData[userRowIdx][2] || 'equipo',
+      departamento: userData[userRowIdx][3] || '',
+      avatar:       userData[userRowIdx][4] || '',
+      color:        userData[userRowIdx][5] || '#9B2C3E'
+    };
+  }
+
+  // Generar token de sesión
+  const token = Utilities.getUuid() + '-' + Utilities.getUuid();
   const now = new Date();
-  const expires = new Date(now.getTime() + CODE_EXPIRY_MINUTES * 60000);
+  const ms = keepActive
+    ? SESSION_LONG_DAYS * 24 * 60 * 60 * 1000
+    : SESSION_SHORT_HOURS * 60 * 60 * 1000;
+  const sessionExpires = new Date(now.getTime() + ms);
 
-  // Limpiar códigos previos del mismo email
-  clearAuthCodesForEmail_(email);
-
-  // Guardar código. Crítico: forzar la columna del código a formato texto
-  // ANTES de escribir el valor, si no Sheets lo convierte a número y la
-  // comparación string === number falla luego.
-  const sheet = getOrCreateAuthSheet_();
-  sheet.appendRow([
+  const authSheet = getOrCreateAuthSheet_();
+  authSheet.appendRow([
     Utilities.getUuid(),
     email,
-    '',                     // code placeholder, se rellena después
-    '',                     // token (vacío hasta que se verifique)
+    '',
+    token,
     now.toISOString(),
-    expires.toISOString(),
-    '',                     // lastUsed
-    'code'                  // tipo
+    sessionExpires.toISOString(),
+    now.toISOString(),
+    'session'
   ]);
-  // Ahora fijamos formato texto en la columna del código y escribimos el valor
-  const newRowIdx = sheet.getLastRow();
-  sheet.getRange(newRowIdx, 3).setNumberFormat('@').setValue(code);
 
-  // Enviar email con el código
   try {
-    sendAuthEmail_(email, code);
-  } catch (err) {
-    return { success: false, error: 'No se pudo enviar el email: ' + err.message };
-  }
+    logActivity_('🔑', userObj.nombre || emailToName_(email), 'inició sesión', 'Cosecha', '');
+  } catch (e) {}
 
   return {
     success: true,
-    message: 'Código enviado a ' + email,
-    expiresInMinutes: CODE_EXPIRY_MINUTES
+    token: token,
+    email: email,
+    name: userObj.nombre || emailToName_(email),
+    rol: userObj.rol || 'equipo',
+    departamento: userObj.departamento || '',
+    color: userObj.color || '#9B2C3E',
+    avatar: userObj.avatar || '',
+    expiresAt: sessionExpires.toISOString()
   };
 }
 
 /**
- * Verifica el código y crea una sesión.
- * @param {string} email
- * @param {string} code
- * @param {boolean} keepActive - Si true, sesión larga (30 días)
- * @returns {Object} { success, token, email, name, expiresAt }
+ * Resetea el código de login de un usuario (solo admin).
+ * @param {Object} body { email }
  */
-function verifyAuthCode(email, code, keepActive) {
-  email = String(email || '').toLowerCase().trim();
-  code  = String(code  || '').trim();
-
-  const sheet = getOrCreateAuthSheet_();
-  const data  = sheet.getDataRange().getValues();
-  const now   = new Date();
-
-  // Buscar código válido. Importante: Sheets convierte automáticamente
-  // valores numéricos, así que forzamos todo a string para comparar.
+function resetUserCode(body) {
+  const email = String(body.email || '').toLowerCase().trim();
+  if (!email) return { success: false, error: 'Email requerido' };
+  const sheet = getTabSheet_('Usuarios');
+  const data = sheet.getDataRange().getValues();
   for (let i = 1; i < data.length; i++) {
-    const row = data[i];
-    const type = String(row[7] || '').trim();
-    const rEmail = String(row[1] || '').toLowerCase().trim();
-    const rCode  = String(row[2] || '').trim();
-    const rExpires = new Date(row[5]);
-
-    if (type === 'code' && rEmail === email && rCode === code) {
-      if (rExpires > now) {
-        // ✅ Código válido — generar sesión
-        const token = Utilities.getUuid() + '-' + Utilities.getUuid();
-        const ms = keepActive
-          ? SESSION_LONG_DAYS * 24 * 60 * 60 * 1000
-          : SESSION_SHORT_HOURS * 60 * 60 * 1000;
-        const sessionExpires = new Date(now.getTime() + ms);
-
-        // Guardar sesión
-        sheet.appendRow([
-          Utilities.getUuid(),
-          email,
-          '',
-          token,
-          now.toISOString(),
-          sessionExpires.toISOString(),
-          now.toISOString(),
-          'session'
-        ]);
-
-        // Eliminar el código usado
-        sheet.deleteRow(i + 1);
-
-        // Registrar actividad
-        try {
-          logActivity_('🔑', emailToName_(email), 'inició sesión', 'Cosecha', '');
-        } catch (e) {}
-
-        // Crear/obtener perfil de usuario con rol
-        let user = null;
-        try {
-          user = getOrCreateUser_(email);
-        } catch (e) {
-          user = { email: email, nombre: emailToName_(email), rol: 'equipo' };
-        }
-
-        return {
-          success: true,
-          token: token,
-          email: email,
-          name: user.nombre || emailToName_(email),
-          rol: user.rol || 'equipo',
-          color: user.color || '#9B2C3E',
-          avatar: user.avatar || '',
-          expiresAt: sessionExpires.toISOString()
-        };
-      } else {
-        return { success: false, error: 'Código expirado. Solicita uno nuevo.' };
-      }
+    if (String(data[i][0] || '').toLowerCase().trim() === email) {
+      sheet.getRange(i + 1, 9).setValue('');
+      return { success: true };
     }
   }
+  return { success: false, error: 'Usuario no encontrado' };
+}
 
-  return { success: false, error: 'Código incorrecto' };
+/**
+ * [DEPRECATED - compatibilidad] Antes usábamos magic link por email.
+ * Esta función existe para no romper el endpoint requestCode del frontend:
+ * simplemente responde éxito sin hacer nada, porque el código se valida
+ * directamente en verifyAuthCode.
+ */
+function requestAuthCode(email) {
+  email = String(email || '').toLowerCase().trim();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return { success: false, error: 'Email no válido' };
+  }
+  const domain = getConfig_('AUTH_DOMAIN') || AUTH_DOMAIN_DEFAULT;
+  if (!email.endsWith('@' + domain)) {
+    return { success: false, error: 'Solo se permiten emails @' + domain };
+  }
+  return { success: true, message: 'Introduce tu código' };
 }
 
 /**
