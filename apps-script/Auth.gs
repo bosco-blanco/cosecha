@@ -16,8 +16,8 @@
 // ─── Configuración ──────────────────────────────────────────
 const AUTH_DOMAIN_DEFAULT = 'encopadebalon.com';
 const CODE_EXPIRY_MINUTES = 10;
-const SESSION_LONG_DAYS   = 30;
-const SESSION_SHORT_HOURS = 24;
+const SESSION_LONG_DAYS   = 30;  // "Mantener sesión activa 30 días"
+const SESSION_SHORT_HOURS = 8;   // Sesión de jornada laboral (8h por defecto)
 
 // ─── API pública ────────────────────────────────────────────
 
@@ -209,6 +209,29 @@ function logoutAuth(token) {
     }
   }
   return { success: true };
+}
+
+/**
+ * Invalida todas las sesiones cortas (de jornada) de un usuario.
+ * Se usa cuando ficha salida: la sesión de trabajo termina con el turno.
+ * Las sesiones "persistentes" (30 días) se respetan.
+ */
+function invalidateWorkdaySessions(email) {
+  email = String(email || '').toLowerCase().trim();
+  if (!email) return;
+  const sheet = getOrCreateAuthSheet_();
+  const data  = sheet.getDataRange().getValues();
+  const now = new Date();
+  for (let i = data.length - 1; i >= 1; i--) {
+    if (data[i][7] !== 'session') continue;
+    if (String(data[i][1]).toLowerCase() !== email) continue;
+    const created = new Date(data[i][4]);
+    const expires = new Date(data[i][5]);
+    // Si la sesión duraba <= 12 horas, es de jornada → invalidar
+    if ((expires - created) <= 12 * 60 * 60 * 1000) {
+      sheet.deleteRow(i + 1);
+    }
+  }
 }
 
 /**

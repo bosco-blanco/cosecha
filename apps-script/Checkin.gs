@@ -33,6 +33,9 @@ const ROLE_RULES = {
 const DEFAULT_ROLE = 'equipo';
 const AVATAR_COLORS = ['#9B2C3E', '#1B9E5A', '#2B7BD4', '#7B5EA7', '#D97C1E', '#C4952E'];
 
+// Duración máxima de la jornada laboral en ms (8 horas)
+const WORKDAY_MS = 8 * 60 * 60 * 1000;
+
 // ─── Usuarios ───────────────────────────────────────────────
 
 /**
@@ -224,6 +227,11 @@ function registerCheckin(body) {
 
   upsert('Fichajes', fichaje);
 
+  // Al fichar salida, invalidar sesiones de jornada (corte limpio)
+  if (tipo === 'salida') {
+    try { invalidateWorkdaySessions(email); } catch (e) {}
+  }
+
   try {
     const emoji = tipo === 'entrada' ? '🟢' : '🔴';
     logActivity_(emoji, emailToName_(email), 'fichó', tipo, body.direccion || '');
@@ -265,18 +273,156 @@ function getCheckinHistory(email, days) {
 
 /**
  * Estado actual del usuario (¿ha fichado? ¿entrada/salida?)
+ * Incluye descansos del día y tiempo de jornada transcurrido.
  */
 function getCheckinStatus(email) {
   const today = getCheckinsToday(email);
   const entrada = today.find(f => f.tipo === 'entrada');
   const salida = today.find(f => f.tipo === 'salida');
+  const breaks = getBreaksToday(email);
+  const openBreak = breaks.find(b => !b.fin);
+  let breakMinutes = 0;
+  breaks.forEach(b => { if (b.duracionMin) breakMinutes += +b.duracionMin; });
+
+  let workedMs = 0;
+  if (entrada) {
+    const endMs = salida ? new Date(salida.timestamp).getTime() : Date.now();
+    workedMs = endMs - new Date(entrada.timestamp).getTime() - (breakMinutes * 60000);
+  }
+
   return {
     fichadoHoy: !!entrada,
     dentro: !!entrada && !salida,
+    enDescanso: !!openBreak,
     entrada: entrada || null,
     salida: salida || null,
-    hoy: today
+    descansos: breaks,
+    descansoAbierto: openBreak || null,
+    minutosDescanso: breakMinutes,
+    msTrabajados: workedMs,
+    hoy: today,
+    jornadaMaxMs: WORKDAY_MS
   };
+}
+
+// ─── Descansos ──────────────────────────────────────────────
+
+/**
+ * Inicia un descanso. Solo se puede si hay entrada y no hay otro descanso abierto.
+ */
+function startBreak(body) {
+  const email = String(body.email || '').toLowerCase().trim();
+  if (!email) return { success: false, error: 'Email requerido' };
+
+  const status = getCheckinStatus(email);
+  if (!status.dentro) return { success: false, error: 'Debes fichar entrada primero' };
+  if (status.enDescanso) return { success: false, error: 'Ya tienes un descanso en curso' };
+
+  const fichaje = {
+    id: Utilities.getUuid(),
+    email: email,
+    fecha: new Date().toISOString().slice(0, 10),
+    inicio: new Date().toISOString(),
+    fin: '',
+    duracionMin: '',
+    motivo: body.motivo || 'Descanso'
+  };
+  upsert('Descansos', fichaje);
+
+  try {
+    logActivity_('☕', emailToName_(email), 'inició descanso', body.motivo || 'Descanso', '');
+  } catch (e) {}
+
+  return { success: true, descanso: fichaje };
+}
+
+/**
+ * Finaliza el descanso abierto del usuario.
+ */
+function endBreak(body) {
+  const email = String(body.email || '').toLowerCase().trim();
+  if (!email) return { success: false, error: 'Email requerido' };
+
+  const sheet = getTabSheet_('Descansos');
+  const data = sheet.getDataRange().getValues();
+  const now = new Date();
+
+  for (let i = data.length - 1; i >= 1; i--) {
+    if (String(data[i][1]).toLowerCase() === email && !data[i][4]) {
+      const inicio = new Date(data[i][3]);
+      const durMin = Math.round((now - inicio) / 60000);
+      sheet.getRange(i + 1, 5).setValue(now.toISOString());
+      sheet.getRange(i + 1, 6).setValue(durMin);
+
+      try {
+        logActivity_('▶️', emailToName_(email), 'volvió del descanso', '', durMin + ' min');
+      } catch (e) {}
+
+      return { success: true, duracionMin: durMin };
+    }
+  }
+  return { success: false, error: 'No hay descanso abierto' };
+}
+
+/**
+ * Descansos del usuario hoy.
+ */
+function getBreaksToday(email) {
+  email = String(email || '').toLowerCase().trim();
+  const today = new Date().toISOString().slice(0, 10);
+  const all = getAll('Descansos');
+  return all.filter(b => String(b.email).toLowerCase() === email && b.fecha === today);
+}
+
+// ─── Auto-cierre de jornada ─────────────────────────────────
+
+/**
+ * Cierra automáticamente las jornadas que lleven más de 8h abiertas.
+ * Se debe programar como trigger cada 30 minutos.
+ * Busca entradas sin salida y si han pasado más de WORKDAY_MS, crea la salida auto.
+ */
+function autoCloseWorkdays() {
+  const allFichajes = getAll('Fichajes');
+  const now = new Date();
+  const cutoff = now.getTime() - WORKDAY_MS;
+
+  // Agrupar por email+fecha
+  const byUserDay = {};
+  allFichajes.forEach(f => {
+    const day = String(f.timestamp).slice(0, 10);
+    const key = f.email + '|' + day;
+    if (!byUserDay[key]) byUserDay[key] = { entrada: null, salida: null, email: f.email, day: day };
+    if (f.tipo === 'entrada') byUserDay[key].entrada = f;
+    if (f.tipo === 'salida')  byUserDay[key].salida = f;
+  });
+
+  let closed = 0;
+  Object.keys(byUserDay).forEach(key => {
+    const { entrada, salida, email } = byUserDay[key];
+    if (entrada && !salida) {
+      const entradaMs = new Date(entrada.timestamp).getTime();
+      if (entradaMs < cutoff) {
+        // Jornada abierta hace más de 8h → cerrar automáticamente
+        const fichaje = {
+          id: Utilities.getUuid(),
+          email: email,
+          tipo: 'salida',
+          timestamp: new Date(entradaMs + WORKDAY_MS).toISOString(),
+          lat: '',
+          lng: '',
+          direccion: '',
+          nota: 'Auto-cierre al cumplir jornada de 8h'
+        };
+        upsert('Fichajes', fichaje);
+        try {
+          logActivity_('🌙', emailToName_(email), 'auto-cierre', 'jornada 8h', '');
+        } catch (e) {}
+        closed++;
+      }
+    }
+  });
+
+  return { cerradas: closed, checked: Object.keys(byUserDay).length };
 }
 
 // ─── Helpers ────────────────────────────────────────────────

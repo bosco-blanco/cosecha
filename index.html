@@ -397,6 +397,58 @@ input[type="file"]{display:none}
 .fich-t{font-size:14px;font-weight:700}
 .fich-s{font-size:11px;color:var(--t3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .fich-h{font-size:13px;font-weight:700;color:var(--t2)}
+
+/* ===== LEGAL CONSENT ===== */
+.legal-wrap{position:fixed;inset:0;background:var(--bg);display:none;flex-direction:column;z-index:420;overflow-y:auto;padding:calc(var(--safe-t) + 20px) 0 0}
+.legal-wrap.show{display:flex}
+.legal-hdr{padding:0 24px 16px;border-bottom:1px solid var(--border);flex-shrink:0}
+.legal-brand{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.legal-brand .ic{width:36px;height:36px;border-radius:12px;background:var(--wine);display:flex;align-items:center;justify-content:center;font-size:18px}
+.legal-brand .nm{font-size:18px;font-weight:800;letter-spacing:-0.4px}
+.legal-brand .sb{font-size:9px;font-weight:700;color:var(--t3);letter-spacing:1px;text-transform:uppercase}
+.legal-t{font-size:22px;font-weight:800;letter-spacing:-0.4px;margin-bottom:4px}
+.legal-s{font-size:13px;color:var(--t3);line-height:1.5}
+.legal-body{flex:1;padding:18px 24px 20px;overflow-y:auto}
+.legal-ver{font-size:10px;font-weight:700;color:var(--t3);letter-spacing:.5px;margin-bottom:16px;text-transform:uppercase}
+.legal-sec{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:12px}
+.legal-sec.on{border-color:var(--wine);background:var(--wine-soft)}
+.legal-sec-h{display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;cursor:pointer}
+.legal-chk{width:22px;height:22px;border-radius:6px;border:2px solid var(--border2);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px;color:#fff;transition:all .15s;margin-top:1px}
+.legal-sec.on .legal-chk{background:var(--wine);border-color:var(--wine)}
+.legal-sec-t{flex:1;font-size:14px;font-weight:700;line-height:1.3}
+.legal-req{display:inline-block;font-size:8px;font-weight:800;padding:2px 6px;border-radius:var(--r-full);background:var(--red-soft);color:var(--red);margin-left:4px;vertical-align:middle;text-transform:uppercase;letter-spacing:.3px}
+.legal-body-tx{font-size:12px;line-height:1.55;color:var(--t2);padding-left:32px}
+.legal-contact{margin-top:20px;padding:14px;background:var(--bg2);border-radius:var(--r-sm);font-size:11px;color:var(--t3);line-height:1.5;text-align:center}
+.legal-ftr{padding:16px 24px calc(20px + var(--safe-b));border-top:1px solid var(--border);background:var(--bg);flex-shrink:0}
+.legal-btn{display:block;width:100%;padding:16px;border-radius:var(--r);font-family:'Inter',sans-serif;font-size:15px;font-weight:800;border:none;cursor:pointer;background:var(--wine);color:#fff;box-shadow:0 4px 16px rgba(155,44,62,0.2);transition:all .15s}
+.legal-btn:disabled{opacity:.4;cursor:not-allowed;background:var(--t3);box-shadow:none}
+.legal-btn:active:not(:disabled){transform:scale(.98)}
+.legal-decl{font-size:11px;color:var(--t3);text-align:center;margin-top:10px;line-height:1.5}
+
+/* ===== BREAK BUTTON IN CHECK-IN ===== */
+.ci-break{display:block;width:100%;padding:14px;border-radius:var(--r);font-family:'Inter',sans-serif;font-size:14px;font-weight:700;border:1.5px solid var(--border);background:var(--bg);color:var(--gold);cursor:pointer;margin-bottom:8px;transition:all .15s}
+.ci-break:active{transform:scale(.98)}
+.ci-break.active{background:var(--gold-soft);border-color:var(--gold);color:var(--gold)}
+
+/* Break indicator */
+.ci-breakbar{background:var(--gold-soft);border:1.5px solid var(--gold);border-radius:var(--r);padding:14px 16px;margin-bottom:16px;display:flex;align-items:center;gap:12px}
+.ci-breakbar .ic{font-size:24px}
+.ci-breakbar .inf{flex:1}
+.ci-breakbar .t{font-size:13px;font-weight:700;color:var(--gold)}
+.ci-breakbar .s{font-size:11px;color:var(--t2)}
+.ci-breakbar .tm{font-size:18px;font-weight:800;color:var(--gold);font-variant-numeric:tabular-nums}
+
+/* ===== DOCUMENTS ===== */
+.doc-row{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:8px;cursor:pointer;box-shadow:var(--shadow);display:flex;align-items:center;gap:12px}
+.doc-row:active{transform:scale(.99)}
+.doc-ic{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;background:var(--blue-soft);color:var(--blue)}
+.doc-inf{flex:1;min-width:0}
+.doc-t{font-size:14px;font-weight:700;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.doc-s{font-size:11px;color:var(--t3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.doc-st{display:inline-block;font-size:9px;font-weight:800;padding:3px 8px;border-radius:var(--r-full);text-transform:uppercase;letter-spacing:.3px;flex-shrink:0}
+.doc-st.pendiente{background:var(--orange-soft);color:var(--orange)}
+.doc-st.leido{background:var(--blue-soft);color:var(--blue)}
+.doc-st.firmado{background:var(--green-soft);color:var(--green)}
 </style>
 </head>
 <body>
@@ -438,6 +490,24 @@ input[type="file"]{display:none}
   <div class="auth-footer">🍇 Cosecha · Passwordless login</div>
 </div>
 
+<!-- ============ LEGAL / CONSENTIMIENTO ============ -->
+<div class="legal-wrap" id="legalWrap">
+  <div class="legal-hdr">
+    <div class="legal-brand"><div class="ic">🍇</div><div><div class="nm">Cosecha</div><div class="sb">EN COPA DE BALÓN</div></div></div>
+    <div class="legal-t">Antes de empezar</div>
+    <div class="legal-s">Necesitamos que leas y aceptes las condiciones de uso y el tratamiento de tus datos.</div>
+  </div>
+  <div class="legal-body">
+    <div class="legal-ver" id="legalVer">CARGANDO...</div>
+    <div id="legalSections"></div>
+    <div class="legal-contact" id="legalContact"></div>
+  </div>
+  <div class="legal-ftr">
+    <button class="legal-btn" id="legalAccept" disabled onclick="legalAcceptClick()">Acepto y continúo</button>
+    <div class="legal-decl">Al aceptar dejas constancia de tu consentimiento. Quedará registrado con fecha y hora.</div>
+  </div>
+</div>
+
 <!-- ============ CHECK-IN ============ -->
 <div class="ci-wrap" id="ciWrap">
   <div class="ci-box">
@@ -454,6 +524,8 @@ input[type="file"]{display:none}
 
     <div id="ciActive" style="display:none">
       <div class="ci-done"><div class="ic">✅</div><div class="tx">Jornada iniciada</div><div class="sub" id="ciEntryTime">—</div></div>
+      <div id="ciBreakBar" class="ci-breakbar" style="display:none"><span class="ic">☕</span><div class="inf"><div class="t">En descanso</div><div class="s" id="ciBreakSince">—</div></div><span class="tm" id="ciBreakTm">00:00</span></div>
+      <button class="ci-break" id="ciBreakBtn" onclick="toggleBreak()">☕ Iniciar descanso</button>
       <button class="ci-big out" onclick="doCheckin('salida')">🔴 Fichar salida</button>
       <button class="ci-skip" onclick="skipCheckin()">Seguir trabajando →</button>
     </div>
@@ -635,6 +707,7 @@ input[type="file"]{display:none}
     <div style="flex:1;min-width:0"><div style="font-size:20px;font-weight:800" id="userShNm">—</div><div style="font-size:12px;color:var(--t3)" id="userShEm">—</div><div style="margin-top:6px"><span class="adm-role" id="userShRol">—</span><span class="ci-pill out" id="userShCi"><span class="d"></span>Sin fichar</span></div></div>
   </div>
   <button class="btn btn-p" style="margin-bottom:8px" onclick="closeSh('user-sh');openCheckin()">⏱️ Fichar / ver jornada</button>
+  <button class="btn btn-g" style="margin-bottom:8px" onclick="closeSh('user-sh');openSh('mydocs-sh')">📄 Mis documentos <span id="docsBadge" style="display:none;background:var(--red);color:#fff;font-size:10px;padding:2px 7px;border-radius:99px;margin-left:6px">0</span></button>
   <button class="btn btn-g" id="userShAdmBtn" style="margin-bottom:8px;display:none" onclick="closeSh('user-sh');openSh('admin-sh')">👑 Panel admin</button>
   <div class="det-sec"><div class="det-l">Sesión</div>
     <div style="font-size:13px;color:var(--t2);line-height:1.6">Activa hasta: <b id="userShExp">—</b></div>
@@ -646,12 +719,41 @@ input[type="file"]{display:none}
 <!-- Panel admin -->
 <div class="sh-bg" id="admin-sh"><div class="sh"><div class="sh-bar"></div>
   <div class="sh-tl">👑 Panel admin</div><div class="sh-sb">Usuarios y permisos del equipo</div>
-  <button class="btn btn-p" style="margin-bottom:14px" onclick="openSh('inviteuser-sh')">➕ Invitar usuario</button>
+  <button class="btn btn-p" style="margin-bottom:10px" onclick="openSh('inviteuser-sh')">➕ Invitar usuario</button>
+  <button class="btn btn-g" style="margin-bottom:14px" onclick="openSh('senddoc-sh')">📄 Enviar documento a un empleado</button>
   <div class="det-l" style="margin-bottom:8px">Miembros del equipo</div>
   <div id="admUsersL"></div>
   <div class="det-l" style="margin-top:20px;margin-bottom:8px">Fichajes de hoy</div>
   <div id="admCheckinsL"></div>
   <button class="btn btn-g" style="margin-top:14px" onclick="closeSh('admin-sh')">Cerrar</button>
+</div></div>
+
+<!-- Mis documentos -->
+<div class="sh-bg" id="mydocs-sh"><div class="sh"><div class="sh-bar"></div>
+  <div class="sh-tl">📄 Mis documentos</div><div class="sh-sb">Documentación enviada por RRHH</div>
+  <div id="myDocsL"></div>
+  <button class="btn btn-g" style="margin-top:14px" onclick="closeSh('mydocs-sh')">Cerrar</button>
+</div></div>
+
+<!-- Detalle documento -->
+<div class="sh-bg" id="docdet-sh"><div class="sh" id="docdetC"></div></div>
+
+<!-- Enviar documento (admin) -->
+<div class="sh-bg" id="senddoc-sh"><div class="sh"><div class="sh-bar"></div>
+  <div class="sh-tl">📄 Enviar documento</div><div class="sh-sb">Lo recibirá el empleado por email y en la app</div>
+  <div class="fg"><label class="fl">Empleado</label><select class="fsel" id="sdEm"></select></div>
+  <div class="fg"><label class="fl">Tipo</label>
+    <div class="pri-row">
+      <div class="po s-medium" data-dt="nomina" onclick="setDocType(this,'nomina')">💰 Nómina</div>
+      <div class="po" data-dt="contrato" onclick="setDocType(this,'contrato')">📝 Contrato</div>
+      <div class="po" data-dt="comunicado" onclick="setDocType(this,'comunicado')">📢 Comunicado</div>
+    </div>
+  </div>
+  <div class="fg"><label class="fl">Título</label><input class="fi" id="sdT" placeholder="Ej: Nómina abril 2026"></div>
+  <div class="fg"><label class="fl">Enlace de Google Drive</label><input class="fi" id="sdU" placeholder="https://drive.google.com/file/d/..."><div style="font-size:11px;color:var(--t3);margin-top:4px">Sube el archivo a Drive, compártelo con el empleado y pega aquí el enlace</div></div>
+  <div class="fg"><label class="fl">Nota (opcional)</label><textarea class="fta" id="sdN" placeholder="Para firma antes del viernes..."></textarea></div>
+  <button class="btn btn-p" onclick="sendDocPost()">📤 Enviar al empleado</button>
+  <button class="btn btn-g" style="margin-top:8px" onclick="closeSh('senddoc-sh')">Cancelar</button>
 </div></div>
 
 <!-- Editar usuario -->
@@ -1209,6 +1311,203 @@ authBoot=async function(){
   }
   return ok;
 };
+
+// ===== LEGAL / CONSENT =====
+const LEGAL_KEY='cosecha_legal_v1';
+let legalData=null;
+let legalAccepted={};
+
+async function loadLegalText(){
+  // Texto por defecto (fallback si no hay backend o falla)
+  const FALLBACK={
+    version:'1.0.0',lastUpdated:'2026-04-11',company:'En Copa de Balón S.L.',
+    sections:[
+      {id:'dataProcessing',required:true,title:'📋 Tratamiento de datos personales',body:'En cumplimiento del RGPD y la LOPD-GDD, En Copa de Balón S.L. trata tus datos personales (nombre, email corporativo, rol, departamento) con la finalidad de gestionar la relación laboral. Base legal: ejecución del contrato de trabajo (art. 6.1.b RGPD). Derechos: acceso, rectificación, supresión, oposición, limitación, portabilidad → rrhh@encopadebalon.com.'},
+      {id:'workdayTracking',required:true,title:'⏱️ Registro de jornada laboral',body:'Según el Real Decreto-ley 8/2019, la empresa está obligada a registrar la jornada diaria de cada empleado. Cosecha registra entrada, salida y descansos. Conservación: 4 años. Disponible para la Inspección de Trabajo.'},
+      {id:'geolocation',required:false,title:'📍 Geolocalización (voluntaria)',body:'Puedes activar la geolocalización al fichar o al registrar reuniones con clientes. Si lo haces, guardaremos coordenadas GPS junto con el registro. Puedes rechazar desde tu navegador. Los datos se borran a los 12 meses.'},
+      {id:'audio',required:false,title:'🎙️ Grabación y transcripción de reuniones',body:'Cosecha permite grabar y transcribir reuniones. Si la usas, eres responsable de informar y obtener consentimiento de los participantes. La transcripción se almacena en Google Drive de la empresa.'},
+      {id:'documents',required:false,title:'📁 Gestión documental',body:'RRHH puede enviarte documentos laborales para lectura y firma electrónica. Tu firma en la app equivale a firma electrónica simple con validez contractual (art. 10 Ley 6/2020).'}
+    ],
+    contact:{company:'En Copa de Balón S.L.',dpo:'rrhh@encopadebalon.com',address:'Madrid, España'}
+  };
+  if(cfg.apiUrl){
+    try{
+      const r=await fetch(cfg.apiUrl+'?action=legalText');
+      const d=await r.json();if(d&&d.sections)return d;
+    }catch(e){}
+  }
+  return FALLBACK;
+}
+async function openLegal(){
+  legalData=await loadLegalText();
+  legalAccepted={};
+  $('legalVer').textContent='POLÍTICA v'+legalData.version+' · '+(legalData.lastUpdated||'');
+  $('legalSections').innerHTML=legalData.sections.map(s=>`<div class="legal-sec" data-id="${s.id}" onclick="toggleLegal('${s.id}')"><div class="legal-sec-h"><div class="legal-chk">✓</div><div class="legal-sec-t">${s.title}${s.required?'<span class="legal-req">Obligatorio</span>':''}</div></div><div class="legal-body-tx">${s.body}</div></div>`).join('');
+  $('legalContact').innerHTML='<b>'+legalData.contact.company+'</b><br>'+legalData.contact.address+'<br>Delegado de Protección de Datos: '+legalData.contact.dpo;
+  updateLegalBtn();
+  $('legalWrap').classList.add('show');document.body.style.overflow='hidden';
+}
+function toggleLegal(id){
+  legalAccepted[id]=!legalAccepted[id];
+  const el=document.querySelector('.legal-sec[data-id="'+id+'"]');
+  if(el)el.classList.toggle('on',!!legalAccepted[id]);
+  updateLegalBtn();
+}
+function updateLegalBtn(){
+  if(!legalData)return;
+  const req=legalData.sections.filter(s=>s.required);
+  const allReq=req.every(s=>legalAccepted[s.id]);
+  $('legalAccept').disabled=!allReq;
+}
+function closeLegal(){$('legalWrap').classList.remove('show');document.body.style.overflow='';}
+async function legalAcceptClick(){
+  const body={email:user.email,version:legalData.version,items:legalAccepted,userAgent:navigator.userAgent};
+  // Guardar local por si el backend falla
+  try{localStorage.setItem(LEGAL_KEY,JSON.stringify({...body,at:new Date().toISOString()}));}catch(e){}
+  if(cfg.apiUrl&&user&&!user.token.startsWith('demo-')){
+    try{
+      const r=await fetch(cfg.apiUrl+'?action=saveConsent',{method:'POST',body:JSON.stringify(body),headers:{'Content-Type':'text/plain'}});
+      const d=await r.json();if(!d.success)throw new Error(d.error);
+    }catch(e){toast('⚠️ '+e.message);}
+  }
+  closeLegal();toast('✅ Consentimiento registrado');
+  // Continuar al check-in
+  setTimeout(()=>{const st=getLocalCi();if(!st||!st.entrada)openCheckin();},300);
+}
+async function needsLegalConsent(){
+  if(!user)return false;
+  // Check local primero
+  try{
+    const l=JSON.parse(localStorage.getItem(LEGAL_KEY)||'null');
+    if(l&&l.email===user.email){
+      const data=await loadLegalText();
+      if(l.version===data.version)return false;
+    }
+  }catch(e){}
+  // Check backend
+  if(cfg.apiUrl&&!user.token.startsWith('demo-')){
+    try{
+      const r=await fetch(cfg.apiUrl+'?action=consentStatus&token='+encodeURIComponent(user.token));
+      const d=await r.json();if(d.accepted)return false;
+    }catch(e){}
+  }
+  return true;
+}
+
+// ===== BREAK =====
+let breakStart=null,breakInt=null;
+function toggleBreak(){
+  const st=getLocalCi()||{};
+  if(st.breakOpen){
+    // Finalizar descanso
+    const durMs=Date.now()-new Date(st.breakOpen).getTime();
+    const durMin=Math.round(durMs/60000);
+    st.totalBreakMin=(st.totalBreakMin||0)+durMin;
+    delete st.breakOpen;
+    setLocalCi(st);
+    if(breakInt){clearInterval(breakInt);breakInt=null;}
+    $('ciBreakBar').style.display='none';
+    $('ciBreakBtn').textContent='☕ Iniciar descanso';
+    $('ciBreakBtn').classList.remove('active');
+    toast('▶️ De vuelta al trabajo ('+durMin+' min)');
+    if(cfg.apiUrl&&!user.token.startsWith('demo-'))fetch(cfg.apiUrl+'?action=endBreak',{method:'POST',body:JSON.stringify({token:user.token}),headers:{'Content-Type':'text/plain'}}).catch(()=>{});
+  }else{
+    // Iniciar descanso
+    st.breakOpen=new Date().toISOString();
+    setLocalCi(st);
+    showBreakBar();
+    $('ciBreakBtn').textContent='▶️ Finalizar descanso';
+    $('ciBreakBtn').classList.add('active');
+    toast('☕ Descanso iniciado');
+    if(cfg.apiUrl&&!user.token.startsWith('demo-'))fetch(cfg.apiUrl+'?action=startBreak',{method:'POST',body:JSON.stringify({token:user.token}),headers:{'Content-Type':'text/plain'}}).catch(()=>{});
+  }
+}
+function showBreakBar(){
+  const st=getLocalCi();if(!st||!st.breakOpen)return;
+  $('ciBreakBar').style.display='';
+  $('ciBreakSince').textContent='Desde '+new Date(st.breakOpen).toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'});
+  $('ciBreakBtn').textContent='▶️ Finalizar descanso';
+  $('ciBreakBtn').classList.add('active');
+  if(breakInt)clearInterval(breakInt);
+  const tick=()=>{const ms=Date.now()-new Date(st.breakOpen).getTime();const m=Math.floor(ms/60000),s=Math.floor((ms%60000)/1000);$('ciBreakTm').textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');};
+  tick();breakInt=setInterval(tick,1000);
+}
+
+// ===== DOCUMENTOS =====
+let myDocs=[];
+async function loadMyDocs(){
+  if(!cfg.apiUrl||!user||user.token.startsWith('demo-')){
+    myDocs=[
+      {id:'demo1',titulo:'Nómina marzo 2026',tipo:'nomina',estado:'pendiente',enviadoEn:new Date(Date.now()-86400000).toISOString(),driveUrl:'#'},
+      {id:'demo2',titulo:'Protocolo vacaciones 2026',tipo:'comunicado',estado:'leido',enviadoEn:new Date(Date.now()-3*86400000).toISOString(),driveUrl:'#'}
+    ];
+    renderMyDocs();return;
+  }
+  try{
+    const r=await fetch(cfg.apiUrl+'?action=myDocuments&token='+encodeURIComponent(user.token));
+    const d=await r.json();if(Array.isArray(d))myDocs=d;
+    renderMyDocs();
+  }catch(e){}
+}
+function renderMyDocs(){
+  const pending=myDocs.filter(d=>d.estado!=='firmado').length;
+  const badge=$('docsBadge');if(badge){badge.style.display=pending?'':'none';badge.textContent=pending;}
+  const l=$('myDocsL');if(!l)return;
+  l.innerHTML=myDocs.length?myDocs.map(d=>{
+    const ic=d.tipo==='nomina'?'💰':d.tipo==='contrato'?'📝':d.tipo==='comunicado'?'📢':'📄';
+    const dt=new Date(d.enviadoEn).toLocaleDateString('es-ES',{day:'numeric',month:'short',year:'numeric'});
+    return`<div class="doc-row" onclick="openDocDet('${d.id}')"><div class="doc-ic">${ic}</div><div class="doc-inf"><div class="doc-t">${d.titulo}</div><div class="doc-s">${dt}</div></div><span class="doc-st ${d.estado}">${d.estado}</span></div>`;
+  }).join(''):'<div class="empty"><div class="empty-ic">📄</div><div class="empty-t">Sin documentos</div><div class="empty-s">RRHH te enviará aquí nóminas, contratos y comunicados</div></div>';
+}
+function openDocDet(id){
+  const d=myDocs.find(x=>x.id===id);if(!d)return;
+  if(d.estado==='pendiente'){d.estado='leido';renderMyDocs();if(cfg.apiUrl&&!user.token.startsWith('demo-'))fetch(cfg.apiUrl+'?action=markDocRead',{method:'POST',body:JSON.stringify({id,token:user.token}),headers:{'Content-Type':'text/plain'}}).catch(()=>{});}
+  $('docdetC').innerHTML=`<div class="sh-bar"></div><div style="display:flex;align-items:center;gap:12px;margin-bottom:16px"><div class="doc-ic" style="width:52px;height:52px;font-size:22px">${d.tipo==='nomina'?'💰':d.tipo==='contrato'?'📝':'📢'}</div><div><div style="font-size:18px;font-weight:800">${d.titulo}</div><div style="font-size:12px;color:var(--t3)">${new Date(d.enviadoEn).toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}</div></div></div><span class="doc-st ${d.estado}" style="margin-bottom:14px">${d.estado}</span>${d.nota?`<div class="det-sec"><div class="det-l">Nota de RRHH</div><div style="font-size:13px;line-height:1.5;color:var(--t2)">${d.nota}</div></div>`:''}${d.driveUrl&&d.driveUrl!=='#'?`<a class="btn btn-g" style="margin-top:14px;text-decoration:none;display:flex" href="${d.driveUrl}" target="_blank">📁 Abrir en Drive</a>`:''}${d.estado!=='firmado'?`<div class="comp-box" style="margin-top:14px"><div style="text-align:center;font-size:24px;margin-bottom:6px">✍️</div><div style="text-align:center;font-weight:700;margin-bottom:2px">Firma electrónica</div><div style="text-align:center;font-size:12px;color:var(--t2);margin-bottom:14px">Al firmar dejas constancia de haber leído y aceptado el contenido</div><button class="btn btn-s" onclick="signDoc('${d.id}')">✍️ Firmar documento</button></div>`:`<div style="margin-top:14px;padding:14px;background:var(--green-soft);border-radius:var(--r);text-align:center;font-size:13px;color:var(--green);font-weight:700">✅ Firmado el ${new Date(d.firmadoEn||d.enviadoEn).toLocaleDateString('es-ES')}</div>`}<button class="btn btn-g" style="margin-top:14px" onclick="closeSh('docdet-sh')">Cerrar</button>`;
+  openSh('docdet-sh');
+}
+function signDoc(id){
+  const d=myDocs.find(x=>x.id===id);if(!d)return;
+  d.estado='firmado';d.firmadoEn=new Date().toISOString();
+  renderMyDocs();closeSh('docdet-sh');toast('✍️ Firmado');
+  if(cfg.apiUrl&&!user.token.startsWith('demo-'))fetch(cfg.apiUrl+'?action=signDocument',{method:'POST',body:JSON.stringify({id,token:user.token}),headers:{'Content-Type':'text/plain'}}).catch(()=>{});
+}
+
+// Admin enviar documento
+let sdType='comunicado';
+function setDocType(el,t){sdType=t;document.querySelectorAll('[data-dt]').forEach(e=>e.className='po');el.className='po s-'+(t==='nomina'?'medium':t==='contrato'?'low':'high');}
+function sendDocPost(){
+  const em=$('sdEm').value,t=$('sdT').value.trim(),u=$('sdU').value.trim(),n=$('sdN').value.trim();
+  if(!em||!t)return toast('Empleado y título requeridos');
+  const body={userEmail:em,tipo:sdType,titulo:t,driveUrl:u,nota:n};
+  if(cfg.apiUrl&&!user.token.startsWith('demo-'))fetch(cfg.apiUrl+'?action=sendDocument',{method:'POST',body:JSON.stringify({...body,token:user.token}),headers:{'Content-Type':'text/plain'}}).catch(()=>{});
+  ['sdT','sdU','sdN'].forEach(id=>$(id).value='');
+  closeSh('senddoc-sh');toast('📤 Documento enviado a '+em);
+}
+// Rellenar el selector de empleados cuando se abre el sheet
+const _origOpenSh=openSh;
+openSh=function(id){
+  if(id==='senddoc-sh'&&teamUsers.length){
+    $('sdEm').innerHTML=teamUsers.filter(u=>u.email!==user.email).map(u=>`<option value="${u.email}">${u.nombre} (${u.email})</option>`).join('');
+  }
+  if(id==='mydocs-sh')loadMyDocs();
+  _origOpenSh(id);
+};
+
+// Hook authBoot: tras login, verificar consentimiento ANTES del check-in
+const _origAuthBoot2=authBoot;
+authBoot=async function(){
+  const ok=await _origAuthBoot2();
+  if(ok&&user){
+    const needsLegal=await needsLegalConsent();
+    if(needsLegal){setTimeout(()=>openLegal(),300);}
+    loadMyDocs();
+  }
+  return ok;
+};
+
+// Hook openCheckin para mostrar la break bar si hay descanso abierto
+const _origOpenCheckin=openCheckin;
+openCheckin=function(){_origOpenCheckin();setTimeout(()=>{const st=getLocalCi();if(st&&st.breakOpen)showBreakBar();},50);};
 
 restore();loadCfg();authBoot().then(()=>{R();});
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});

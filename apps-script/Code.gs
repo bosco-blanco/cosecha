@@ -13,7 +13,7 @@
 const ALLOWED_ORIGINS = '*'; // En producción, restringir al dominio de la PWA
 
 // Rutas que NO requieren autenticación
-const PUBLIC_ACTIONS = ['requestCode', 'verifyCode', 'validateToken', ''];
+const PUBLIC_ACTIONS = ['requestCode', 'verifyCode', 'validateToken', 'legalText', ''];
 
 // ─── Punto de entrada GET ───────────────────────────────────
 function doGet(e) {
@@ -104,6 +104,24 @@ function doGet(e) {
         };
         break;
 
+      case 'legalText':
+        // Devuelve los textos legales actuales (pública, sin auth)
+        result = getLegalText();
+        break;
+
+      case 'consentStatus':
+        result = getConsentStatus(auth.email);
+        break;
+
+      case 'myDocuments':
+        result = getUserDocuments(auth.email);
+        break;
+
+      case 'allDocuments':
+        if (auth.rol !== 'admin') { result = { error: true, message: 'Solo admin' }; break; }
+        result = getAllDocuments();
+        break;
+
       default:
         result = {
           app: 'Cosecha CRM',
@@ -138,6 +156,9 @@ function doPost(e) {
     }
     if (action === 'logout') {
       return buildResponse_(logoutAuth(body.token));
+    }
+    if (action === 'saveConsent') {
+      return buildResponse_(saveConsent(body));
     }
 
     // --- Rutas protegidas ---
@@ -176,6 +197,33 @@ function doPost(e) {
         // Forzar el email del usuario autenticado (no se puede fichar por otro)
         body.email = auth.email;
         result = registerCheckin(body);
+        break;
+
+      case 'startBreak':
+        body.email = auth.email;
+        result = startBreak(body);
+        break;
+
+      case 'endBreak':
+        body.email = auth.email;
+        result = endBreak(body);
+        break;
+
+      // --- Documentos ---
+      case 'sendDocument':
+        if (auth.rol !== 'admin') { result = { error: true, message: 'Solo admin' }; break; }
+        body.enviadoPor = auth.email;
+        result = sendDocument(body);
+        break;
+
+      case 'markDocRead':
+        body.email = auth.email;
+        result = markDocumentRead(body);
+        break;
+
+      case 'signDocument':
+        body.email = auth.email;
+        result = signDocument(body);
         break;
 
       // --- Admin: gestión de usuarios ---

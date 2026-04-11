@@ -14,14 +14,17 @@ const SHEET_NAME = 'Cosecha CRM';
  * El orden de las columnas determina el orden en la hoja.
  */
 const TAB_SCHEMA = {
-  'Usuarios':  ['email', 'nombre', 'rol', 'departamento', 'avatar', 'color', 'creado', 'ultimaActividad'],
-  'Fichajes':  ['id', 'email', 'tipo', 'timestamp', 'lat', 'lng', 'direccion', 'nota'],
-  'Contactos': ['id', 'nombre', 'email', 'telefono', 'empresa', 'tipo', 'etiquetas', 'notas', 'ultimoContacto', 'creado', 'creadoPor'],
-  'Deals':     ['id', 'titulo', 'contactoId', 'contactoNombre', 'valor', 'etapa', 'probabilidad', 'cierreEsperado', 'asignado', 'notas', 'creado'],
-  'Tareas':    ['id', 'titulo', 'descripcion', 'columna', 'prioridad', 'etiqueta', 'fechaLimite', 'asignados', 'proyecto', 'creado', 'completado'],
-  'Reuniones': ['id', 'titulo', 'fecha', 'duracion', 'ubicacion', 'lat', 'lng', 'direccion', 'canal', 'asistentes', 'clienteId', 'clienteNombre', 'tipoReunion', 'palabras', 'resumen', 'puntosClave', 'acciones', 'notasGranola', 'driveFileId', 'compartidoCon', 'creado'],
-  'Actividad': ['id', 'icono', 'quien', 'accion', 'que', 'detalle', 'timestamp'],
-  'Config':    ['clave', 'valor']
+  'Usuarios':       ['email', 'nombre', 'rol', 'departamento', 'avatar', 'color', 'creado', 'ultimaActividad'],
+  'Fichajes':       ['id', 'email', 'tipo', 'timestamp', 'lat', 'lng', 'direccion', 'nota'],
+  'Descansos':      ['id', 'email', 'fecha', 'inicio', 'fin', 'duracionMin', 'motivo'],
+  'Consentimientos':['id', 'email', 'version', 'aceptadoEn', 'items', 'userAgent', 'ip'],
+  'Documentos':     ['id', 'email', 'titulo', 'tipo', 'driveFileId', 'driveUrl', 'estado', 'enviadoPor', 'enviadoEn', 'firmadoEn', 'nota'],
+  'Contactos':      ['id', 'nombre', 'email', 'telefono', 'empresa', 'tipo', 'etiquetas', 'notas', 'ultimoContacto', 'creado', 'creadoPor'],
+  'Deals':          ['id', 'titulo', 'contactoId', 'contactoNombre', 'valor', 'etapa', 'probabilidad', 'cierreEsperado', 'asignado', 'notas', 'creado'],
+  'Tareas':         ['id', 'titulo', 'descripcion', 'columna', 'prioridad', 'etiqueta', 'fechaLimite', 'asignados', 'proyecto', 'creado', 'completado'],
+  'Reuniones':      ['id', 'titulo', 'fecha', 'duracion', 'ubicacion', 'lat', 'lng', 'direccion', 'canal', 'asistentes', 'clienteId', 'clienteNombre', 'tipoReunion', 'palabras', 'resumen', 'puntosClave', 'acciones', 'notasGranola', 'driveFileId', 'compartidoCon', 'creado'],
+  'Actividad':      ['id', 'icono', 'quien', 'accion', 'que', 'detalle', 'timestamp'],
+  'Config':         ['clave', 'valor']
 };
 
 // ─── Inicialización ─────────────────────────────────────────
