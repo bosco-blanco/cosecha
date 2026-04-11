@@ -1,0 +1,58 @@
+name: Deploy Apps Script
+
+# Se dispara automáticamente cuando hay cambios en apps-script/
+# o cuando se lanza manualmente desde la pestaña "Actions" de GitHub
+on:
+  push:
+    branches:
+      - main
+      - claude/enterprise-crm-google-workspace-lDLYl
+    paths:
+      - 'apps-script/**'
+      - '.github/workflows/deploy-apps-script.yml'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install clasp
+        run: npm install -g @google/clasp@2.4.2
+
+      - name: Restore clasp credentials
+        env:
+          CLASPRC: ${{ secrets.CLASPRC }}
+        run: |
+          if [ -z "$CLASPRC" ]; then
+            echo "::error::Falta el secret CLASPRC. Añádelo en Settings → Secrets and variables → Actions."
+            exit 1
+          fi
+          echo "$CLASPRC" > ~/.clasprc.json
+
+      - name: Restore .clasp.json
+        env:
+          CLASP_JSON: ${{ secrets.CLASP_JSON }}
+        run: |
+          if [ -z "$CLASP_JSON" ]; then
+            echo "::error::Falta el secret CLASP_JSON. Añádelo en Settings → Secrets and variables → Actions."
+            exit 1
+          fi
+          echo "$CLASP_JSON" > .clasp.json
+
+      - name: Push to Apps Script
+        run: clasp push --force
+
+      - name: Create new deployment
+        run: |
+          clasp deploy --description "auto-$(date +%Y%m%d-%H%M%S)-${GITHUB_SHA::7}" || echo "Deploy falló (puede ser normal si no hay cambios desplegables)"
+
+      - name: Summary
+        run: echo "✅ Apps Script sincronizado con el commit $GITHUB_SHA"

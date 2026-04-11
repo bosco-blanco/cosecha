@@ -2,6 +2,8 @@
 
 Guía paso a paso para dejar Cosecha funcionando con tu propia cuenta de Google Workspace. **Tiempo estimado: 10 minutos**. **Coste: 0 €**.
 
+> 💡 **¿No quieres copiar-pegar cada cambio?** Si ya tienes un despliegue inicial funcionando, lee [DEPLOY.md](./DEPLOY.md) para automatizarlo con `clasp` + GitHub Actions. A partir de ese momento, cada commit al repo se sincroniza solo con Apps Script.
+
 ---
 
 ## Parte 1 — El backend (Google Apps Script)

@@ -1,0 +1,19 @@
+{
+  "name": "cosecha",
+  "version": "1.0.0",
+  "description": "CRM y gestión para En Copa de Balón",
+  "private": true,
+  "scripts": {
+    "clasp:login": "clasp login",
+    "clasp:create": "clasp create --type standalone --title 'Cosecha Backend' --rootDir apps-script",
+    "clasp:clone": "clasp clone --rootDir apps-script",
+    "push": "clasp push",
+    "pull": "clasp pull",
+    "deploy": "clasp push && clasp deploy --description \"auto-$(date +%Y%m%d-%H%M%S)\"",
+    "open": "clasp open-script",
+    "logs": "clasp logs --watch"
+  },
+  "devDependencies": {
+    "@google/clasp": "^2.4.2"
+  }
+}
