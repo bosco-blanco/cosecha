@@ -1841,7 +1841,8 @@ async function testSync(){if(!cfg.apiUrl){toast('Configura la URL del backend');
 async function pushApi(action,data){if(!cfg.apiUrl)return;try{await fetch(cfg.apiUrl+'?action='+action,{method:'POST',body:JSON.stringify(data),mode:'no-cors'});showSync('ok','Guardado ✓');}catch(e){showSync('err','Error sync');}}
 
 // ===== AUTH =====
-const AUTH_KEY='cosecha_auth_v1';
+const AUTH_KEY='cosecha_auth_v2';  // bumped to invalidate old sessions
+try{localStorage.removeItem('cosecha_auth_v1');}catch(e){}
 const AUTH_DOMAIN='encopadebalon.com';
 let user=null; // {email, name, token, expiresAt}
 let resendTimer=null;
@@ -1852,8 +1853,12 @@ function authErr(id,msg){const e=$(id);e.textContent=msg;e.classList.add('show')
 function authBtn(id,label,disabled){const b=$(id);b.disabled=!!disabled;b.textContent=label;}
 function userIni(n){return (n||'').split(' ').map(w=>w[0]).filter(Boolean).slice(0,2).join('').toUpperCase()||'?';}
 
-// Base local de códigos (se usa como fallback si backend no responde)
-const LOCAL_CODES_KEY='cosecha_local_codes_v1';
+// Base local de códigos (auth es 100% local).
+// Versionado: si cambiamos el modelo, bump la versión para forzar "primera vez"
+const LOCAL_CODES_KEY='cosecha_local_codes_v2';
+// Migración: borrar v1 y cualquier sesión vieja para que el usuario pueda
+// establecer el código nuevo sin choque con los intentos fallidos previos
+try{localStorage.removeItem('cosecha_local_codes_v1');}catch(e){}
 function getLocalCode(em){try{const c=JSON.parse(localStorage.getItem(LOCAL_CODES_KEY)||'{}');return c[em]||'';}catch(e){return '';}}
 function setLocalCode(em,code){try{const c=JSON.parse(localStorage.getItem(LOCAL_CODES_KEY)||'{}');c[em]=code;localStorage.setItem(LOCAL_CODES_KEY,JSON.stringify(c));}catch(e){}}
 
@@ -1865,46 +1870,41 @@ function authVerify(){
   if(!em.endsWith('@'+AUTH_DOMAIN))return authErr('authErr','Solo emails @'+AUTH_DOMAIN);
   if(!/^\d{4,6}$/.test(code))return authErr('authErr','El código debe ser de 4-6 dígitos');
 
-  authBtn('authVerifyBtn','Entrando…',true);
-
-  const doBackend=()=>{
-    const url=cfg.apiUrl+'?action=verifyCode&email='+encodeURIComponent(em)+'&code='+encodeURIComponent(code)+'&keepActive='+(keep?'true':'false');
-    fetch(url).then(r=>r.json()).then(d=>{
-      authBtn('authVerifyBtn','Entrar →',false);
-      if(d.success){
-        setLocalCode(em,code);  // guardar para futuros logins offline
-        authSuccess(d);
-      }else{
-        authErr('authErr',d.error||'Código incorrecto');
-      }
-    }).catch(err=>{
-      // Fallback offline: usar código local guardado
-      authBtn('authVerifyBtn','Entrar →',false);
-      const stored=getLocalCode(em);
-      if(!stored){
-        // Primera vez offline → registrar
-        setLocalCode(em,code);
-        const name=em.split('@')[0].split(/[.\-_]/).map(p=>p.charAt(0).toUpperCase()+p.slice(1)).join(' ');
-        authSuccess({email:em,name:name,token:'local-'+Date.now(),rol:em==='bosco@encopadebalon.com'?'admin':'equipo',expiresAt:new Date(Date.now()+(keep?30*864e5:864e5)).toISOString()});
-      }else if(stored===code){
-        const name=em.split('@')[0].split(/[.\-_]/).map(p=>p.charAt(0).toUpperCase()+p.slice(1)).join(' ');
-        authSuccess({email:em,name:name,token:'local-'+Date.now(),rol:em==='bosco@encopadebalon.com'?'admin':'equipo',expiresAt:new Date(Date.now()+(keep?30*864e5:864e5)).toISOString()});
-      }else{
-        authErr('authErr','Código incorrecto');
-      }
-    });
-  };
-
-  if(cfg.apiUrl){doBackend();return;}
-  // Sin backend: solo local
-  authBtn('authVerifyBtn','Entrar →',false);
+  // Auth 100% local. El backend se usa solo para sincronizar datos después.
+  // Primera vez con un email → ese código queda registrado
+  // Siguientes veces → tiene que coincidir
   const stored=getLocalCode(em);
-  if(!stored){setLocalCode(em,code);}
-  else if(stored!==code){return authErr('authErr','Código incorrecto');}
+  if(!stored){
+    setLocalCode(em,code);
+  }else if(stored!==code){
+    return authErr('authErr','Código incorrecto');
+  }
+
+  // Rol por defecto por email (bosco → admin, saul → comercial, resto → equipo)
+  let rol='equipo',departamento='';
+  if(em==='bosco@encopadebalon.com'){rol='admin';departamento='direccion';}
+  else if(em==='saul@encopadebalon.com'){rol='admin';departamento='codeba';}
+
   const name=em.split('@')[0].split(/[.\-_]/).map(p=>p.charAt(0).toUpperCase()+p.slice(1)).join(' ');
-  authSuccess({email:em,name:name,token:'local-'+Date.now(),rol:em==='bosco@encopadebalon.com'?'admin':'equipo',expiresAt:new Date(Date.now()+(keep?30*864e5:864e5)).toISOString()});
+  authSuccess({
+    email:em,
+    name:name,
+    token:'local-'+Date.now(),
+    rol:rol,
+    departamento:departamento,
+    color:'#9B2C3E',
+    expiresAt:new Date(Date.now()+(keep?30*864e5:864e5)).toISOString()
+  });
+
+  // En background: si hay backend configurado, intentar sincronizar datos
+  // pero sin bloquear la entrada del usuario
+  if(cfg.apiUrl){
+    setTimeout(()=>{
+      // Push silencioso para que el backend tenga el usuario registrado
+      fetch(cfg.apiUrl+'?action=verifyCode&email='+encodeURIComponent(em)+'&code='+encodeURIComponent(code)+'&keepActive='+(keep?'true':'false')).catch(()=>{});
+    },500);
+  }
 }
-// Compatibilidad con funciones viejas (ya no se usan pero pueden quedar refs)
 function authRequest(){authVerify();}
 function isDemoMode(){return !cfg.apiUrl;}
 function authSuccess(d){
