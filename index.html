@@ -342,6 +342,61 @@ input[type="file"]{display:none}
 .user-chip.show{display:flex}
 .user-chip .av{width:26px;height:26px;margin:0;border:none;font-size:10px}
 .user-chip-n{font-size:12px;font-weight:700;color:var(--t2)}
+
+/* Check-in pill (fichaje estado) */
+.ci-pill{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:var(--r-full);font-size:11px;font-weight:700;margin-left:6px}
+.ci-pill.in{background:var(--green-soft);color:var(--green)}
+.ci-pill.out{background:var(--bg3);color:var(--t3)}
+.ci-pill .d{width:6px;height:6px;border-radius:50%;background:currentColor;animation:bk 1.8s infinite}
+
+/* ===== CHECK-IN SCREEN ===== */
+.ci-wrap{position:fixed;inset:0;background:linear-gradient(180deg,#FFFFFF 0%,#F7F1F2 100%);display:none;flex-direction:column;align-items:center;justify-content:center;padding:40px 28px calc(40px + var(--safe-b));z-index:380;overflow-y:auto}
+.ci-wrap.show{display:flex}
+.ci-box{width:100%;max-width:400px;text-align:center}
+.ci-greet{font-size:14px;color:var(--t3);font-weight:600;margin-bottom:6px}
+.ci-name{font-size:26px;font-weight:800;letter-spacing:-0.5px;margin-bottom:20px}
+.ci-clock{font-size:68px;font-weight:900;letter-spacing:-2px;color:var(--wine);line-height:1;margin-bottom:4px;font-variant-numeric:tabular-nums}
+.ci-date{font-size:13px;color:var(--t3);text-transform:capitalize;margin-bottom:30px}
+.ci-gps{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;margin-bottom:20px;display:flex;align-items:center;gap:10px;font-size:13px;color:var(--t2);text-align:left}
+.ci-gps .ic{font-size:18px;flex-shrink:0}
+.ci-gps .tx{flex:1;min-width:0}
+.ci-gps .tx b{display:block;color:var(--t1);font-weight:700;margin-bottom:2px}
+.ci-gps .tx span{font-size:11px;color:var(--t3);display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ci-gps.ok{border-color:var(--green);background:var(--green-soft)}
+.ci-gps.err{border-color:var(--red);background:var(--red-soft);color:var(--red)}
+.ci-big{display:block;width:100%;padding:22px;border-radius:var(--r-lg);font-family:'Inter',sans-serif;font-size:17px;font-weight:800;border:none;cursor:pointer;letter-spacing:.3px;margin-bottom:10px;transition:all .15s;box-shadow:0 8px 24px rgba(155,44,62,0.2)}
+.ci-big.entry{background:var(--green);color:#fff;box-shadow:0 8px 24px rgba(27,158,90,0.25)}
+.ci-big.out{background:var(--wine);color:#fff}
+.ci-big:active{transform:scale(.98)}
+.ci-big:disabled{opacity:.5;cursor:not-allowed}
+.ci-skip{background:none;border:none;color:var(--t3);font-family:'Inter',sans-serif;font-size:12px;cursor:pointer;padding:8px;margin-top:6px}
+.ci-done{background:var(--green-soft);border:1.5px solid rgba(27,158,90,0.25);border-radius:var(--r);padding:20px;margin-bottom:16px;text-align:center}
+.ci-done .ic{font-size:44px;margin-bottom:8px}
+.ci-done .tx{font-size:14px;font-weight:700;color:var(--green);margin-bottom:2px}
+.ci-done .sub{font-size:12px;color:var(--t2)}
+
+/* Admin panel */
+.adm-tile{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:8px;cursor:pointer;box-shadow:var(--shadow);display:flex;align-items:center;gap:12px}
+.adm-tile:active{transform:scale(.99)}
+.adm-tile-ic{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.adm-tile-inf{flex:1;min-width:0}
+.adm-tile-t{font-size:15px;font-weight:700;margin-bottom:2px}
+.adm-tile-s{font-size:12px;color:var(--t3)}
+.adm-role{display:inline-block;font-size:9px;font-weight:800;padding:3px 8px;border-radius:var(--r-full);text-transform:uppercase;letter-spacing:.4px}
+.adm-role.r-admin{background:var(--wine-soft);color:var(--wine)}
+.adm-role.r-comercial{background:var(--gold-soft);color:var(--gold)}
+.adm-role.r-equipo{background:var(--blue-soft);color:var(--blue)}
+
+/* Fichaje row */
+.fich-row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)}
+.fich-row:last-child{border-bottom:none}
+.fich-ic{width:32px;height:32px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.fich-ic.in{background:var(--green-soft);color:var(--green)}
+.fich-ic.out{background:var(--red-soft);color:var(--red)}
+.fich-inf{flex:1;min-width:0}
+.fich-t{font-size:14px;font-weight:700}
+.fich-s{font-size:11px;color:var(--t3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fich-h{font-size:13px;font-weight:700;color:var(--t2)}
 </style>
 </head>
 <body>
@@ -375,6 +430,33 @@ input[type="file"]{display:none}
     </div>
   </div>
   <div class="auth-footer">🍇 Cosecha · Passwordless login</div>
+</div>
+
+<!-- ============ CHECK-IN ============ -->
+<div class="ci-wrap" id="ciWrap">
+  <div class="ci-box">
+    <div class="ci-greet" id="ciGreet">Buenos días</div>
+    <div class="ci-name" id="ciName">—</div>
+    <div class="ci-clock" id="ciClock">00:00</div>
+    <div class="ci-date" id="ciDate">—</div>
+
+    <div id="ciPending">
+      <div class="ci-gps" id="ciGps"><span class="ic">📍</span><div class="tx"><b id="ciGpsT">Localizando…</b><span id="ciGpsS">Toca el botón para capturar tu ubicación</span></div></div>
+      <button class="ci-big entry" id="ciEntryBtn" onclick="doCheckin('entrada')">🟢 Fichar entrada</button>
+      <button class="ci-skip" onclick="skipCheckin()">Omitir por ahora →</button>
+    </div>
+
+    <div id="ciActive" style="display:none">
+      <div class="ci-done"><div class="ic">✅</div><div class="tx">Jornada iniciada</div><div class="sub" id="ciEntryTime">—</div></div>
+      <button class="ci-big out" onclick="doCheckin('salida')">🔴 Fichar salida</button>
+      <button class="ci-skip" onclick="skipCheckin()">Seguir trabajando →</button>
+    </div>
+
+    <div id="ciDone" style="display:none">
+      <div class="ci-done"><div class="ic">🌙</div><div class="tx">Jornada completada</div><div class="sub" id="ciHours">—</div></div>
+      <button class="ci-skip" onclick="skipCheckin()">Continuar →</button>
+    </div>
+  </div>
 </div>
 
 <div class="top-s"></div>
@@ -544,13 +626,46 @@ input[type="file"]{display:none}
 <div class="sh-bg" id="user-sh"><div class="sh"><div class="sh-bar"></div>
   <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px">
     <div class="ctc-av" style="background:var(--wine);width:56px;height:56px;font-size:18px" id="userShAv">?</div>
-    <div><div style="font-size:20px;font-weight:800" id="userShNm">—</div><div style="font-size:12px;color:var(--t3)" id="userShEm">—</div></div>
+    <div style="flex:1;min-width:0"><div style="font-size:20px;font-weight:800" id="userShNm">—</div><div style="font-size:12px;color:var(--t3)" id="userShEm">—</div><div style="margin-top:6px"><span class="adm-role" id="userShRol">—</span><span class="ci-pill out" id="userShCi"><span class="d"></span>Sin fichar</span></div></div>
   </div>
+  <button class="btn btn-p" style="margin-bottom:8px" onclick="closeSh('user-sh');openCheckin()">⏱️ Fichar / ver jornada</button>
+  <button class="btn btn-g" id="userShAdmBtn" style="margin-bottom:8px;display:none" onclick="closeSh('user-sh');openSh('admin-sh')">👑 Panel admin</button>
   <div class="det-sec"><div class="det-l">Sesión</div>
-    <div style="font-size:13px;color:var(--t2);line-height:1.6">Sesión activa hasta:<br><b id="userShExp">—</b></div>
+    <div style="font-size:13px;color:var(--t2);line-height:1.6">Activa hasta: <b id="userShExp">—</b></div>
   </div>
-  <button class="btn btn-d" style="margin-top:18px" onclick="authLogout()">🚪 Cerrar sesión</button>
+  <button class="btn btn-d" style="margin-top:14px" onclick="authLogout()">🚪 Cerrar sesión</button>
   <button class="btn btn-g" style="margin-top:8px" onclick="closeSh('user-sh')">Cerrar</button>
+</div></div>
+
+<!-- Panel admin -->
+<div class="sh-bg" id="admin-sh"><div class="sh"><div class="sh-bar"></div>
+  <div class="sh-tl">👑 Panel admin</div><div class="sh-sb">Usuarios y permisos del equipo</div>
+  <button class="btn btn-p" style="margin-bottom:14px" onclick="openSh('inviteuser-sh')">➕ Invitar usuario</button>
+  <div class="det-l" style="margin-bottom:8px">Miembros del equipo</div>
+  <div id="admUsersL"></div>
+  <div class="det-l" style="margin-top:20px;margin-bottom:8px">Fichajes de hoy</div>
+  <div id="admCheckinsL"></div>
+  <button class="btn btn-g" style="margin-top:14px" onclick="closeSh('admin-sh')">Cerrar</button>
+</div></div>
+
+<!-- Editar usuario -->
+<div class="sh-bg" id="edituser-sh"><div class="sh" id="edituserC"></div></div>
+
+<!-- Invitar usuario -->
+<div class="sh-bg" id="inviteuser-sh"><div class="sh"><div class="sh-bar"></div>
+  <div class="sh-tl">➕ Invitar usuario</div><div class="sh-sb">Se creará la ficha antes del primer login</div>
+  <div class="fg"><label class="fl">Email corporativo</label><input class="fi" id="invEm" type="email" placeholder="nombre@encopadebalon.com"></div>
+  <div class="fg"><label class="fl">Nombre completo</label><input class="fi" id="invNm" placeholder="Nombre Apellido"></div>
+  <div class="fg"><label class="fl">Rol</label>
+    <div class="pri-row">
+      <div class="po s-high" data-r="admin" onclick="setInvRol(this,'admin')">👑 Admin</div>
+      <div class="po" data-r="comercial" onclick="setInvRol(this,'comercial')">💼 Comercial</div>
+      <div class="po" data-r="equipo" onclick="setInvRol(this,'equipo')">👥 Equipo</div>
+    </div>
+  </div>
+  <div class="fg"><label class="fl">Departamento</label><input class="fi" id="invDp" placeholder="Ej: Operaciones, Comercial..."></div>
+  <button class="btn btn-p" onclick="invitePost()">➕ Crear usuario</button>
+  <button class="btn btn-g" style="margin-top:8px" onclick="closeSh('inviteuser-sh')">Cancelar</button>
 </div></div>
 
 <div class="sh-bg" id="settings-sh"><div class="sh"><div class="sh-bar"></div><div class="sh-tl">Configuración</div><div class="sh-sb">Conecta tu backend y Slack</div>
@@ -869,6 +984,222 @@ async function authBoot(){
   }
   renderUser();authHide();return true;
 }
+
+// ===== CHECK-IN =====
+const CI_KEY='cosecha_ci_v1';
+let ciState=null; // {tipo, lat, lng, direccion, time} del fichaje actual
+let ciClockInt=null;
+let ciGpsOk=false,ciLat=null,ciLng=null,ciAddr='';
+
+function ciGreet(){const h=new Date().getHours();if(h<6)return'Trasnochando';if(h<12)return'Buenos días';if(h<20)return'Buenas tardes';return'Buenas noches';}
+function openCheckin(){
+  if(!user)return;
+  $('ciName').textContent=user.name.split(' ')[0]+' 👋';
+  $('ciGreet').textContent=ciGreet()+',';
+  updateCiClock();
+  if(ciClockInt)clearInterval(ciClockInt);
+  ciClockInt=setInterval(updateCiClock,1000);
+  $('ciWrap').classList.add('show');document.body.style.overflow='hidden';
+  renderCiState();
+  requestGps();
+}
+function closeCheckin(){$('ciWrap').classList.remove('show');document.body.style.overflow='';if(ciClockInt){clearInterval(ciClockInt);ciClockInt=null;}}
+function skipCheckin(){closeCheckin();}
+function updateCiClock(){
+  const d=new Date();
+  $('ciClock').textContent=String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+  $('ciDate').textContent=d.toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long'});
+}
+function renderCiState(){
+  const st=getLocalCi();
+  $('ciPending').style.display='none';$('ciActive').style.display='none';$('ciDone').style.display='none';
+  if(!st||!st.entrada){
+    $('ciPending').style.display='';
+  }else if(st.entrada&&!st.salida){
+    $('ciActive').style.display='';
+    $('ciEntryTime').textContent='Entrada a las '+new Date(st.entrada.time).toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'});
+  }else{
+    $('ciDone').style.display='';
+    const hrs=((new Date(st.salida.time)-new Date(st.entrada.time))/3600000).toFixed(1);
+    $('ciHours').textContent='Trabajaste '+hrs+' horas hoy';
+  }
+}
+function getLocalCi(){
+  try{
+    const all=JSON.parse(localStorage.getItem(CI_KEY)||'{}');
+    const today=new Date().toISOString().slice(0,10);
+    return all[today]||null;
+  }catch(e){return null;}
+}
+function setLocalCi(data){
+  try{
+    const all=JSON.parse(localStorage.getItem(CI_KEY)||'{}');
+    const today=new Date().toISOString().slice(0,10);
+    all[today]=data;
+    // Limpiar días anteriores (>30 días)
+    const cutoff=new Date(Date.now()-30*864e5).toISOString().slice(0,10);
+    Object.keys(all).forEach(k=>{if(k<cutoff)delete all[k];});
+    localStorage.setItem(CI_KEY,JSON.stringify(all));
+  }catch(e){}
+}
+function requestGps(){
+  const g=$('ciGps');
+  if(!navigator.geolocation){g.classList.add('err');$('ciGpsT').textContent='GPS no disponible';$('ciGpsS').textContent='Tu navegador no soporta geolocalización';return;}
+  $('ciGpsT').textContent='Localizando…';
+  $('ciGpsS').textContent='Concede el permiso cuando se solicite';
+  navigator.geolocation.getCurrentPosition(pos=>{
+    ciLat=pos.coords.latitude;ciLng=pos.coords.longitude;ciGpsOk=true;
+    g.classList.remove('err');g.classList.add('ok');
+    $('ciGpsT').textContent='Ubicación capturada';
+    $('ciGpsS').textContent=ciLat.toFixed(5)+', '+ciLng.toFixed(5);
+    // Reverse geocoding con OpenStreetMap (gratis, sin API key)
+    fetch('https://nominatim.openstreetmap.org/reverse?format=json&lat='+ciLat+'&lon='+ciLng+'&zoom=18&addressdetails=0',{headers:{'Accept':'application/json'}})
+      .then(r=>r.json()).then(d=>{if(d&&d.display_name){ciAddr=d.display_name;$('ciGpsS').textContent=ciAddr;}}).catch(()=>{});
+  },err=>{
+    ciGpsOk=false;g.classList.add('err');
+    $('ciGpsT').textContent='Sin ubicación';
+    $('ciGpsS').textContent=err.code===1?'Permiso denegado - puedes fichar igualmente':'No se pudo obtener la ubicación';
+  },{enableHighAccuracy:true,timeout:8000,maximumAge:60000});
+}
+function doCheckin(tipo){
+  const btn=tipo==='entrada'?$('ciEntryBtn'):null;
+  if(btn){btn.disabled=true;btn.textContent='Registrando...';}
+  const fichaje={tipo,time:new Date().toISOString(),lat:ciLat,lng:ciLng,direccion:ciAddr};
+  // Guardar local
+  const st=getLocalCi()||{};
+  st[tipo]=fichaje;setLocalCi(st);
+  // Push al backend si está configurado
+  if(cfg.apiUrl&&user&&!user.token.startsWith('demo-')){
+    fetch(cfg.apiUrl+'?action=checkin',{method:'POST',body:JSON.stringify({tipo,lat:ciLat,lng:ciLng,direccion:ciAddr,token:user.token}),headers:{'Content-Type':'text/plain'}}).catch(()=>{});
+  }
+  // Actividad local
+  acts.unshift({ic:tipo==='entrada'?'🟢':'🔴',bg:tipo==='entrada'?'var(--green-soft)':'var(--red-soft)',w:user.name.split(' ')[0],a:'fichó',wh:tipo,dt:ciAddr?ciAddr.split(',').slice(0,2).join(','):'',tm:'Ahora'});
+  if(btn){btn.disabled=false;btn.textContent='🟢 Fichar entrada';}
+  renderCiState();renderUserCheckinPill();R();
+  toast(tipo==='entrada'?'🟢 Entrada registrada':'🔴 Salida registrada');
+  setTimeout(closeCheckin,1200);
+}
+function renderUserCheckinPill(){
+  const st=getLocalCi();const pill=$('userShCi');if(!pill)return;
+  if(st&&st.entrada&&!st.salida){pill.className='ci-pill in';pill.innerHTML='<span class="d"></span>En jornada';}
+  else if(st&&st.salida){pill.className='ci-pill out';pill.innerHTML='Jornada cerrada';}
+  else{pill.className='ci-pill out';pill.innerHTML='Sin fichar';}
+}
+
+// ===== ADMIN PANEL =====
+let teamUsers=[];
+let invRol='equipo';
+function isAdmin(){return user&&(user.rol==='admin');}
+function setInvRol(el,r){invRol=r;document.querySelectorAll('#inviteuser-sh .po').forEach(e=>e.className='po');el.className='po s-'+(r==='admin'?'high':r==='comercial'?'medium':'low');}
+
+async function loadTeamUsers(){
+  if(!cfg.apiUrl||!user||user.token.startsWith('demo-')){
+    // Modo demo: usuarios de ejemplo
+    teamUsers=[
+      {email:user.email,nombre:user.name,rol:user.rol||'admin',departamento:'Dirección',color:'#9B2C3E'},
+      {email:'saul@encopadebalon.com',nombre:'Saúl González',rol:'comercial',departamento:'Comercial',color:'#1B9E5A'},
+      {email:'alfredo@encopadebalon.com',nombre:'Alfredo Fernández',rol:'equipo',departamento:'Operaciones',color:'#2B7BD4'},
+      {email:'maryana@encopadebalon.com',nombre:'Maryana',rol:'equipo',departamento:'RRHH',color:'#7B5EA7'}
+    ];
+    renderAdmin();return;
+  }
+  try{
+    const r=await fetch(cfg.apiUrl+'?action=users&token='+encodeURIComponent(user.token));
+    const d=await r.json();if(Array.isArray(d))teamUsers=d;
+    renderAdmin();
+  }catch(e){toast('Error cargando usuarios');}
+}
+function renderAdmin(){
+  const ul=$('admUsersL');
+  ul.innerHTML=teamUsers.map(u=>{
+    const ini=(u.nombre||'').split(' ').map(w=>w[0]).filter(Boolean).slice(0,2).join('').toUpperCase();
+    return`<div class="adm-tile" onclick="openEditUser('${u.email}')"><div class="adm-tile-ic" style="background:${u.color};color:#fff">${ini}</div><div class="adm-tile-inf"><div class="adm-tile-t">${u.nombre}</div><div class="adm-tile-s">${u.email} ${u.departamento?'· '+u.departamento:''}</div></div><span class="adm-role r-${u.rol}">${u.rol}</span></div>`;
+  }).join('')||'<div style="color:var(--t3);font-size:13px;padding:10px">Sin usuarios</div>';
+  $('admCheckinsL').innerHTML='<div style="color:var(--t3);font-size:13px;padding:10px">Los fichajes se cargarán al conectar el backend</div>';
+}
+function openEditUser(email){
+  const u=teamUsers.find(x=>x.email===email);if(!u)return;
+  $('edituserC').innerHTML=`<div class="sh-bar"></div><div class="sh-tl">Editar usuario</div><div class="sh-sb">${u.email}</div>
+    <div class="fg"><label class="fl">Nombre</label><input class="fi" id="euNm" value="${u.nombre||''}"></div>
+    <div class="fg"><label class="fl">Rol</label>
+      <div class="pri-row">
+        <div class="po ${u.rol==='admin'?'s-high':''}" onclick="setEuRol(this,'admin')">👑 Admin</div>
+        <div class="po ${u.rol==='comercial'?'s-medium':''}" onclick="setEuRol(this,'comercial')">💼 Comercial</div>
+        <div class="po ${u.rol==='equipo'?'s-low':''}" onclick="setEuRol(this,'equipo')">👥 Equipo</div>
+      </div>
+    </div>
+    <div class="fg"><label class="fl">Departamento</label><input class="fi" id="euDp" value="${u.departamento||''}"></div>
+    <button class="btn btn-p" onclick="saveEditUser('${u.email}')">💾 Guardar</button>
+    ${u.email!==user.email?'<button class="btn btn-d" style="margin-top:8px" onclick="delTeamUser(\''+u.email+'\')">🗑️ Eliminar usuario</button>':''}
+    <button class="btn btn-g" style="margin-top:8px" onclick="closeSh('edituser-sh')">Cancelar</button>`;
+  window._euRol=u.rol;
+  openSh('edituser-sh');
+}
+function setEuRol(el,r){window._euRol=r;el.parentNode.querySelectorAll('.po').forEach(e=>e.className='po');el.className='po s-'+(r==='admin'?'high':r==='comercial'?'medium':'low');}
+async function saveEditUser(email){
+  const body={email,nombre:$('euNm').value.trim(),rol:window._euRol,departamento:$('euDp').value.trim()};
+  const idx=teamUsers.findIndex(u=>u.email===email);
+  if(idx>=0)Object.assign(teamUsers[idx],body);
+  renderAdmin();closeSh('edituser-sh');toast('✅ Usuario actualizado');
+  if(cfg.apiUrl&&!user.token.startsWith('demo-'))fetch(cfg.apiUrl+'?action=updateUser',{method:'POST',body:JSON.stringify({...body,token:user.token}),headers:{'Content-Type':'text/plain'}}).catch(()=>{});
+}
+async function delTeamUser(email){
+  if(!confirm('¿Eliminar a '+email+'?'))return;
+  teamUsers=teamUsers.filter(u=>u.email!==email);renderAdmin();closeSh('edituser-sh');toast('Usuario eliminado');
+  if(cfg.apiUrl&&!user.token.startsWith('demo-'))fetch(cfg.apiUrl+'?action=deleteUser',{method:'POST',body:JSON.stringify({email,token:user.token}),headers:{'Content-Type':'text/plain'}}).catch(()=>{});
+}
+async function invitePost(){
+  const em=$('invEm').value.trim().toLowerCase();
+  if(!em||!em.endsWith('@'+AUTH_DOMAIN))return toast('Email @'+AUTH_DOMAIN+' requerido');
+  const body={email:em,nombre:$('invNm').value.trim()||em.split('@')[0],rol:invRol,departamento:$('invDp').value.trim()};
+  teamUsers.push({...body,color:'#2B7BD4'});renderAdmin();
+  ['invEm','invNm','invDp'].forEach(id=>$(id).value='');invRol='equipo';
+  closeSh('inviteuser-sh');toast('➕ Usuario invitado');
+  if(cfg.apiUrl&&!user.token.startsWith('demo-'))fetch(cfg.apiUrl+'?action=inviteUser',{method:'POST',body:JSON.stringify({...body,token:user.token}),headers:{'Content-Type':'text/plain'}}).catch(()=>{});
+}
+
+// Hook al renderUser existente: añadir rol y fichaje pill + mostrar botón admin
+const _origRenderUser=renderUser;
+renderUser=function(){
+  _origRenderUser();
+  if(user){
+    const rolEl=$('userShRol');if(rolEl){rolEl.className='adm-role r-'+(user.rol||'equipo');rolEl.textContent=user.rol||'equipo';}
+    const admBtn=$('userShAdmBtn');if(admBtn)admBtn.style.display=isAdmin()?'':'none';
+  }
+  renderUserCheckinPill();
+};
+
+// Hook al authSuccess: si entra por primera vez y no ha fichado hoy → pantalla de check-in
+const _origAuthSuccess=authSuccess;
+authSuccess=function(d){
+  if(!d.rol)d.rol='equipo';
+  _origAuthSuccess(d);
+  setTimeout(()=>{
+    const st=getLocalCi();
+    if(!st||!st.entrada)openCheckin();
+  },400);
+};
+
+// Hook al authBoot: cargar usuarios del equipo si es admin
+const _origAuthBoot=authBoot;
+authBoot=async function(){
+  const ok=await _origAuthBoot();
+  if(ok&&user){
+    // Asumir rol por email si no viene del backend (útil en modo demo)
+    if(!user.rol){
+      user.rol=user.email==='bosco@encopadebalon.com'?'admin':(user.email==='saul@encopadebalon.com'?'comercial':'equipo');
+      localStorage.setItem(AUTH_KEY,JSON.stringify(user));
+    }
+    renderUser();
+    if(isAdmin())loadTeamUsers();
+    // Si no ha fichado hoy, mostrar pantalla check-in
+    setTimeout(()=>{
+      const st=getLocalCi();
+      if(!st||!st.entrada)openCheckin();
+    },500);
+  }
+  return ok;
+};
 
 restore();loadCfg();authBoot().then(()=>{R();});
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});

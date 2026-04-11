@@ -127,11 +127,22 @@ function verifyAuthCode(email, code, keepActive) {
           logActivity_('🔑', emailToName_(email), 'inició sesión', 'Cosecha', '');
         } catch (e) {}
 
+        // Crear/obtener perfil de usuario con rol
+        let user = null;
+        try {
+          user = getOrCreateUser_(email);
+        } catch (e) {
+          user = { email: email, nombre: emailToName_(email), rol: 'equipo' };
+        }
+
         return {
           success: true,
           token: token,
           email: email,
-          name: emailToName_(email),
+          name: user.nombre || emailToName_(email),
+          rol: user.rol || 'equipo',
+          color: user.color || '#9B2C3E',
+          avatar: user.avatar || '',
           expiresAt: sessionExpires.toISOString()
         };
       } else {
@@ -162,10 +173,16 @@ function validateAuthToken(token) {
       if (expires > now) {
         // Actualizar lastUsed
         sheet.getRange(i + 1, 7).setValue(now.toISOString());
+        // Cargar perfil completo
+        let user = null;
+        try { user = getOrCreateUser_(row[1]); } catch (e) {}
         return {
           valid: true,
           email: row[1],
-          name: emailToName_(row[1]),
+          name: (user && user.nombre) || emailToName_(row[1]),
+          rol: (user && user.rol) || 'equipo',
+          color: (user && user.color) || '#9B2C3E',
+          avatar: (user && user.avatar) || '',
           expiresAt: expires.toISOString()
         };
       } else {

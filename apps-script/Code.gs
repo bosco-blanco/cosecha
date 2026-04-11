@@ -30,9 +30,10 @@ function doGet(e) {
     }
 
     // --- Rutas protegidas: validar token ---
+    let auth = { valid: true, email: '', name: '', rol: '' };
     if (PUBLIC_ACTIONS.indexOf(action) === -1) {
       const token = e.parameter.token || '';
-      const auth = validateAuthToken(token);
+      auth = validateAuthToken(token);
       if (!auth.valid) {
         return buildResponse_({ error: true, code: 'UNAUTHORIZED', message: 'Sesión inválida o expirada' });
       }
@@ -70,6 +71,38 @@ function doGet(e) {
           : getUpcomingEvents(days);
         break;
       }
+
+      case 'users':
+        result = listUsers();
+        break;
+
+      case 'checkinStatus':
+        result = getCheckinStatus(auth.email);
+        break;
+
+      case 'checkinHistory':
+        result = getCheckinHistory(auth.email, e.parameter.days || 30);
+        break;
+
+      case 'checkinsToday':
+        // Solo admin puede ver fichajes de todos
+        if (auth.rol !== 'admin') {
+          result = { error: true, message: 'Solo admin' };
+        } else {
+          result = getAllCheckinsToday();
+        }
+        break;
+
+      case 'me':
+        // Perfil del usuario autenticado
+        result = {
+          email: auth.email,
+          name: auth.name,
+          rol: auth.rol,
+          color: auth.color,
+          avatar: auth.avatar
+        };
+        break;
 
       default:
         result = {
@@ -119,23 +152,46 @@ function doPost(e) {
     switch (action) {
       // --- CRUD individual ---
       case 'contact':
+        if (!body.creadoPor) body.creadoPor = auth.email;
         result = upsert('Contactos', body);
-        logActivity_('👤', body.nombre || 'Desconocido', body.id ? 'actualizó' : 'creó', 'contacto', body.nombre || '');
+        logActivity_('👤', whoami, body.id ? 'actualizó' : 'creó', 'contacto', body.nombre || '');
         break;
 
       case 'deal':
         result = upsert('Deals', body);
-        logActivity_('💰', body.asignado || 'Sistema', body.id ? 'actualizó' : 'creó', 'deal', body.titulo || '');
+        logActivity_('💰', whoami, body.id ? 'actualizó' : 'creó', 'deal', body.titulo || '');
         break;
 
       case 'task':
         result = upsert('Tareas', body);
-        logActivity_('🍇', body.asignados || 'Sistema', body.id ? 'actualizó' : 'creó', 'tarea', body.titulo || '');
+        logActivity_('🍇', whoami, body.id ? 'actualizó' : 'creó', 'tarea', body.titulo || '');
         break;
 
       case 'meeting':
         result = upsert('Reuniones', body);
-        logActivity_('🎙️', 'Sistema', body.id ? 'actualizó' : 'registró', 'reunión', body.titulo || '');
+        logActivity_('🎙️', whoami, body.id ? 'actualizó' : 'registró', 'reunión', body.titulo || '');
+        break;
+
+      case 'checkin':
+        // Forzar el email del usuario autenticado (no se puede fichar por otro)
+        body.email = auth.email;
+        result = registerCheckin(body);
+        break;
+
+      // --- Admin: gestión de usuarios ---
+      case 'inviteUser':
+        if (auth.rol !== 'admin') { result = { error: true, message: 'Solo admin' }; break; }
+        result = inviteUser(body);
+        break;
+
+      case 'updateUser':
+        if (auth.rol !== 'admin') { result = { error: true, message: 'Solo admin' }; break; }
+        result = updateUser(body);
+        break;
+
+      case 'deleteUser':
+        if (auth.rol !== 'admin') { result = { error: true, message: 'Solo admin' }; break; }
+        result = deleteUser(body.email);
         break;
 
       // --- Sincronización completa (offline-first) ---
