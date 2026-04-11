@@ -14,12 +14,36 @@
 <style>
 :root {
   --bg: #FFFFFF;
-  --bg2: #F7F7F8;
-  --bg3: #EEEFF1;
+  --bg2: #FAF6F6;
+  --bg3: #F0E8EA;
   --card: #FFFFFF;
   --wine: #9B2C3E;
   --wine-soft: #F3E8EB;
   --wine-mid: #C44058;
+
+  /* === Board/Canvas === (granate suave estilo Trello) */
+  --board-bg: #B07680;               /* Granate polvoriento */
+  --board-bg-2: #A66B77;              /* Variante un tono más oscuro */
+  --col-bg: #EFE3E6;                  /* Gris rosado muy suave (como Trello gris) */
+  --col-bg-hover: #E6D6D9;
+  --col-text: #5C3942;                /* Granate oscuro legible */
+  --col-text-soft: #8A6B71;
+  --card-bg: #FFFFFF;
+  --card-shadow: 0 1px 0 rgba(92,57,66,0.12);
+  --card-shadow-hover: 0 4px 10px rgba(92,57,66,0.20);
+
+  /* === Labels (paleta Trello) === */
+  --lbl-green:  #61BD4F;
+  --lbl-yellow: #F2D600;
+  --lbl-orange: #FF9F1A;
+  --lbl-red:    #EB5A46;
+  --lbl-purple: #C377E0;
+  --lbl-blue:   #0079BF;
+  --lbl-sky:    #00C2E0;
+  --lbl-lime:   #51E898;
+  --lbl-pink:   #FF78CB;
+  --lbl-black:  #344563;
+
   --gold: #C4952E;
   --gold-soft: #FBF3E4;
   --green: #1B9E5A;
@@ -33,9 +57,9 @@
   --purple: #7B5EA7;
   --purple-soft: #F1ECF8;
   --slack: #4A154B;
-  --t1: #111111;
-  --t2: #555555;
-  --t3: #999999;
+  --t1: #172B3D;
+  --t2: #5E6C84;
+  --t3: #8993A4;
   --border: #E5E5E7;
   --border2: #D5D5D8;
   --shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.03);
@@ -70,89 +94,200 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg2
 .pill.on{background:var(--t1);color:var(--bg);border-color:var(--t1)}
 .pill:active:not(.on){transform:scale(.96)}
 
-/* ===== BOARD TRELLO-STYLE ===== */
-.cdots{display:flex;justify-content:center;gap:5px;padding:10px 0 8px}
-.cdot{width:6px;height:6px;border-radius:50%;background:var(--border2);transition:all .25s}
-.cdot.on{width:22px;border-radius:3px;background:var(--t1)}
+/* ===== BOARD TRELLO CLONE (granate suave) ===== */
+.cdots{display:none}
 
 /* People filter bar */
-.ppl-bar{display:flex;gap:8px;overflow-x:auto;padding:4px 16px 14px;scrollbar-width:none;align-items:center}
+.ppl-bar{display:flex;gap:8px;overflow-x:auto;padding:6px 16px 12px;scrollbar-width:none;align-items:center;background:var(--board-bg)}
 .ppl-bar::-webkit-scrollbar{display:none}
-.ppl-lbl{font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;flex-shrink:0;margin-right:2px}
-.ppl-chip{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;cursor:pointer;flex-shrink:0;border:3px solid var(--bg2);transition:all .15s;position:relative}
-.ppl-chip.on{border-color:var(--t1);transform:scale(1.08)}
+.ppl-lbl{font-size:10px;font-weight:800;color:rgba(255,255,255,0.85);text-transform:uppercase;letter-spacing:.5px;flex-shrink:0;margin-right:2px}
+.ppl-chip{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;cursor:pointer;flex-shrink:0;border:2.5px solid transparent;transition:all .15s;position:relative}
+.ppl-chip.on{border-color:#fff;transform:scale(1.1);box-shadow:0 2px 8px rgba(0,0,0,0.2)}
 .ppl-chip:active{transform:scale(.94)}
-.ppl-all{background:var(--bg3);color:var(--t2);border-color:var(--border2)}
-.ppl-all.on{background:var(--t1);color:var(--bg);border-color:var(--t1)}
+.ppl-all{background:rgba(255,255,255,0.25);color:#fff;font-size:9px}
+.ppl-all.on{background:#fff;color:var(--board-bg-2);border-color:#fff}
 
-/* Kanban track: horizontal scroll with snap, peek of next column */
-.ctrack{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;padding:0 16px 24px;gap:12px;-webkit-overflow-scrolling:touch}
+/* BOARD CANVAS — fondo granate suave que ocupa toda la zona */
+#ag-board{background:var(--board-bg);min-height:calc(100dvh - 120px);margin:0 -16px;padding-top:4px}
+#v-agenda .tabs{background:var(--board-bg);border-bottom:none;padding:8px 16px 10px;margin:0}
+#v-agenda .tab{color:rgba(255,255,255,0.65);font-weight:700}
+#v-agenda .tab.on{color:#fff;border-bottom-color:#fff}
+
+.ctrack{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;padding:8px 12px 28px;gap:10px;-webkit-overflow-scrolling:touch;background:var(--board-bg)}
 .ctrack::-webkit-scrollbar{display:none}
-.col{min-width:85vw;max-width:85vw;scroll-snap-align:center;display:flex;flex-direction:column;background:var(--bg2);border-radius:var(--r-lg);padding:4px;border:1px solid var(--border)}
-@media (min-width:720px){.col{min-width:320px;max-width:320px}}
 
-.col-hd{display:flex;align-items:center;justify-content:space-between;padding:12px 14px 10px;background:var(--card);border-radius:16px 16px 0 0;border-bottom:1px solid var(--border);position:relative;overflow:hidden}
-.col-hd::before{content:'';position:absolute;top:0;left:0;right:0;height:4px}
+/* COLUMNA estilo Trello */
+.col{
+  min-width:272px;max-width:272px;
+  scroll-snap-align:start;
+  display:flex;flex-direction:column;
+  background:var(--col-bg);
+  border-radius:12px;
+  padding:0;
+  box-shadow:0 1px 0 rgba(0,0,0,0.08);
+  max-height:calc(100dvh - 210px);
+  align-self:flex-start;
+}
+@media (max-width:480px){.col{min-width:calc(100vw - 52px);max-width:calc(100vw - 52px)}}
+
+.col-hd{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 12px 8px;
+  background:transparent;
+  border:none;
+  position:static;
+}
+.col-hd::before{display:none}
 .col-bar{display:none}
-.col-nm{font-size:14px;font-weight:800;letter-spacing:-0.2px;display:flex;align-items:center;gap:6px}
-.col-nm .emj{font-size:16px}
-.col-ct{font-size:11px;font-weight:800;color:var(--t3);background:var(--bg3);padding:3px 10px;border-radius:var(--r-full);min-width:24px;text-align:center}
-.col-cards{flex:1;padding:10px;display:flex;flex-direction:column;gap:10px;min-height:80px;overflow-y:auto;max-height:calc(100dvh - 320px);scrollbar-width:none}
-.col-cards::-webkit-scrollbar{display:none}
-.col-quickadd{padding:4px 10px 10px}
-.qadd{width:100%;padding:10px 12px;border:1.5px dashed var(--border2);background:transparent;color:var(--t3);font-size:13px;font-weight:600;font-family:'Inter',sans-serif;border-radius:var(--r-sm);cursor:pointer;transition:all .15s}
-.qadd:hover,.qadd:focus{border-color:var(--wine);color:var(--wine);background:var(--wine-soft);outline:none}
-.qadd.editing{border-style:solid;border-color:var(--wine);background:var(--card);color:var(--t1);text-align:left}
+.col-nm{
+  font-size:14px;
+  font-weight:700;
+  letter-spacing:-0.1px;
+  color:var(--col-text);
+  display:flex;align-items:center;gap:7px;
+}
+.col-nm .emj{font-size:15px}
+.col-ct{
+  font-size:11px;font-weight:700;
+  color:var(--col-text-soft);
+  background:rgba(92,57,66,0.08);
+  padding:2px 9px;
+  border-radius:10px;
+  min-width:22px;text-align:center;
+}
+.col-cards{
+  padding:0 8px;
+  display:flex;flex-direction:column;gap:8px;
+  min-height:20px;
+  overflow-y:auto;
+  scrollbar-width:thin;scrollbar-color:rgba(92,57,66,0.15) transparent;
+}
+.col-cards::-webkit-scrollbar{width:6px}
+.col-cards::-webkit-scrollbar-thumb{background:rgba(92,57,66,0.15);border-radius:3px}
+.col-quickadd{padding:8px}
+.qadd{
+  width:100%;padding:8px 12px;
+  border:none;
+  background:transparent;
+  color:var(--col-text-soft);
+  font-size:13px;font-weight:500;
+  font-family:'Inter',sans-serif;
+  border-radius:8px;
+  cursor:pointer;
+  transition:background .12s;
+  text-align:left;
+  display:flex;align-items:center;gap:6px;
+}
+.qadd:hover,.qadd:focus{background:rgba(92,57,66,0.08);color:var(--col-text);outline:none}
+.qadd.editing{background:#FFF;color:var(--t1);text-align:left;box-shadow:0 1px 0 rgba(92,57,66,0.12)}
 
-/* Per-column accent colors (header top bar) */
-.col[data-c="backlog"]   .col-hd::before{background:#8B7355}
-.col[data-c="pendiente"] .col-hd::before{background:#9B2C3E}
-.col[data-c="en-curso"]  .col-hd::before{background:#D97C1E}
-.col[data-c="revision"]  .col-hd::before{background:#2B7BD4}
-.col[data-c="completado"].col-hd::before{background:#1B9E5A}
+/* ===== CARD estilo Trello ===== */
+.card{
+  background:var(--card-bg);
+  border:none;
+  border-radius:8px;
+  padding:8px 12px 8px;
+  cursor:pointer;
+  box-shadow:var(--card-shadow);
+  transition:background .12s, box-shadow .15s, transform .12s;
+  position:relative;
+}
+.card:hover{background:#FAFBFC}
+.card:active{background:#F4F5F7;transform:translateY(0)}
 
-/* ===== CARDS TRELLO-STYLE ===== */
-.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;cursor:pointer;box-shadow:0 1px 0 rgba(9,30,66,.12);transition:all .15s;position:relative;overflow:hidden}
-.card:active{transform:translateY(1px);box-shadow:0 0 0 rgba(0,0,0,0)}
-.card:hover{box-shadow:0 4px 12px rgba(9,30,66,.15)}
+/* Barras de etiquetas multicolor arriba (Trello-style) */
+.card-labels{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:6px}
+.card-lbl{
+  height:8px;
+  min-width:40px;
+  max-width:56px;
+  border-radius:4px;
+  flex:0 0 auto;
+  transition:all .15s;
+}
+.card.labels-exp .card-lbl{height:16px;max-width:none;width:auto;padding:0 10px;display:flex;align-items:center;color:#fff;font-size:10px;font-weight:700}
 
-/* Colored label strips (Trello-style) */
-.card-labels{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px}
-.card-lbl{height:8px;min-width:44px;border-radius:4px;flex-grow:1;max-width:120px}
-.card-lbl.l-operaciones{background:#EB5A46}
-.card-lbl.l-estrategia{background:#C377E0}
-.card-lbl.l-comercial{background:#F2D600}
-.card-lbl.l-rrhh{background:#0079BF}
-.card-lbl.l-financiero{background:#61BD4F}
-.card-lbl.l-proveedores{background:#FF9F1A}
-.card-lbl.l-enoturismo{background:#A44C9C}
+/* Paleta Trello */
+.lbl-green {background:var(--lbl-green)}
+.lbl-yellow{background:var(--lbl-yellow)}
+.lbl-orange{background:var(--lbl-orange)}
+.lbl-red   {background:var(--lbl-red)}
+.lbl-purple{background:var(--lbl-purple)}
+.lbl-blue  {background:var(--lbl-blue)}
+.lbl-sky   {background:var(--lbl-sky)}
+.lbl-lime  {background:var(--lbl-lime)}
+.lbl-pink  {background:var(--lbl-pink)}
+.lbl-black {background:var(--lbl-black)}
 
-/* Legacy pill-style label kept for sheets/modals */
+/* Legacy mapping de etiquetas viejas a paleta Trello */
+.card-lbl.l-operaciones{background:var(--lbl-red)}
+.card-lbl.l-estrategia {background:var(--lbl-purple)}
+.card-lbl.l-comercial  {background:var(--lbl-yellow)}
+.card-lbl.l-rrhh       {background:var(--lbl-blue)}
+.card-lbl.l-financiero {background:var(--lbl-green)}
+.card-lbl.l-proveedores{background:var(--lbl-orange)}
+.card-lbl.l-enoturismo {background:var(--lbl-pink)}
+
 .cl{display:inline-block;font-size:10px;font-weight:800;padding:3px 9px;border-radius:var(--r-full);text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px;color:#fff}
-.l-operaciones{background:#EB5A46}.l-estrategia{background:#C377E0}.l-comercial{background:#F2D600;color:#5E4E00}.l-rrhh{background:#0079BF}.l-financiero{background:#61BD4F}.l-proveedores{background:#FF9F1A}.l-enoturismo{background:#A44C9C}
+.l-operaciones{background:var(--lbl-red)}.l-estrategia{background:var(--lbl-purple)}.l-comercial{background:var(--lbl-yellow);color:#5E4E00}.l-rrhh{background:var(--lbl-blue)}.l-financiero{background:var(--lbl-green)}.l-proveedores{background:var(--lbl-orange)}.l-enoturismo{background:var(--lbl-pink)}
 
-.c-t{font-size:14px;font-weight:700;line-height:1.35;margin-bottom:6px;color:var(--t1)}
-.c-d{font-size:12px;color:var(--t2);line-height:1.4;margin-bottom:10px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.pb-r{display:flex;align-items:center;gap:8px;margin-bottom:10px}
-.pb{flex:1;height:6px;background:var(--bg3);border-radius:3px;overflow:hidden}
-.pf{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--wine) 0%,#C44058 100%);transition:width .4s}
-.pt{font-size:11px;font-weight:700;color:var(--t3);min-width:34px;text-align:right}
-.c-ph{display:flex;gap:5px;margin-bottom:10px;flex-wrap:wrap}
-.c-thb{width:44px;height:44px;border-radius:8px;background:var(--bg2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:18px}
-.c-ft{display:flex;align-items:center;justify-content:space-between;gap:8px}
-.c-meta{display:flex;align-items:center;gap:6px;flex-wrap:wrap;min-width:0}
-.c-meta-ic{font-size:11px;font-weight:700;color:var(--t3);display:inline-flex;align-items:center;gap:3px}
-.due{font-size:10px;font-weight:800;padding:4px 9px;border-radius:var(--r-full);display:inline-flex;align-items:center;gap:3px}
-.due-over{background:var(--red-soft);color:var(--red)}.due-soon{background:var(--orange-soft);color:var(--orange)}.due-ok{background:var(--bg3);color:var(--t3)}
-.avs{display:flex;flex-shrink:0}
-.av{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#fff;margin-left:-8px;border:2.5px solid var(--card);box-shadow:0 1px 2px rgba(0,0,0,0.1)}
+.c-t{
+  font-size:14px;
+  font-weight:400;
+  line-height:1.35;
+  margin-bottom:4px;
+  color:var(--t1);
+}
+.c-d{display:none}
+
+.pb-r{display:flex;align-items:center;gap:6px;margin:6px 0 4px}
+.pb{flex:1;height:4px;background:rgba(92,57,66,0.1);border-radius:2px;overflow:hidden}
+.pf{height:100%;border-radius:2px;background:var(--wine);transition:width .4s}
+.pt{font-size:10px;font-weight:600;color:var(--col-text-soft);min-width:28px;text-align:right}
+
+.c-ph{display:flex;gap:4px;margin:4px -4px 4px;flex-wrap:wrap}
+.c-thb{width:100%;max-width:none;height:120px;border-radius:4px;background:var(--bg2);display:flex;align-items:center;justify-content:center;font-size:36px;flex:1 0 100%;margin:0}
+
+.c-ft{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-top:6px;flex-wrap:wrap}
+.c-meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap;min-width:0}
+.c-meta-ic{
+  font-size:11px;
+  font-weight:500;
+  color:var(--col-text-soft);
+  display:inline-flex;align-items:center;gap:3px;
+  padding:2px 4px;border-radius:3px;
+}
+.c-meta-ic.over{background:rgba(235,90,70,0.15);color:#B04632}
+.due{font-size:11px;font-weight:500;padding:2px 6px;border-radius:3px;display:inline-flex;align-items:center;gap:3px}
+.due-over{background:#FADBD4;color:#B04632}
+.due-soon{background:#FCE8C8;color:#8C6B14}
+.due-ok{background:transparent;color:var(--col-text-soft)}
+
+.avs{display:flex;flex-shrink:0;margin-left:auto}
+.av{
+  width:28px;height:28px;
+  border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:10px;font-weight:700;
+  color:#fff;
+  margin-left:-6px;
+  border:2px solid var(--card-bg);
+}
 .av:first-child{margin-left:0}
-.card.done{opacity:.55}.card.done .c-t{text-decoration:line-through;color:var(--t3)}
+
+.card.done{opacity:.55}
+.card.done .c-t{text-decoration:line-through;color:var(--col-text-soft)}
 .card.done .card-labels{opacity:.5}
 .card.filtered-out{display:none}
 
-/* Empty column state */
-.col-empty{text-align:center;padding:30px 16px;color:var(--t3);font-size:12px;border:2px dashed var(--border);border-radius:var(--r);margin:4px 4px 0}
+.col-empty{
+  text-align:center;padding:14px 12px;
+  color:var(--col-text-soft);
+  font-size:12px;
+  border:none;
+  margin:0;
+  background:transparent;
+}
 
 /* Meeting badge */
 .rec-bdg{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;padding:3px 9px;border-radius:var(--r-full);background:var(--wine-soft);color:var(--wine);text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px}
@@ -367,6 +502,32 @@ input[type="file"]{display:none}
 
 /* Placeholder badge */
 .soon{display:inline-block;font-size:9px;font-weight:700;padding:2px 7px;border-radius:var(--r-full);background:var(--gold-soft);color:var(--gold);text-transform:uppercase;letter-spacing:.3px;margin-left:6px;vertical-align:middle}
+
+/* ===== DRAWER (lateral menu) ===== */
+.drawer-ov{position:fixed;inset:0;background:rgba(23,43,61,0.5);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);z-index:240;opacity:0;pointer-events:none;transition:opacity .28s ease}
+.drawer-ov.open{opacity:1;pointer-events:auto}
+.drawer{position:fixed;top:0;left:0;bottom:0;width:84vw;max-width:320px;background:var(--bg);z-index:250;transform:translateX(-100%);transition:transform .32s cubic-bezier(.32,.72,.16,1);display:flex;flex-direction:column;box-shadow:4px 0 28px rgba(0,0,0,0.12);padding-top:var(--safe-t);padding-bottom:var(--safe-b)}
+.drawer.open{transform:translateX(0)}
+.drawer-hd{padding:20px 20px 16px;background:linear-gradient(135deg,var(--wine) 0%,#7A1F2F 100%);color:#fff;flex-shrink:0}
+.drawer-av{width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;color:#fff;border:2.5px solid rgba(255,255,255,0.3);margin-bottom:12px}
+.drawer-nm{font-size:17px;font-weight:800;letter-spacing:-0.3px;margin-bottom:2px}
+.drawer-em{font-size:11px;color:rgba(255,255,255,0.75);margin-bottom:8px}
+.drawer-rol{display:inline-block;font-size:9px;font-weight:800;padding:3px 9px;border-radius:var(--r-full);background:rgba(255,255,255,0.2);color:#fff;text-transform:uppercase;letter-spacing:.4px}
+.drawer-body{flex:1;overflow-y:auto;padding:8px 0}
+.drawer-sec-t{font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.6px;padding:14px 20px 6px}
+.drawer-item{display:flex;align-items:center;gap:14px;padding:12px 20px;cursor:pointer;font-size:14px;font-weight:600;color:var(--t2);transition:background .15s;border-left:3px solid transparent;background:none;border:none;width:100%;text-align:left;font-family:'Inter',sans-serif}
+.drawer-item:hover{background:var(--bg2)}
+.drawer-item:active{background:var(--bg3)}
+.drawer-item.active{background:var(--wine-soft);color:var(--wine);border-left-color:var(--wine)}
+.drawer-item .ic{font-size:18px;width:22px;text-align:center;flex-shrink:0}
+.drawer-item .bdg{margin-left:auto;font-size:10px;font-weight:800;padding:2px 7px;border-radius:var(--r-full);background:var(--red);color:#fff}
+.drawer-ftr{padding:12px 20px calc(16px + var(--safe-b));border-top:1px solid var(--border);flex-shrink:0}
+.drawer-ver{font-size:10px;color:var(--t3);text-align:center;margin-top:8px}
+
+/* Hamburger button */
+.hamb{width:38px;height:38px;border-radius:10px;border:none;background:var(--bg);color:var(--t1);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:3px;flex-direction:column;padding:0}
+.hamb span{width:18px;height:2px;background:currentColor;border-radius:2px;transition:all .3s}
+.hamb:active{background:var(--bg2)}
 
 /* ===== LOGIN / AUTH ===== */
 .auth-wrap{position:fixed;inset:0;background:linear-gradient(180deg,#FFFFFF 0%,#F7F1F2 100%);display:none;flex-direction:column;align-items:center;justify-content:center;padding:40px 28px calc(40px + var(--safe-b));z-index:400;overflow-y:auto}
@@ -595,14 +756,51 @@ input[type="file"]{display:none}
   </div>
 </div>
 
+<!-- ============ DRAWER LATERAL ============ -->
+<div class="drawer-ov" id="drawerOv" onclick="closeDrawer()"></div>
+<aside class="drawer" id="drawer">
+  <div class="drawer-hd">
+    <div class="drawer-av" id="drawerAv">?</div>
+    <div class="drawer-nm" id="drawerNm">—</div>
+    <div class="drawer-em" id="drawerEm">—</div>
+    <span class="drawer-rol" id="drawerRol">equipo</span>
+  </div>
+  <div class="drawer-body">
+    <div class="drawer-sec-t">Principal</div>
+    <button class="drawer-item" data-drv="dash" onclick="drvGo('dash')"><span class="ic">🏠</span>Inicio</button>
+    <button class="drawer-item" data-drv="crm-contactos" onclick="drvGo('crm','contactos')"><span class="ic">👥</span>Contactos</button>
+    <button class="drawer-item" data-drv="crm-pipeline" onclick="drvGo('crm','pipeline')"><span class="ic">💰</span>Pipeline</button>
+
+    <div class="drawer-sec-t">Trabajo</div>
+    <button class="drawer-item" data-drv="agenda-board" onclick="drvGo('agenda','board')"><span class="ic">📋</span>Tablero</button>
+    <button class="drawer-item" data-drv="agenda-meet" onclick="drvGo('agenda','meet')"><span class="ic">🎙️</span>Reuniones</button>
+    <button class="drawer-item" data-drv="agenda-cal" onclick="drvGo('agenda','cal')"><span class="ic">📅</span>Calendario</button>
+    <button class="drawer-item" data-drv="mas" onclick="drvGo('mas')"><span class="ic">📣</span>Actividad</button>
+
+    <div class="drawer-sec-t">Personal</div>
+    <button class="drawer-item" onclick="closeDrawer();openCheckin()"><span class="ic">⏱️</span>Fichar jornada</button>
+    <button class="drawer-item" onclick="closeDrawer();openSh('mydocs-sh')"><span class="ic">📄</span>Mis documentos<span class="bdg" id="drawerDocsBdg" style="display:none">0</span></button>
+    <button class="drawer-item" onclick="closeDrawer();openSh('notif-sh')"><span class="ic">🔔</span>Notificaciones</button>
+
+    <div class="drawer-sec-t" id="drawerAdmSec" style="display:none">Administración</div>
+    <button class="drawer-item adm-only" style="display:none" onclick="closeDrawer();openSh('admin-sh')"><span class="ic">👑</span>Panel admin</button>
+    <button class="drawer-item adm-only" style="display:none" onclick="closeDrawer();openSh('backoffice-sh')"><span class="ic">🧰</span>Backoffice</button>
+  </div>
+  <div class="drawer-ftr">
+    <button class="drawer-item" onclick="closeDrawer();openSh('user-sh')"><span class="ic">⚙️</span>Preferencias</button>
+    <button class="drawer-item" onclick="authLogout()" style="color:var(--red)"><span class="ic">🚪</span>Cerrar sesión</button>
+    <div class="drawer-ver">Cosecha v0.7 · 🍇</div>
+  </div>
+</aside>
+
 <div class="top-s"></div>
 <header class="hdr">
   <div class="hdr-row">
-    <div class="brand"><div class="brand-ic">🍇</div><div><div class="brand-nm">Cosecha</div><div class="brand-sub">En Copa de Balón</div></div></div>
+    <button class="hamb" onclick="openDrawer()" aria-label="Menú"><span></span><span></span><span></span></button>
+    <div class="brand" style="flex:1;margin-left:12px"><div class="brand-ic">🍇</div><div><div class="brand-nm">Cosecha</div><div class="brand-sub">En Copa de Balón</div></div></div>
     <div class="hb">
-      <button class="user-chip" id="userChip" onclick="openSh('user-sh')"><div class="av" id="userAv">?</div><span class="user-chip-n" id="userNm">—</span></button>
+      <button class="user-chip" id="userChip" onclick="openSh('user-sh')"><div class="av" id="userAv">?</div></button>
       <button class="hbtn" onclick="openSh('notif-sh')">🔔<span class="dot-b"></span></button>
-      <button class="hbtn" onclick="openSh('settings-sh')">⚙️</button>
     </div>
   </div>
   <div class="pills" id="pills"></div>
@@ -834,18 +1032,26 @@ input[type="file"]{display:none}
   <button class="btn btn-g" style="margin-top:8px" onclick="closeSh('inviteuser-sh')">Cancelar</button>
 </div></div>
 
-<div class="sh-bg" id="settings-sh"><div class="sh"><div class="sh-bar"></div><div class="sh-tl">Configuración</div><div class="sh-sb">Conecta tu backend y Slack</div>
-  <div class="fg"><label class="fl">🔗 URL Backend (Apps Script)</label><input class="fi" id="cfgApi" placeholder="https://script.google.com/macros/s/.../exec"><div style="font-size:11px;color:var(--t3);margin-top:4px">Despliega apps-script/ en script.google.com</div></div>
-  <div class="fg"><label class="fl">💬 Webhook Slack (opcional)</label><input class="fi" id="cfgSlack" placeholder="https://hooks.slack.com/services/..."></div>
-  <button class="btn btn-p" onclick="saveCfg()">💾 Guardar configuración</button>
-  <button class="btn btn-g" style="margin-top:8px" onclick="testSync()">🔄 Probar conexión</button>
-  <div style="height:1px;background:var(--border);margin:20px 0"></div>
-  <div class="sh-sb">Integraciones automáticas</div>
-  <div class="gw-row"><div class="gw-ic" style="background:var(--red-soft)">✉️</div><div class="gw-inf"><div class="gw-nm">Gmail</div><div class="gw-st">Email al completar/finalizar</div></div><button class="tog on" onclick="this.classList.toggle('on')"></button></div>
-  <div class="gw-row"><div class="gw-ic" style="background:var(--purple-soft)">💬</div><div class="gw-inf"><div class="gw-nm">Slack</div><div class="gw-st">Notificaciones a canales</div></div><button class="tog on" onclick="this.classList.toggle('on')"></button></div>
-  <div class="gw-row"><div class="gw-ic" style="background:var(--blue-soft)">📅</div><div class="gw-inf"><div class="gw-nm">Calendar</div><div class="gw-st">Fechas y reuniones</div></div><button class="tog on" onclick="this.classList.toggle('on')"></button></div>
-  <div class="gw-row"><div class="gw-ic" style="background:var(--green-soft)">📁</div><div class="gw-inf"><div class="gw-nm">Drive</div><div class="gw-st">Transcripciones y fotos</div></div><button class="tog on" onclick="this.classList.toggle('on')"></button></div>
+<!-- Settings (usuario normal) — solo preferencias personales -->
+<div class="sh-bg" id="settings-sh"><div class="sh"><div class="sh-bar"></div><div class="sh-tl">Preferencias</div><div class="sh-sb">Tu experiencia en Cosecha</div>
+  <div class="gw-row"><div class="gw-ic" style="background:var(--red-soft)">✉️</div><div class="gw-inf"><div class="gw-nm">Notificaciones Gmail</div><div class="gw-st">Email al completar tareas y al finalizar reuniones</div></div><button class="tog on" onclick="this.classList.toggle('on')"></button></div>
+  <div class="gw-row"><div class="gw-ic" style="background:var(--purple-soft)">💬</div><div class="gw-inf"><div class="gw-nm">Avisos Slack</div><div class="gw-st">Recibir notificaciones en los canales de Slack</div></div><button class="tog on" onclick="this.classList.toggle('on')"></button></div>
+  <div class="gw-row"><div class="gw-ic" style="background:var(--blue-soft)">📅</div><div class="gw-inf"><div class="gw-nm">Google Calendar</div><div class="gw-st">Sincronizar reuniones con tu calendario</div></div><button class="tog on" onclick="this.classList.toggle('on')"></button></div>
   <button class="btn btn-g" style="margin-top:18px" onclick="closeSh('settings-sh')">Cerrar</button>
+</div></div>
+
+<!-- Backoffice (solo admin) — configuración del sistema -->
+<div class="sh-bg" id="backoffice-sh"><div class="sh"><div class="sh-bar"></div>
+  <div class="sh-tl">🧰 Backoffice</div><div class="sh-sb">Configuración del sistema · solo admin</div>
+  <div class="fg"><label class="fl">🔗 URL Backend (Apps Script)</label><input class="fi" id="cfgApi" placeholder="https://script.google.com/macros/s/.../exec"><div style="font-size:11px;color:var(--t3);margin-top:4px">Por defecto ya viene configurada. Cambia solo si migras el backend.</div></div>
+  <div class="fg"><label class="fl">💬 Webhook Slack</label><input class="fi" id="cfgSlack" placeholder="https://hooks.slack.com/services/..."><div style="font-size:11px;color:var(--t3);margin-top:4px">Incoming webhook del workspace. Todos los usuarios lo heredan automáticamente.</div></div>
+  <button class="btn btn-p" onclick="saveCfg()">💾 Guardar configuración</button>
+  <button class="btn btn-g" style="margin-top:8px" onclick="testSync()">🔄 Probar conexión al backend</button>
+  <div style="height:1px;background:var(--border);margin:20px 0"></div>
+  <div class="sh-sb">Integración con Slack Workspace</div>
+  <button class="btn btn-g" onclick="toast('🔜 Sincronización de usuarios Slack - próximamente')">👥 Importar usuarios de Slack</button>
+  <div style="font-size:11px;color:var(--t3);margin-top:6px;line-height:1.5">Trae automáticamente todos los miembros del workspace de Slack con sus emails y los crea en la pestaña Usuarios.</div>
+  <button class="btn btn-g" style="margin-top:18px" onclick="closeSh('backoffice-sh')">Cerrar</button>
 </div></div>
 
 <div class="tw" id="tw"></div>
@@ -879,6 +1085,9 @@ const DEAL_STAGES=[
   {id:'cerrado-perdido',n:'Perdido',e:'❌',c:'#D93B3B'}
 ];
 const LS_KEY='cosecha_data_v1';
+// URL del backend desplegada. Cualquier dispositivo que abra la app queda
+// conectado automáticamente: el equipo solo tiene que hacer login.
+const DEFAULT_API_URL='https://script.google.com/macros/s/AKfycbwgkECbvdFVNGSzFhIBKtlY3lmvyDj5F2gmDR3AWNw6QCcCxBxSEfFhy23I61ZDebXe/exec';
 function $(id){return document.getElementById(id)}
 function R(){rPills();rBoard();rDots();rMy();rMeet();rAct();rNot();rTmP();rDash();rContacts();rDeals();}
 function rPills(){$('pills').innerHTML=PJ.map(p=>`<button class="pill ${p.id===cP?'on':''}" onclick="cP='${p.id}';R()">${p.e} ${p.n}</button>`).join('');}
@@ -1110,7 +1319,7 @@ function setCrmTab(t){crmTab=t;document.querySelectorAll('[data-ct]').forEach(b=
 function setAgTab(t){agTab=t;document.querySelectorAll('[data-at]').forEach(b=>b.classList.toggle('on',b.dataset.at===t));$('ag-board').style.display=t==='board'?'':'none';$('ag-meet').style.display=t==='meet'?'':'none';$('ag-cal').style.display=t==='cal'?'':'none';}
 
 // ===== CONFIG + SYNC =====
-function loadCfg(){try{const c=JSON.parse(localStorage.getItem('cosecha_cfg')||'{}');cfg={apiUrl:c.apiUrl||'',slackWebhook:c.slackWebhook||''};}catch(e){}if($('cfgApi'))$('cfgApi').value=cfg.apiUrl;if($('cfgSlack'))$('cfgSlack').value=cfg.slackWebhook;}
+function loadCfg(){try{const c=JSON.parse(localStorage.getItem('cosecha_cfg')||'{}');cfg={apiUrl:c.apiUrl||DEFAULT_API_URL,slackWebhook:c.slackWebhook||''};}catch(e){cfg={apiUrl:DEFAULT_API_URL,slackWebhook:''};}if($('cfgApi'))$('cfgApi').value=cfg.apiUrl;if($('cfgSlack'))$('cfgSlack').value=cfg.slackWebhook;}
 function saveCfg(){cfg.apiUrl=$('cfgApi').value.trim();cfg.slackWebhook=$('cfgSlack').value.trim();localStorage.setItem('cosecha_cfg',JSON.stringify(cfg));toast('✅ Configuración guardada');if(cfg.apiUrl)testSync();}
 function persist(){try{localStorage.setItem(LS_KEY,JSON.stringify({contacts,deals,tasks,meetings,acts,nots}));}catch(e){}}
 function restore(){try{const d=JSON.parse(localStorage.getItem(LS_KEY)||'null');if(d){contacts=d.contacts||[];deals=d.deals||[];if(d.tasks&&d.tasks.length)tasks=d.tasks;if(d.meetings&&d.meetings.length)meetings=d.meetings;if(d.acts)acts=d.acts;if(d.nots)nots=d.nots;}}catch(e){}}
@@ -1650,6 +1859,51 @@ authBoot=async function(){
 // Hook openCheckin para mostrar la break bar si hay descanso abierto
 const _origOpenCheckin=openCheckin;
 openCheckin=function(){_origOpenCheckin();setTimeout(()=>{const st=getLocalCi();if(st&&st.breakOpen)showBreakBar();},50);};
+
+// ===== DRAWER LATERAL =====
+function openDrawer(){
+  if(user){
+    $('drawerAv').textContent=userIni(user.name);
+    $('drawerNm').textContent=user.name;
+    $('drawerEm').textContent=user.email;
+    $('drawerRol').textContent=(user.rol||'equipo').toUpperCase();
+    $('drawerRol').className='drawer-rol r-'+(user.rol||'equipo');
+    const isAdm=isAdmin();
+    document.querySelectorAll('.drawer .adm-only').forEach(el=>el.style.display=isAdm?'flex':'none');
+    $('drawerAdmSec').style.display=isAdm?'block':'none';
+    // Badge docs pendientes
+    const pend=myDocs.filter(d=>d.estado!=='firmado').length;
+    const bdg=$('drawerDocsBdg');if(bdg){bdg.textContent=pend;bdg.style.display=pend?'inline-block':'none';}
+    // Marcar activo
+    document.querySelectorAll('.drawer-item').forEach(el=>el.classList.remove('active'));
+  }
+  $('drawer').classList.add('open');
+  $('drawerOv').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeDrawer(){
+  $('drawer').classList.remove('open');
+  $('drawerOv').classList.remove('open');
+  document.body.style.overflow='';
+}
+function drvGo(view,subTab){
+  closeDrawer();
+  setTimeout(()=>{
+    go(view);
+    if(view==='crm'&&subTab)setCrmTab(subTab);
+    if(view==='agenda'&&subTab)setAgTab(subTab);
+  },120);
+}
+
+// Override renderUser para también rellenar el drawer
+const _origRenderUser2=renderUser;
+renderUser=function(){
+  _origRenderUser2();
+  if(user){
+    // Avatar en header
+    const av=$('userAv');if(av){av.style.background=user.color||'var(--wine)';}
+  }
+};
 
 restore();loadCfg();authBoot().then(()=>{R();});
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
