@@ -2015,18 +2015,13 @@ function renderUser(){
   }
 }
 async function authBoot(){
-  // Cargar sesión local
   try{const s=JSON.parse(localStorage.getItem(AUTH_KEY)||'null');if(s&&s.token&&new Date(s.expiresAt)>new Date())user=s;}catch(e){}
   if(!user){authShow();return false;}
-  // Validar con backend si está configurado
-  if(cfg.apiUrl&&!user.token.startsWith('demo-')){
-    try{
-      const r=await fetch(cfg.apiUrl+'?action=validateToken&token='+encodeURIComponent(user.token));
-      const d=await r.json();
-      if(!d.valid){user=null;localStorage.removeItem(AUTH_KEY);authShow();return false;}
-      user.expiresAt=d.expiresAt;localStorage.setItem(AUTH_KEY,JSON.stringify(user));
-    }catch(e){/* offline: usar sesión local */}
-  }
+  // Auth es 100% local. Los tokens local-/demo- no se validan contra el
+  // backend porque los genera el cliente. La sesión local es la fuente
+  // de verdad. Antes teníamos un fetch a validateToken que invalidaba
+  // la sesión a los 5-6 segundos porque el backend no conoce estos
+  // tokens — eso causaba el "entra y se sale solo".
   renderUser();authHide();return true;
 }
 
@@ -2726,7 +2721,7 @@ renderUser=function(){
 
 restore();loadCfg();authBoot().then(()=>{R();});
 // Service worker con auto-reload al detectar nueva versión + purga agresiva
-const APP_VERSION='v13.1';
+const APP_VERSION='v14';
 const storedVer=localStorage.getItem('cosecha_app_version');
 if(storedVer&&storedVer!==APP_VERSION){
   // Versión cambió → purgar caches + reload una sola vez
