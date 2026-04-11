@@ -1336,14 +1336,21 @@ input[type="file"]{display:none}
 <div class="sh-bg" id="ctdet-sh"><div class="sh" id="ctdetC"></div></div>
 <div class="sh-bg" id="ddet-sh"><div class="sh" id="ddetC"></div></div>
 
-<div class="sh-bg" id="newtask-sh"><div class="sh"><div class="sh-bar"></div><div class="sh-tl">Nueva tarea</div><div class="sh-sb">Añade a la cosecha</div>
+<div class="sh-bg" id="newtask-sh"><div class="sh"><div class="sh-bar"></div><div class="sh-tl">Nueva tarea</div><div class="sh-sb" id="ntSb">Añade a la cosecha</div>
   <div class="fg"><label class="fl">Título</label><input class="fi" id="ntT" placeholder="¿Qué hay que hacer?"></div>
   <div class="fg"><label class="fl">Descripción</label><textarea class="fta" id="ntD" placeholder="Detalles..."></textarea></div>
-  <div class="fg"><label class="fl">Columna</label><select class="fsel" id="ntC"><option value="pendiente">📋 Pendiente</option><option value="en-curso">🔥 En Curso</option><option value="revision">👀 Revisión</option></select></div>
+  <!-- Campo dinámico: Cliente (si codeba) o Proyecto (resto) -->
+  <div class="fg" id="ntCtxG"><label class="fl" id="ntCtxL">Proyecto</label>
+    <select class="fsel" id="ntCtx"></select>
+  </div>
+  <div class="fg"><label class="fl">Estado</label><select class="fsel" id="ntC"><option value="pendiente">📋 Pendiente</option><option value="en-curso">🔥 En Curso</option><option value="revision">👀 Revisión</option></select></div>
   <div class="fg"><label class="fl">Prioridad</label><div class="pri-row" id="ntPri"><div class="po" data-p="high" onclick="sPri(this,'high')">🔴 Alta</div><div class="po s-medium" onclick="sPri(this,'medium')">🟠 Media</div><div class="po" onclick="sPri(this,'low')">🔵 Baja</div></div></div>
-  <div class="fg"><label class="fl">Etiqueta</label><div class="lbl-row" id="ntLbl"><div class="lo cl l-operaciones" data-l="operaciones" onclick="sLbl(this)">Operaciones</div><div class="lo cl l-estrategia" data-l="estrategia" onclick="sLbl(this)">Estrategia</div><div class="lo cl l-comercial" data-l="comercial" onclick="sLbl(this)">Comercial</div><div class="lo cl l-rrhh" data-l="rrhh" onclick="sLbl(this)">RRHH</div><div class="lo cl l-proveedores" data-l="proveedores" onclick="sLbl(this)">Proveedores</div><div class="lo cl l-enoturismo" data-l="enoturismo" onclick="sLbl(this)">Enoturismo</div></div></div>
   <div class="fg"><label class="fl">Fecha límite</label><input type="date" class="fi" id="ntDue"></div>
-  <div class="fg"><label class="fl">Asignar</label><div class="tm-row" id="ntTm"></div></div>
+  <div class="fg"><label class="fl">Asignar a</label><div class="tm-row" id="ntTm"></div></div>
+  <!-- GPS obligatorio -->
+  <div class="fg"><label class="fl">📍 Ubicación</label>
+    <div class="ci-gps" id="ntGps" style="margin-bottom:0"><span class="ic">📍</span><div class="tx"><b id="ntGpsT">Capturando ubicación…</b><span id="ntGpsS">Concede permiso cuando se solicite</span></div></div>
+  </div>
   <div class="fg"><label class="fl">📷 Fotos</label><div class="ph-row" id="ntPh"><button class="ph-add" onclick="document.getElementById('phI').click()">📷<span>Añadir</span></button></div><input type="file" id="phI" accept="image/*" multiple onchange="addPh(this.files)"></div>
   <button class="btn btn-p" onclick="createTask()">🍇 Crear tarea</button><button class="btn btn-g" style="margin-top:8px" onclick="closeSh('newtask-sh')">Cancelar</button>
 </div></div>
@@ -1374,8 +1381,16 @@ input[type="file"]{display:none}
 <!-- Perfil de usuario -->
 <div class="sh-bg" id="user-sh"><div class="sh"><div class="sh-bar"></div>
   <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px">
-    <div class="ctc-av" style="background:var(--wine);width:56px;height:56px;font-size:18px" id="userShAv">?</div>
-    <div style="flex:1;min-width:0"><div style="font-size:20px;font-weight:800" id="userShNm">—</div><div style="font-size:12px;color:var(--t3)" id="userShEm">—</div><div style="margin-top:6px"><span class="adm-role" id="userShRol">—</span><span class="ci-pill out" id="userShCi"><span class="d"></span>Sin fichar</span></div></div>
+    <div class="ctc-av" style="background:var(--wine);width:60px;height:60px;font-size:20px" id="userShAv">?</div>
+    <div style="flex:1;min-width:0">
+      <div style="font-size:22px;font-weight:800;letter-spacing:-0.5px" id="userShNm">—</div>
+      <div style="font-size:13px;color:var(--t3)" id="userShEm">—</div>
+      <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+        <span class="adm-role" id="userShRol">—</span>
+        <span id="userShDept" style="font-size:10px;font-weight:700;padding:3px 9px;border-radius:var(--r-full);background:var(--fill-3);color:var(--t2);letter-spacing:.3px">—</span>
+        <span class="ci-pill out" id="userShCi"><span class="d"></span>Sin fichar</span>
+      </div>
+    </div>
   </div>
   <button class="btn btn-p" style="margin-bottom:8px" onclick="closeSh('user-sh');openCheckin()">⏱️ Fichar / ver jornada</button>
   <button class="btn btn-g" style="margin-bottom:8px" onclick="closeSh('user-sh');openSh('mydocs-sh')">📄 Mis documentos <span id="docsBadge" style="display:none;background:var(--red);color:#fff;font-size:10px;padding:2px 7px;border-radius:99px;margin-left:6px">0</span></button>
@@ -1439,11 +1454,21 @@ input[type="file"]{display:none}
   <div class="fg"><label class="fl">Rol</label>
     <div class="pri-row">
       <div class="po s-high" data-r="admin" onclick="setInvRol(this,'admin')">👑 Admin</div>
-      <div class="po" data-r="comercial" onclick="setInvRol(this,'comercial')">💼 Comercial</div>
-      <div class="po" data-r="equipo" onclick="setInvRol(this,'equipo')">👥 Equipo</div>
+      <div class="po s-low" data-r="equipo" onclick="setInvRol(this,'equipo')">👥 Usuario</div>
     </div>
   </div>
-  <div class="fg"><label class="fl">Departamento</label><input class="fi" id="invDp" placeholder="Ej: Operaciones, Comercial..."></div>
+  <div class="fg"><label class="fl">Departamento</label>
+    <select class="fsel" id="invDp">
+      <option value="">— Sin asignar —</option>
+      <option value="direccion">👑 Dirección</option>
+      <option value="rrhh">🧑‍💼 RRHH</option>
+      <option value="compras">📦 Compras</option>
+      <option value="operaciones">⚙️ Operaciones</option>
+      <option value="finanzas">💰 Finanzas</option>
+      <option value="codeba">🍷 Codeba (Comercial)</option>
+      <option value="marketing">📣 Marketing</option>
+    </select>
+  </div>
   <button class="btn btn-p" onclick="invitePost()">➕ Crear usuario</button>
   <button class="btn btn-g" style="margin-top:8px" onclick="closeSh('inviteuser-sh')">Cancelar</button>
 </div></div>
@@ -1584,7 +1609,64 @@ function togSub(tid,si){const t=tasks.find(x=>x.id===tid);if(t){t.sub[si].d=!t.s
 function mvT(tid,cid){const t=tasks.find(x=>x.id===tid);if(!t)return;if(cid==='completado'){compT(tid);return;}const fr=CO.find(c=>c.id===t.col)?.n,to=CO.find(c=>c.id===cid)?.n;t.col=cid;acts.unshift({ic:'🔄',bg:'var(--orange-soft)',w:'Bosco',a:'movió',wh:t.t,dt:`${fr} → ${to}`,tm:'Ahora'});openDet(tid);R();toast(`Movida a ${to}`);}
 function compT(id){const t=tasks.find(x=>x.id===id);if(!t)return;t.col='completado';const ns=t.tm.map(a=>TM.find(m=>m.id===a)?.n).filter(Boolean).join(', ');acts.unshift({ic:'✅',bg:'var(--green-soft)',w:'Bosco',a:'completó',wh:t.t,dt:'',tm:'Ahora'});closeSh('det-sh');R();toast('✅ Completada');setTimeout(()=>toast(`✉️ Email a ${ns}`),700);setTimeout(()=>toast('💬 Slack'),1400);}
 
-function createTask(){const title=$('ntT').value.trim();if(!title)return toast('Título requerido');tasks.push({id:tasks.length+1,t:title,d:$('ntD').value.trim(),col:$('ntC').value,pri:ntPri,lbl:ntLbl,due:$('ntDue').value,tm:ntTm.length?ntTm:['bosco'],ph:[...ntPh],sub:[],pj:cP});acts.unshift({ic:'🆕',bg:'var(--wine-soft)',w:'Bosco',a:'creó',wh:title,dt:PJ.find(p=>p.id===cP)?.n,tm:'Ahora'});$('ntT').value='';$('ntD').value='';$('ntDue').value='';ntPri='medium';ntLbl='';ntTm=[];ntPh=[];closeSh('newtask-sh');R();toast('🍇 Tarea creada');}
+let ntCtxValue='';let ntLat=null,ntLng=null,ntAddr='';
+function prepareNewTaskSheet(){
+  // Rellenar el campo dinámico según departamento
+  const label=isComercial()?'Cliente':'Proyecto';
+  const labelEl=$('ntCtxL');if(labelEl)labelEl.textContent=label;
+  const sel=$('ntCtx');
+  if(isComercial()){
+    // Lista de contactos (clientes/leads)
+    const cli=contacts.filter(c=>!c.tipo||c.tipo==='cliente'||c.tipo==='lead');
+    sel.innerHTML='<option value="">— Nuevo cliente…</option>'+cli.map(c=>`<option value="${c.id}">${c.nombre}${c.empresa?' · '+c.empresa:''}</option>`).join('');
+  }else{
+    sel.innerHTML=PJ.map(p=>`<option value="${p.id}" ${p.id===cP?'selected':''}>${p.e} ${p.n}</option>`).join('');
+  }
+  // Capturar GPS
+  ntLat=null;ntLng=null;ntAddr='';
+  $('ntGpsT').textContent='Capturando ubicación…';
+  $('ntGpsS').textContent='Concede permiso cuando se solicite';
+  $('ntGps').classList.remove('ok','err');
+  if(navigator.geolocation){
+    navigator.geolocation.getCurrentPosition(pos=>{
+      ntLat=pos.coords.latitude;ntLng=pos.coords.longitude;
+      $('ntGps').classList.add('ok');
+      $('ntGpsT').textContent='Ubicación capturada';
+      $('ntGpsS').textContent=ntLat.toFixed(5)+', '+ntLng.toFixed(5);
+      fetch('https://nominatim.openstreetmap.org/reverse?format=json&lat='+ntLat+'&lon='+ntLng+'&zoom=18').then(r=>r.json()).then(d=>{if(d&&d.display_name){ntAddr=d.display_name;$('ntGpsS').textContent=d.display_name;}}).catch(()=>{});
+    },err=>{
+      $('ntGps').classList.add('err');
+      $('ntGpsT').textContent='Sin ubicación';
+      $('ntGpsS').textContent=err.code===1?'Permiso denegado — puedes crear la tarea igualmente':'No se pudo obtener GPS';
+    },{timeout:10000,enableHighAccuracy:true});
+  }
+}
+function createTask(){
+  const title=$('ntT').value.trim();if(!title)return toast('Título requerido');
+  const ctxVal=$('ntCtx').value;
+  const task={
+    id:tasks.length+1,
+    t:title,
+    d:$('ntD').value.trim(),
+    col:$('ntC').value,
+    pri:ntPri,
+    lbl:'',
+    due:$('ntDue').value,
+    tm:ntTm.length?ntTm:[user?user.email.split('@')[0]:'bosco'],
+    ph:[...ntPh],
+    sub:[],
+    pj:isComercial()?(cP||'lm'):ctxVal,
+    lat:ntLat,
+    lng:ntLng,
+    direccion:ntAddr,
+    cliente:isComercial()?ctxVal:'',
+    creadoPor:user?user.email:''
+  };
+  tasks.unshift(task);
+  acts.unshift({ic:'🆕',bg:'var(--wine-soft)',w:user?user.name.split(' ')[0]:'Bosco',a:'creó',wh:title,dt:ntAddr?ntAddr.split(',').slice(0,2).join(','):(isComercial()?'Cliente':PJ.find(p=>p.id===cP)?.n||''),tm:'Ahora'});
+  ['ntT','ntD','ntDue'].forEach(id=>$(id).value='');ntPri='medium';ntLbl='';ntTm=[];ntPh=[];ntLat=null;ntLng=null;ntAddr='';
+  closeSh('newtask-sh');persist();R();toast('🍇 Tarea creada');
+}
 function sPri(el,p){ntPri=p;document.querySelectorAll('#ntPri .po').forEach(e=>e.className='po');el.className=`po s-${p}`;}
 function sLbl(el){document.querySelectorAll('#ntLbl .lo').forEach(e=>e.classList.remove('sel'));el.classList.add('sel');ntLbl=el.dataset.l;}
 function togTm(id,el){const i=ntTm.indexOf(id);if(i>=0){ntTm.splice(i,1);el.classList.remove('sel');}else{ntTm.push(id);el.classList.add('sel');}}
@@ -2049,16 +2131,18 @@ function renderAdmin(){
 }
 function openEditUser(email){
   const u=teamUsers.find(x=>x.email===email);if(!u)return;
+  const deptOpts=DEPTS.map(d=>`<option value="${d.id}" ${u.departamento===d.id?'selected':''}>${d.e} ${d.n}</option>`).join('');
   $('edituserC').innerHTML=`<div class="sh-bar"></div><div class="sh-tl">Editar usuario</div><div class="sh-sb">${u.email}</div>
-    <div class="fg"><label class="fl">Nombre</label><input class="fi" id="euNm" value="${u.nombre||''}"></div>
+    <div class="fg"><label class="fl">Nombre completo</label><input class="fi" id="euNm" value="${u.nombre||''}"></div>
     <div class="fg"><label class="fl">Rol</label>
       <div class="pri-row">
         <div class="po ${u.rol==='admin'?'s-high':''}" onclick="setEuRol(this,'admin')">👑 Admin</div>
-        <div class="po ${u.rol==='comercial'?'s-medium':''}" onclick="setEuRol(this,'comercial')">💼 Comercial</div>
-        <div class="po ${u.rol==='equipo'?'s-low':''}" onclick="setEuRol(this,'equipo')">👥 Equipo</div>
+        <div class="po ${u.rol==='equipo'?'s-low':''}" onclick="setEuRol(this,'equipo')">👥 Usuario</div>
       </div>
     </div>
-    <div class="fg"><label class="fl">Departamento</label><input class="fi" id="euDp" value="${u.departamento||''}"></div>
+    <div class="fg"><label class="fl">Departamento</label>
+      <select class="fsel" id="euDp"><option value="">— Sin asignar —</option>${deptOpts}</select>
+    </div>
     <button class="btn btn-p" onclick="saveEditUser('${u.email}')">💾 Guardar</button>
     ${u.email!==user.email?'<button class="btn btn-d" style="margin-top:8px" onclick="delTeamUser(\''+u.email+'\')">🗑️ Eliminar usuario</button>':''}
     <button class="btn btn-g" style="margin-top:8px" onclick="closeSh('edituser-sh')">Cancelar</button>`;
@@ -2450,13 +2534,14 @@ function sendDocPost(){
   ['sdT','sdU','sdN'].forEach(id=>$(id).value='');
   closeSh('senddoc-sh');toast('📤 Documento enviado a '+em);
 }
-// Rellenar el selector de empleados cuando se abre el sheet
+// Hooks al abrir sheets
 const _origOpenSh=openSh;
 openSh=function(id){
   if(id==='senddoc-sh'&&teamUsers.length){
     $('sdEm').innerHTML=teamUsers.filter(u=>u.email!==user.email).map(u=>`<option value="${u.email}">${u.nombre} (${u.email})</option>`).join('');
   }
   if(id==='mydocs-sh')loadMyDocs();
+  if(id==='newtask-sh')prepareNewTaskSheet();
   _origOpenSh(id);
 };
 
@@ -2586,8 +2671,12 @@ const _origRenderUser2=renderUser;
 renderUser=function(){
   _origRenderUser2();
   if(user){
-    // Avatar en header
-    const av=$('userAv');if(av){av.style.background=user.color||'var(--wine)';}
+    const av=$('userAv');if(av){av.style.background=user.color||'var(--wine)';av.textContent=userIni(user.name);}
+    const dept=$('userShDept');if(dept){
+      const d=DEPTS.find(x=>x.id===user.departamento);
+      if(d){dept.textContent=d.e+' '+d.n;dept.style.display='';}
+      else{dept.textContent='Sin departamento';dept.style.display=''}
+    }
   }
 };
 
