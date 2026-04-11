@@ -603,6 +603,55 @@ body,*{-webkit-overflow-scrolling:touch}
 }
 @keyframes tI{0%{opacity:0;transform:translateY(-24px) scale(.9)}60%{opacity:1;transform:translateY(2px) scale(1.02)}100%{opacity:1;transform:translateY(0) scale(1)}}
 @keyframes tO{from{opacity:1;transform:translateY(0) scale(1)}to{opacity:0;transform:translateY(-16px) scale(.95)}}
+/* === Drag & drop === */
+.col.drag-over{background:#DFD0D4;box-shadow:0 0 0 3px var(--accent) inset,0 8px 24px rgba(155,44,62,0.3);transform:translateY(-2px)}
+.col{transition:background .2s,transform .2s,box-shadow .2s}
+.card.dragging-src{opacity:0.35;transform:scale(0.98)}
+.card-drag-clone{
+  position:fixed !important;
+  pointer-events:none;
+  z-index:9999;
+  transform:rotate(3deg);
+  box-shadow:0 24px 64px rgba(0,0,0,0.4) !important;
+  transition:none !important;
+}
+
+/* Swipe actions */
+.card-swipe-wrap{position:relative;overflow:hidden;border-radius:8px;margin-bottom:8px}
+.card-swipe-bg{position:absolute;inset:0;display:flex;align-items:center;justify-content:space-between;padding:0 24px;font-size:24px;color:#fff;font-weight:700;border-radius:8px;pointer-events:none}
+.card-swipe-bg .left{background:var(--green);flex:1;display:flex;align-items:center;justify-content:flex-start;border-radius:8px}
+.card-swipe-bg .right{background:var(--red);flex:1;display:flex;align-items:center;justify-content:flex-end;border-radius:8px}
+
+/* Pull to refresh */
+.ptr-ind{position:absolute;top:0;left:50%;transform:translateX(-50%) translateY(-60px);padding:14px 24px;background:var(--card);border-radius:999px;box-shadow:0 8px 24px rgba(0,0,0,0.12);display:flex;align-items:center;gap:10px;font-size:13px;font-weight:600;color:var(--t2);transition:transform .3s var(--ease-ios);z-index:50;white-space:nowrap;pointer-events:none}
+.ptr-ind.active{transform:translateX(-50%) translateY(16px)}
+.ptr-ind.loading .ptr-spin{animation:spin 1s linear infinite}
+.ptr-spin{width:16px;height:16px;border:2px solid var(--fill-2);border-top-color:var(--accent);border-radius:50%}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Version badge */
+.v-badge{position:fixed;bottom:calc(4px + var(--safe-b));right:8px;font-size:9px;font-weight:700;color:rgba(255,255,255,0.6);z-index:99;pointer-events:none;letter-spacing:.5px;text-shadow:0 0 4px rgba(0,0,0,0.5)}
+
+/* Calendar view */
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;background:var(--sep);border-radius:12px;overflow:hidden}
+.cal-h{background:var(--bg-elevated);padding:10px 6px;text-align:center;font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.5px}
+.cal-d{background:var(--bg-elevated);min-height:58px;padding:8px 6px;cursor:pointer;display:flex;flex-direction:column;align-items:center;transition:background .15s}
+.cal-d.other{background:var(--fill-4);color:var(--t4)}
+.cal-d.today{background:var(--accent-tint)}
+.cal-d.today .cal-n{background:var(--accent);color:#fff}
+.cal-d:active{background:var(--fill-3)}
+.cal-n{font-size:15px;font-weight:600;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--t1)}
+.cal-dots{display:flex;gap:2px;margin-top:4px;flex-wrap:wrap;justify-content:center}
+.cal-dot{width:4px;height:4px;border-radius:50%;background:var(--accent)}
+.cal-dot.meet{background:var(--blue)}
+.cal-dot.task{background:var(--orange)}
+.cal-nav{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;gap:10px}
+.cal-nav-t{font-size:20px;font-weight:800;letter-spacing:-0.5px;text-transform:capitalize}
+.cal-nav-b{width:36px;height:36px;border-radius:50%;background:var(--fill-3);border:none;font-size:16px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--t1)}
+.cal-nav-b:active{transform:scale(.88);background:var(--fill-1)}
+.cal-events{padding:14px 16px}
+.cal-ev-t{font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px}
+
 input[type="file"]{display:none}
 
 /* === ONBOARDING TOUR (tooltips con spotlight) === */
@@ -1203,6 +1252,7 @@ input[type="file"]{display:none}
     </div>
   </div>
 </header>
+<div class="v-badge" id="vBadge">v15 · drag&drop</div>
 
 <!-- Sync indicator -->
 <div class="sync-b" id="syncB"><span class="sd"></span><span id="syncT">Sincronizado</span></div>
@@ -1572,7 +1622,7 @@ function cH(t){
   let dc='due-ok';
   if(t.due){const d=(new Date(t.due)-new Date())/864e5;if(d<0)dc='due-over';else if(d<3)dc='due-soon';}
   const dT=t.due?new Date(t.due).toLocaleDateString('es-ES',{day:'numeric',month:'short'}):'';
-  return`<div class="card ${isD?'done':''}" onclick="openDet(${t.id})">
+  return`<div class="card ${isD?'done':''}" data-task-id="${t.id}" onclick="openDet(${t.id})">
     ${t.lbl?`<div class="card-labels"><div class="card-lbl l-${t.lbl}" title="${t.lbl}"></div></div>`:''}
     <div class="c-t">${t.t}</div>
     ${t.d?`<div class="c-d">${t.d}</div>`:''}
@@ -2719,9 +2769,156 @@ renderUser=function(){
   }
 };
 
-restore();loadCfg();authBoot().then(()=>{R();});
+// ===== DRAG & DROP (cards entre columnas, estilo Trello) =====
+let dragState=null;
+function initDragDrop(){
+  document.addEventListener('touchstart',onDragTouchStart,{passive:false});
+  document.addEventListener('touchmove',onDragTouchMove,{passive:false});
+  document.addEventListener('touchend',onDragEnd);
+  document.addEventListener('touchcancel',onDragEnd);
+  document.addEventListener('mousedown',onDragMouseStart);
+  document.addEventListener('mousemove',onDragMouseMove);
+  document.addEventListener('mouseup',onDragEnd);
+}
+function onDragTouchStart(e){
+  const card=e.target.closest('.col-cards .card');
+  if(!card||e.target.closest('button,input,select,textarea,a'))return;
+  const t=e.touches[0];
+  startDrag(card,t.clientX,t.clientY);
+}
+function onDragMouseStart(e){
+  const card=e.target.closest('.col-cards .card');
+  if(!card||e.target.closest('button,input,select,textarea,a'))return;
+  if(e.button!==0)return;
+  startDrag(card,e.clientX,e.clientY);
+}
+function onDragTouchMove(e){if(dragState){const t=e.touches[0];handleDragMove(t.clientX,t.clientY,e);}}
+function onDragMouseMove(e){if(dragState)handleDragMove(e.clientX,e.clientY,e);}
+function startDrag(card,x,y){
+  const rect=card.getBoundingClientRect();
+  dragState={
+    card:card,
+    startX:x,startY:y,
+    offsetX:x-rect.left,offsetY:y-rect.top,
+    width:rect.width,height:rect.height,
+    dragging:false,clone:null,
+    holdTimer:setTimeout(()=>{if(dragState)activateDrag();},380),
+    clickSuppressed:false
+  };
+}
+function activateDrag(){
+  if(!dragState)return;
+  const {card,startX,startY,offsetX,offsetY,width}=dragState;
+  if(navigator.vibrate)navigator.vibrate(15);
+  const clone=card.cloneNode(true);
+  clone.classList.add('card-drag-clone');
+  clone.style.left=(startX-offsetX)+'px';
+  clone.style.top=(startY-offsetY)+'px';
+  clone.style.width=width+'px';
+  document.body.appendChild(clone);
+  card.classList.add('dragging-src');
+  dragState.clone=clone;
+  dragState.dragging=true;
+  dragState.clickSuppressed=true;
+  document.body.style.cursor='grabbing';
+  document.body.style.userSelect='none';
+}
+function handleDragMove(x,y,e){
+  if(!dragState.dragging){
+    // Pre-drag: cancelar si el dedo se mueve más de 12px (permite scroll normal)
+    if(Math.abs(x-dragState.startX)>12||Math.abs(y-dragState.startY)>12){
+      clearTimeout(dragState.holdTimer);
+      dragState=null;
+    }
+    return;
+  }
+  if(e.cancelable)e.preventDefault();
+  dragState.clone.style.left=(x-dragState.offsetX)+'px';
+  dragState.clone.style.top=(y-dragState.offsetY)+'px';
+  // Resaltar columna objetivo
+  dragState.clone.style.display='none';
+  const elUnder=document.elementFromPoint(x,y);
+  dragState.clone.style.display='';
+  const target=elUnder?elUnder.closest('.col'):null;
+  document.querySelectorAll('.col').forEach(c=>c.classList.toggle('drag-over',c===target));
+}
+function onDragEnd(e){
+  if(!dragState)return;
+  clearTimeout(dragState.holdTimer);
+  if(dragState.dragging){
+    const touch=e.changedTouches?e.changedTouches[0]:e;
+    const x=touch.clientX,y=touch.clientY;
+    dragState.clone.style.display='none';
+    const elUnder=document.elementFromPoint(x,y);
+    const target=elUnder?elUnder.closest('.col'):null;
+    if(target&&target.dataset.c){
+      const newCol=target.dataset.c;
+      const taskId=parseInt(dragState.card.dataset.taskId);
+      const task=tasks.find(t=>t.id===taskId);
+      if(task&&task.col!==newCol){
+        const fromN=CO.find(c=>c.id===task.col)?.n||'';
+        const toN=CO.find(c=>c.id===newCol)?.n||'';
+        task.col=newCol;
+        acts.unshift({ic:'🔄',bg:'var(--orange-soft)',w:user?.name?.split(' ')[0]||'Bosco',a:'movió',wh:task.t,dt:fromN+' → '+toN,tm:'Ahora'});
+        persist();R();
+        if(navigator.vibrate)navigator.vibrate([10,40,10]);
+        toast('📍 '+toN);
+      }
+    }
+    dragState.card.classList.remove('dragging-src');
+    dragState.clone.remove();
+    document.querySelectorAll('.col.drag-over').forEach(c=>c.classList.remove('drag-over'));
+    document.body.style.cursor='';
+    document.body.style.userSelect='';
+    // Suprimir el próximo click (para que no abra el detalle tras arrastrar)
+    const suppressClick=evt=>{evt.stopPropagation();evt.preventDefault();document.removeEventListener('click',suppressClick,true);};
+    document.addEventListener('click',suppressClick,true);
+    setTimeout(()=>document.removeEventListener('click',suppressClick,true),100);
+  }
+  dragState=null;
+}
+
+// ===== PULL TO REFRESH =====
+let ptrState=null;
+function initPullToRefresh(){
+  const views=['v-dash','v-crm','v-agenda'];
+  document.addEventListener('touchstart',e=>{
+    const view=document.querySelector('.view.active');
+    if(!view||!views.includes(view.id))return;
+    if(window.scrollY>0)return;
+    ptrState={startY:e.touches[0].clientY,dy:0,active:false};
+  },{passive:true});
+  document.addEventListener('touchmove',e=>{
+    if(!ptrState)return;
+    ptrState.dy=e.touches[0].clientY-ptrState.startY;
+    if(ptrState.dy>0&&window.scrollY<=0){
+      if(ptrState.dy>40&&!ptrState.active){showPtr();ptrState.active=true;}
+      if(ptrState.active){
+        const ind=$('ptrInd');if(ind){ind.style.transform='translateX(-50%) translateY('+Math.min(ptrState.dy-40,80)+'px)';}
+      }
+    }
+  },{passive:true});
+  document.addEventListener('touchend',()=>{
+    if(!ptrState)return;
+    if(ptrState.active&&ptrState.dy>120){triggerRefresh();}
+    else{hidePtr();}
+    ptrState=null;
+  });
+}
+function showPtr(){
+  let ind=$('ptrInd');
+  if(!ind){ind=document.createElement('div');ind.id='ptrInd';ind.className='ptr-ind active';ind.innerHTML='<div class="ptr-spin"></div><span>Suelta para actualizar</span>';document.body.appendChild(ind);}
+  else{ind.classList.add('active');}
+}
+function hidePtr(){const ind=$('ptrInd');if(ind)ind.classList.remove('active');}
+function triggerRefresh(){
+  const ind=$('ptrInd');if(ind)ind.classList.add('loading');
+  setTimeout(()=>{R();toast('✅ Actualizado');hidePtr();},700);
+}
+
+restore();loadCfg();authBoot().then(()=>{R();initDragDrop();initPullToRefresh();});
 // Service worker con auto-reload al detectar nueva versión + purga agresiva
-const APP_VERSION='v14';
+const APP_VERSION='v15';
 const storedVer=localStorage.getItem('cosecha_app_version');
 if(storedVer&&storedVer!==APP_VERSION){
   // Versión cambió → purgar caches + reload una sola vez
