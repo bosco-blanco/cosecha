@@ -23,10 +23,19 @@ function doGet(e) {
 
     const action = (e.parameter && e.parameter.action) || '';
 
-    // --- Auth: rutas públicas ---
+    // --- Auth: rutas públicas (aceptan GET para evitar CORS POST issues) ---
     if (action === 'validateToken') {
       const token = e.parameter.token || '';
       return buildResponse_(validateAuthToken(token));
+    }
+    if (action === 'requestCode') {
+      return buildResponse_(requestAuthCode(e.parameter.email));
+    }
+    if (action === 'verifyCode') {
+      return buildResponse_(verifyAuthCode(e.parameter.email, e.parameter.code, e.parameter.keepActive === 'true'));
+    }
+    if (action === 'legalText') {
+      return buildResponse_(getLegalText());
     }
 
     // --- Rutas protegidas: validar token ---

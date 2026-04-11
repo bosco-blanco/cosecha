@@ -107,11 +107,9 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg2
 .ppl-all{background:rgba(255,255,255,0.25);color:#fff;font-size:9px}
 .ppl-all.on{background:#fff;color:var(--board-bg-2);border-color:#fff}
 
-/* BOARD CANVAS — fondo granate suave que ocupa toda la zona */
-#ag-board{background:var(--board-bg);min-height:calc(100dvh - 120px);margin:0 -16px;padding-top:4px}
-#v-agenda .tabs{background:var(--board-bg);border-bottom:none;padding:8px 16px 10px;margin:0}
-#v-agenda .tab{color:rgba(255,255,255,0.65);font-weight:700}
-#v-agenda .tab.on{color:#fff;border-bottom-color:#fff}
+/* BOARD CANVAS — fondo granate suave que ocupa toda la zona del tracker */
+#ct-tablero{background:var(--board-bg);min-height:calc(100dvh - 200px);margin:0;padding:12px 0 0}
+#ct-tablero .ppl-bar{background:transparent}
 
 .ctrack{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;padding:8px 12px 28px;gap:10px;-webkit-overflow-scrolling:touch;background:var(--board-bg)}
 .ctrack::-webkit-scrollbar{display:none}
@@ -768,11 +766,13 @@ input[type="file"]{display:none}
   <div class="drawer-body">
     <div class="drawer-sec-t">Principal</div>
     <button class="drawer-item" data-drv="dash" onclick="drvGo('dash')"><span class="ic">🏠</span>Inicio</button>
-    <button class="drawer-item" data-drv="crm-contactos" onclick="drvGo('crm','contactos')"><span class="ic">👥</span>Contactos</button>
-    <button class="drawer-item" data-drv="crm-pipeline" onclick="drvGo('crm','pipeline')"><span class="ic">💰</span>Pipeline</button>
 
-    <div class="drawer-sec-t">Trabajo</div>
-    <button class="drawer-item" data-drv="agenda-board" onclick="drvGo('agenda','board')"><span class="ic">📋</span>Tablero</button>
+    <div class="drawer-sec-t">Tracker</div>
+    <button class="drawer-item" data-drv="crm-tablero" onclick="drvGo('crm','tablero')"><span class="ic">📋</span>Tablero por proyecto</button>
+    <button class="drawer-item" data-drv="crm-pipeline" onclick="drvGo('crm','pipeline')"><span class="ic">💰</span>Pipeline</button>
+    <button class="drawer-item" data-drv="crm-contactos" onclick="drvGo('crm','contactos')"><span class="ic">👥</span>Contactos</button>
+
+    <div class="drawer-sec-t">Agenda</div>
     <button class="drawer-item" data-drv="agenda-meet" onclick="drvGo('agenda','meet')"><span class="ic">🎙️</span>Reuniones</button>
     <button class="drawer-item" data-drv="agenda-cal" onclick="drvGo('agenda','cal')"><span class="ic">📅</span>Calendario</button>
     <button class="drawer-item" data-drv="mas" onclick="drvGo('mas')"><span class="ic">📣</span>Actividad</button>
@@ -803,7 +803,6 @@ input[type="file"]{display:none}
       <button class="hbtn" onclick="openSh('notif-sh')">🔔<span class="dot-b"></span></button>
     </div>
   </div>
-  <div class="pills" id="pills"></div>
 </header>
 
 <!-- Sync indicator -->
@@ -828,28 +827,36 @@ input[type="file"]{display:none}
   </div>
 </div></div>
 
-<!-- CRM (Contactos + Pipeline) -->
+<!-- TRACKER (antes CRM) — gestión por proyecto -->
 <div id="v-crm" class="view">
-  <div class="tabs"><button class="tab on" data-ct="contactos" onclick="setCrmTab('contactos')">👥 Contactos</button><button class="tab" data-ct="pipeline" onclick="setCrmTab('pipeline')">💰 Pipeline</button></div>
-  <div id="ct-contactos" class="ct-pane">
-    <div class="srch-bar"><input class="srch" id="ctSrch" placeholder="Buscar contactos..." oninput="rContacts()"></div>
-    <div class="tabs" style="border:none;padding:0 16px 10px;margin-bottom:4px"><button class="pill on" data-cf="all" onclick="setCtFilter('all')">Todos</button><button class="pill" data-cf="cliente" onclick="setCtFilter('cliente')">Clientes</button><button class="pill" data-cf="proveedor" onclick="setCtFilter('proveedor')">Proveedores</button><button class="pill" data-cf="partner" onclick="setCtFilter('partner')">Partners</button><button class="pill" data-cf="lead" onclick="setCtFilter('lead')">Leads</button></div>
-    <div class="sec" style="padding-bottom:90px"><div id="contactsL"></div></div>
+  <div class="pills" id="pills" style="padding:10px 16px"></div>
+  <div class="tabs">
+    <button class="tab on" data-ct="tablero" onclick="setCrmTab('tablero')">📋 Tablero</button>
+    <button class="tab" data-ct="pipeline" onclick="setCrmTab('pipeline')">💰 Pipeline</button>
+    <button class="tab" data-ct="contactos" onclick="setCrmTab('contactos')">👥 Contactos</button>
+  </div>
+  <div id="ct-tablero" class="ct-pane">
+    <div class="ppl-bar" id="pplBarContainer" style="background:transparent;padding:0 16px 10px"></div>
+    <div class="ctrack" id="trackTracker"></div>
   </div>
   <div id="ct-pipeline" class="ct-pane" style="display:none">
-    <div style="padding:0 16px 12px;display:flex;align-items:center;justify-content:space-between">
-      <div><div style="font-size:20px;font-weight:800" id="pipeTotal">0 €</div><div style="font-size:11px;color:var(--t3);font-weight:600;text-transform:uppercase;letter-spacing:.4px">Valor pipeline</div></div>
+    <div style="padding:12px 16px;display:flex;align-items:center;justify-content:space-between">
+      <div><div style="font-size:20px;font-weight:800" id="pipeTotal">0 €</div><div style="font-size:11px;color:var(--t3);font-weight:600;text-transform:uppercase;letter-spacing:.4px">Valor pipeline · <span id="pipeProject">proyecto actual</span></div></div>
       <div style="text-align:right"><div style="font-size:20px;font-weight:800;color:var(--wine)" id="pipeWeight">0 €</div><div style="font-size:11px;color:var(--t3);font-weight:600;text-transform:uppercase;letter-spacing:.4px">Ponderado</div></div>
     </div>
     <div class="deal-stg" id="dealTrack"></div>
   </div>
+  <div id="ct-contactos" class="ct-pane" style="display:none">
+    <div class="srch-bar" style="padding-top:12px"><input class="srch" id="ctSrch" placeholder="Buscar contactos..." oninput="rContacts()"></div>
+    <div class="tabs" style="border:none;padding:0 16px 10px;margin-bottom:4px"><button class="pill on" data-cf="all" onclick="setCtFilter('all')">Todos</button><button class="pill" data-cf="cliente" onclick="setCtFilter('cliente')">Clientes</button><button class="pill" data-cf="proveedor" onclick="setCtFilter('proveedor')">Proveedores</button><button class="pill" data-cf="partner" onclick="setCtFilter('partner')">Partners</button><button class="pill" data-cf="lead" onclick="setCtFilter('lead')">Leads</button></div>
+    <div class="sec" style="padding-bottom:90px"><div id="contactsL"></div></div>
+  </div>
 </div>
 
-<!-- AGENDA (Calendario + Tablero + Reuniones) -->
+<!-- AGENDA (Reuniones + Calendario) -->
 <div id="v-agenda" class="view">
-  <div class="tabs"><button class="tab on" data-at="board" onclick="setAgTab('board')">📋 Tablero</button><button class="tab" data-at="meet" onclick="setAgTab('meet')">🎙️ Reuniones</button><button class="tab" data-at="cal" onclick="setAgTab('cal')">📅 Calendar<span class="soon">pronto</span></button></div>
-  <div id="ag-board" class="ag-pane"><div class="cdots" id="dots"></div><div class="ctrack" id="track"></div></div>
-  <div id="ag-meet" class="ag-pane" style="display:none;padding:0 0 90px"><div class="sec"><div class="sec-t">Reuniones</div><div id="meetL"></div></div></div>
+  <div class="tabs"><button class="tab on" data-at="meet" onclick="setAgTab('meet')">🎙️ Reuniones</button><button class="tab" data-at="cal" onclick="setAgTab('cal')">📅 Calendario<span class="soon">pronto</span></button></div>
+  <div id="ag-meet" class="ag-pane" style="padding:0 0 90px"><div class="sec" style="padding-top:14px"><div id="meetL"></div></div></div>
   <div id="ag-cal" class="ag-pane" style="display:none;padding:0 16px 90px"><div class="empty"><div class="empty-ic">📅</div><div class="empty-t">Calendario próximamente</div><div class="empty-s">Se sincronizará con Google Calendar vía el backend de Apps Script</div></div></div>
 </div>
 
@@ -871,7 +878,7 @@ input[type="file"]{display:none}
 </div></div>
 <nav class="bnav">
   <button class="nb on" data-v="dash" onclick="go('dash')"><span class="ni">🏠</span>Inicio</button>
-  <button class="nb" data-v="crm" onclick="go('crm')"><span class="ni">👥</span>CRM</button>
+  <button class="nb" data-v="crm" onclick="go('crm')"><span class="ni">📊</span>Tracker</button>
   <button class="fab" onclick="openSh('fab-sh')">＋</button>
   <button class="nb" data-v="agenda" onclick="go('agenda')"><span class="ni">📅</span>Agenda</button>
   <button class="nb" data-v="mas" onclick="go('mas')"><span class="ni">⋯</span>Más</button>
@@ -1095,17 +1102,11 @@ let pplFilter='all'; // 'all' o el id del TM
 function rBoard(){
   const pt=tasks.filter(x=>x.pj===cP);
   const filtered=pplFilter==='all'?pt:pt.filter(t=>t.tm&&t.tm.includes(pplFilter));
-  $('track').innerHTML=CO.map(col=>{
+  const trackEl=$('trackTracker')||$('track');if(!trackEl)return;
+  trackEl.innerHTML=CO.map(col=>{
     const ct=filtered.filter(x=>x.col===col.id);
     const cards=ct.length?ct.map(cH).join(''):'<div class="col-empty">Sin tareas</div>';
-    return`<div class="col" data-c="${col.id}">
-      <div class="col-hd">
-        <span class="col-nm"><span class="emj">${col.e}</span>${col.n}</span>
-        <span class="col-ct">${ct.length}</span>
-      </div>
-      <div class="col-cards">${cards}</div>
-      <div class="col-quickadd"><button class="qadd" onclick="quickAddTask('${col.id}')">＋ Añadir tarea</button></div>
-    </div>`;
+    return`<div class="col" data-c="${col.id}"><div class="col-hd"><span class="col-nm"><span class="emj">${col.e}</span>${col.n}</span><span class="col-ct">${ct.length}</span></div><div class="col-cards">${cards}</div><div class="col-quickadd"><button class="qadd" onclick="quickAddTask('${col.id}')">＋ Añadir tarea</button></div></div>`;
   }).join('');
   renderPplBar();
 }
@@ -1201,9 +1202,66 @@ function endMeet(){closeSh('end-sh');mS.isRec=false;if(mS.recognition){mS.recogn
 function openMS(id){const m=meetings.find(x=>x.id===id);if(!m)return;$('msC').innerHTML=`<div class="sh-bar"></div><div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px"><span class="sum-bdg sb-mail">✉️ Gmail</span><span class="sum-bdg sb-drive">📁 Drive</span><span class="sum-bdg sb-cal">📅 Calendar</span><span class="sum-bdg sb-slack">💬 ${m.ch}</span></div><div class="sh-tl">${m.title}</div><div class="sh-sb">${new Date(m.date).toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long'})} · ${m.dur} · ${m.loc}</div><div class="det-sec"><div class="det-l">Asistentes</div><div class="avs" style="gap:6px">${m.atts.map(a=>`<div style="display:flex;align-items:center;gap:6px"><div class="av" style="background:${a.c};margin:0;width:28px;height:28px;font-size:10px">${a.i}</div><span style="font-size:13px">${a.n}</span></div>`).join('')}</div></div><div class="det-sec"><div class="det-l">Resumen</div><div style="font-size:14px;line-height:1.6;color:var(--t2)">${m.summary}</div></div><div class="det-sec"><div class="det-l">Puntos clave</div>${m.kp.map(p=>`<div style="display:flex;gap:8px;padding:7px 0;font-size:13px;line-height:1.5;border-bottom:1px solid var(--border)"><div style="width:5px;height:5px;border-radius:50%;background:var(--wine);margin-top:6px;flex-shrink:0"></div><div>${p}</div></div>`).join('')}</div>${m.ais.length?`<div class="det-sec"><div class="det-l">Acciones</div>${m.ais.map(a=>`<div style="font-size:13px;padding:4px 0">• ${a.t} <em style="color:var(--t3)">→ ${a.a}</em></div>`).join('')}</div>`:''}<div class="det-sec"><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;text-align:center"><div><div style="font-size:22px;font-weight:800;color:var(--wine)">${m.dur}</div><div style="font-size:10px;color:var(--t3)">Duración</div></div><div><div style="font-size:22px;font-weight:800;color:var(--wine)">${m.words.toLocaleString()}</div><div style="font-size:10px;color:var(--t3)">Palabras</div></div><div><div style="font-size:22px;font-weight:800;color:var(--wine)">${m.atts.length}</div><div style="font-size:10px;color:var(--t3)">Asistentes</div></div></div></div><div style="display:flex;gap:6px;margin-top:8px"><button class="btn btn-p btn-sm" onclick="toast('📁 Exportado')">📁 Drive</button><button class="btn btn-g btn-sm" onclick="toast('✉️ Reenviado')">✉️ Mail</button><button class="btn btn-g btn-sm" onclick="toast('💬 Slack')">💬 Slack</button></div><button class="btn btn-g" style="margin-top:14px" onclick="closeSh('msum-sh')">Cerrar</button>`;openSh('msum-sh');}
 
 function go(v){const el=$(`v-${v}`);if(!el)return;document.querySelectorAll('.view').forEach(e=>e.classList.remove('active'));el.classList.add('active');document.querySelectorAll('.nb').forEach(b=>b.classList.remove('on'));const btn=document.querySelector(`.nb[data-v="${v}"]`);if(btn)btn.classList.add('on');window.scrollTo(0,0);}
-function openSh(id){$(id).classList.add('open')}
+function openSh(id){const el=$(id);if(!el)return;el.classList.add('open');attachSheetDrag(el);}
 function closeSh(id){$(id).classList.remove('open')}
+function closeAllSheets(){document.querySelectorAll('.sh-bg.open').forEach(el=>el.classList.remove('open'));}
+// Click en backdrop cierra
 document.querySelectorAll('.sh-bg').forEach(el=>el.addEventListener('click',e=>{if(e.target===el)el.classList.remove('open')}));
+// ESC cierra el topmost sheet / drawer
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){
+    if($('drawer')&&$('drawer').classList.contains('open')){closeDrawer();return;}
+    const open=document.querySelectorAll('.sh-bg.open');
+    if(open.length){open[open.length-1].classList.remove('open');}
+  }
+});
+// Drag-to-close: arrastrar la barra gris del sheet hacia abajo lo cierra
+function attachSheetDrag(bg){
+  const sh=bg.querySelector('.sh');if(!sh||sh.dataset.dragReady)return;
+  sh.dataset.dragReady='1';
+  let y0=null,dy=0,dragging=false;
+  const bar=sh.querySelector('.sh-bar');
+  const start=e=>{
+    const touch=e.touches?e.touches[0]:e;
+    // Solo si empieza en la barra o si el contenido está en top
+    if(e.target!==bar&&e.target!==sh)return;
+    y0=touch.clientY;dy=0;dragging=true;
+    sh.style.transition='none';
+  };
+  const move=e=>{
+    if(!dragging)return;
+    const touch=e.touches?e.touches[0]:e;
+    dy=touch.clientY-y0;
+    if(dy<0)dy=0;
+    sh.style.transform='translateY('+dy+'px)';
+    if(dy>30)bg.style.backgroundColor='rgba(0,0,0,'+Math.max(0,0.25-dy/1000)+')';
+  };
+  const end=()=>{
+    if(!dragging)return;
+    dragging=false;
+    sh.style.transition='';
+    bg.style.backgroundColor='';
+    if(dy>100){
+      sh.style.transform='translateY(100%)';
+      setTimeout(()=>{bg.classList.remove('open');sh.style.transform='';},260);
+    }else{
+      sh.style.transform='';
+    }
+    dy=0;
+  };
+  // Handlers en la barra (siempre arrastrables)
+  if(bar){
+    bar.addEventListener('touchstart',start,{passive:true});
+    bar.addEventListener('touchmove',move,{passive:true});
+    bar.addEventListener('touchend',end);
+    bar.addEventListener('mousedown',e=>{start({target:bar,clientY:e.clientY});
+      const mm=ev=>move({touches:[{clientY:ev.clientY}]});
+      const mu=()=>{end();window.removeEventListener('mousemove',mm);window.removeEventListener('mouseup',mu);};
+      window.addEventListener('mousemove',mm);window.addEventListener('mouseup',mu);
+    });
+    bar.style.cursor='grab';bar.style.touchAction='none';
+  }
+}
 function toast(msg){const t=document.createElement('div');t.className='toast';t.textContent=msg;$('tw').appendChild(t);setTimeout(()=>t.remove(),4000);}
 
 // ===== DASHBOARD =====
@@ -1315,8 +1373,8 @@ function mvDeal(id,stg){const d=deals.find(x=>x.id===id);if(!d)return;const fr=D
 function delDeal(id){if(!confirm('¿Eliminar oportunidad?'))return;deals=deals.filter(d=>d.id!==id);closeSh('ddet-sh');persist();R();toast('Oportunidad eliminada');}
 
 // ===== TABS INTERNOS =====
-function setCrmTab(t){crmTab=t;document.querySelectorAll('[data-ct]').forEach(b=>b.classList.toggle('on',b.dataset.ct===t));$('ct-contactos').style.display=t==='contactos'?'':'none';$('ct-pipeline').style.display=t==='pipeline'?'':'none';}
-function setAgTab(t){agTab=t;document.querySelectorAll('[data-at]').forEach(b=>b.classList.toggle('on',b.dataset.at===t));$('ag-board').style.display=t==='board'?'':'none';$('ag-meet').style.display=t==='meet'?'':'none';$('ag-cal').style.display=t==='cal'?'':'none';}
+function setCrmTab(t){crmTab=t;document.querySelectorAll('[data-ct]').forEach(b=>b.classList.toggle('on',b.dataset.ct===t));$('ct-tablero').style.display=t==='tablero'?'':'none';$('ct-pipeline').style.display=t==='pipeline'?'':'none';$('ct-contactos').style.display=t==='contactos'?'':'none';if(t==='tablero')rBoard();if(t==='pipeline')rDeals();}
+function setAgTab(t){agTab=t;document.querySelectorAll('[data-at]').forEach(b=>b.classList.toggle('on',b.dataset.at===t));const bd=$('ag-board');if(bd)bd.style.display='none';$('ag-meet').style.display=t==='meet'?'':'none';$('ag-cal').style.display=t==='cal'?'':'none';}
 
 // ===== CONFIG + SYNC =====
 function loadCfg(){try{const c=JSON.parse(localStorage.getItem('cosecha_cfg')||'{}');cfg={apiUrl:c.apiUrl||DEFAULT_API_URL,slackWebhook:c.slackWebhook||''};}catch(e){cfg={apiUrl:DEFAULT_API_URL,slackWebhook:''};}if($('cfgApi'))$('cfgApi').value=cfg.apiUrl;if($('cfgSlack'))$('cfgSlack').value=cfg.slackWebhook;}
@@ -1357,7 +1415,7 @@ function authRequest(){
     },300);
     return;
   }
-  fetch(cfg.apiUrl+'?action=requestCode',{method:'POST',body:JSON.stringify({email:em}),headers:{'Content-Type':'text/plain'}})
+  fetch(cfg.apiUrl+'?action=requestCode&email='+encodeURIComponent(em))
     .then(r=>r.json()).then(d=>{
       authBtn('authSendBtn','Enviar código →',false);
       if(d.success){
@@ -1367,7 +1425,7 @@ function authRequest(){
         startResendCountdown();
       }else{authErr('authErr',d.error||'Error al enviar el código');}
     })
-    .catch(err=>{authBtn('authSendBtn','Enviar código →',false);authErr('authErr','No se pudo contactar el backend. ¿URL configurada?');});
+    .catch(err=>{authBtn('authSendBtn','Enviar código →',false);authErr('authErr','No se pudo contactar el backend: '+err.message);});
 }
 function authVerify(){
   const em=($('authEmail').value||'').toLowerCase().trim();
@@ -1388,13 +1446,14 @@ function authVerify(){
     },300);
     return;
   }
-  fetch(cfg.apiUrl+'?action=verifyCode',{method:'POST',body:JSON.stringify({email:em,code:code,keepActive:keep}),headers:{'Content-Type':'text/plain'}})
+  const url=cfg.apiUrl+'?action=verifyCode&email='+encodeURIComponent(em)+'&code='+encodeURIComponent(code)+'&keepActive='+(keep?'true':'false');
+  fetch(url)
     .then(r=>r.json()).then(d=>{
       authBtn('authVerifyBtn','Verificar y entrar',false);
       if(d.success){authSuccess(d);}
       else{authErr('authErr2',d.error||'Código incorrecto');}
     })
-    .catch(err=>{authBtn('authVerifyBtn','Verificar y entrar',false);authErr('authErr2','Error de red');});
+    .catch(err=>{authBtn('authVerifyBtn','Verificar y entrar',false);authErr('authErr2','Error de red: '+err.message);});
 }
 function authSuccess(d){
   user={email:d.email,name:d.name,token:d.token,expiresAt:d.expiresAt};
@@ -1906,7 +1965,22 @@ renderUser=function(){
 };
 
 restore();loadCfg();authBoot().then(()=>{R();});
-if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+// Service worker con auto-reload al detectar nueva versión
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('./sw.js').then(reg=>{
+    if(reg.waiting){reg.waiting.postMessage({type:'SKIP_WAITING'});}
+    reg.addEventListener('updatefound',()=>{
+      const nw=reg.installing;
+      if(nw)nw.addEventListener('statechange',()=>{
+        if(nw.state==='installed'&&navigator.serviceWorker.controller){
+          toast('🔄 Nueva versión — recargando…');
+          setTimeout(()=>window.location.reload(),800);
+        }
+      });
+    });
+    document.addEventListener('visibilitychange',()=>{if(!document.hidden)reg.update();});
+  }).catch(()=>{});
+}
 </script>
 </body>
 </html>
