@@ -48,18 +48,23 @@ function requestAuthCode(email) {
   // Limpiar códigos previos del mismo email
   clearAuthCodesForEmail_(email);
 
-  // Guardar código
+  // Guardar código. Crítico: forzar la columna del código a formato texto
+  // ANTES de escribir el valor, si no Sheets lo convierte a número y la
+  // comparación string === number falla luego.
   const sheet = getOrCreateAuthSheet_();
   sheet.appendRow([
     Utilities.getUuid(),
     email,
-    code,
+    '',                     // code placeholder, se rellena después
     '',                     // token (vacío hasta que se verifique)
     now.toISOString(),
     expires.toISOString(),
     '',                     // lastUsed
     'code'                  // tipo
   ]);
+  // Ahora fijamos formato texto en la columna del código y escribimos el valor
+  const newRowIdx = sheet.getLastRow();
+  sheet.getRange(newRowIdx, 3).setNumberFormat('@').setValue(code);
 
   // Enviar email con el código
   try {
@@ -90,12 +95,13 @@ function verifyAuthCode(email, code, keepActive) {
   const data  = sheet.getDataRange().getValues();
   const now   = new Date();
 
-  // Buscar código válido
+  // Buscar código válido. Importante: Sheets convierte automáticamente
+  // valores numéricos, así que forzamos todo a string para comparar.
   for (let i = 1; i < data.length; i++) {
     const row = data[i];
-    const type = row[7];
-    const rEmail = row[1];
-    const rCode  = row[2];
+    const type = String(row[7] || '').trim();
+    const rEmail = String(row[1] || '').toLowerCase().trim();
+    const rCode  = String(row[2] || '').trim();
     const rExpires = new Date(row[5]);
 
     if (type === 'code' && rEmail === email && rCode === code) {
@@ -168,7 +174,9 @@ function validateAuthToken(token) {
 
   for (let i = 1; i < data.length; i++) {
     const row = data[i];
-    if (row[7] === 'session' && row[3] === token) {
+    const rType = String(row[7] || '').trim();
+    const rToken = String(row[3] || '').trim();
+    if (rType === 'session' && rToken === String(token).trim()) {
       const expires = new Date(row[5]);
       if (expires > now) {
         // Actualizar lastUsed
@@ -203,8 +211,9 @@ function logoutAuth(token) {
   if (!token) return { success: true };
   const sheet = getOrCreateAuthSheet_();
   const data  = sheet.getDataRange().getValues();
+  const tokenStr = String(token).trim();
   for (let i = data.length - 1; i >= 1; i--) {
-    if (data[i][7] === 'session' && data[i][3] === token) {
+    if (String(data[i][7] || '').trim() === 'session' && String(data[i][3] || '').trim() === tokenStr) {
       sheet.deleteRow(i + 1);
     }
   }
@@ -280,8 +289,9 @@ function getOrCreateAuthSheet_() {
 function clearAuthCodesForEmail_(email) {
   const sheet = getOrCreateAuthSheet_();
   const data  = sheet.getDataRange().getValues();
+  const em = String(email || '').toLowerCase().trim();
   for (let i = data.length - 1; i >= 1; i--) {
-    if (data[i][7] === 'code' && data[i][1] === email) {
+    if (String(data[i][7] || '').trim() === 'code' && String(data[i][1] || '').toLowerCase().trim() === em) {
       sheet.deleteRow(i + 1);
     }
   }
