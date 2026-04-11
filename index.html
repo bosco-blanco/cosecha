@@ -407,6 +407,12 @@ input[type="file"]{display:none}
     <div class="auth-brand">Cosecha</div>
     <div class="auth-sub">EN COPA DE BALÓN</div>
 
+    <!-- Banner modo demo (solo visible si no hay backend configurado) -->
+    <div id="demoBanner" style="display:none;background:var(--gold-soft);border:1.5px solid rgba(196,149,46,0.3);border-radius:var(--r);padding:12px 14px;margin-bottom:20px;text-align:left;font-size:12px;color:var(--t2);line-height:1.5">
+      <div style="font-weight:800;color:var(--gold);font-size:11px;text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px">🧪 Modo demo</div>
+      El backend aún no está desplegado. Usa cualquier email <b>@encopadebalon.com</b> y el código <b style="font-size:14px;color:var(--wine)">1234</b> para entrar.
+    </div>
+
     <!-- Paso 1: Email -->
     <div class="auth-step" id="authStep1">
       <div class="auth-title">Bienvenido</div>
@@ -422,7 +428,7 @@ input[type="file"]{display:none}
       <div class="auth-title">Revisa tu email 📧</div>
       <div class="auth-desc">Hemos enviado un código de 6 dígitos a<br><b id="authEmailConfirm"></b></div>
       <div class="auth-err" id="authErr2"></div>
-      <div class="auth-field"><input class="auth-input auth-code" id="authCode" type="text" placeholder="······" maxlength="6" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" onkeydown="if(event.key==='Enter')authVerify()"></div>
+      <div class="auth-field"><input class="auth-input auth-code" id="authCode" type="text" placeholder="····" maxlength="6" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" onkeydown="if(event.key==='Enter')authVerify()"></div>
       <label class="auth-keep"><input type="checkbox" id="authKeep" checked><span>Mantener sesión activa en este dispositivo (30 días)</span></label>
       <button class="auth-btn" id="authVerifyBtn" onclick="authVerify()">Verificar y entrar</button>
       <button class="auth-link" id="authResend" onclick="authResend()">Reenviar código</button>
@@ -874,18 +880,19 @@ const AUTH_DOMAIN='encopadebalon.com';
 let user=null; // {email, name, token, expiresAt}
 let resendTimer=null;
 
-function authShow(){$('authWrap').classList.add('show');document.body.style.overflow='hidden';}
+function authShow(){$('authWrap').classList.add('show');document.body.style.overflow='hidden';$('demoBanner').style.display=isDemoMode()?'block':'none';}
 function authHide(){$('authWrap').classList.remove('show');document.body.style.overflow='';}
 function authErr(id,msg){const e=$(id);e.textContent=msg;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),5000);}
 function authBtn(id,label,disabled){const b=$(id);b.disabled=!!disabled;b.textContent=label;}
 function userIni(n){return (n||'').split(' ').map(w=>w[0]).filter(Boolean).slice(0,2).join('').toUpperCase()||'?';}
 
+function isDemoMode(){return !cfg.apiUrl;}
 function authRequest(){
   const em=($('authEmail').value||'').toLowerCase().trim();
   if(!em||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em))return authErr('authErr','Introduce un email válido');
   if(!em.endsWith('@'+AUTH_DOMAIN))return authErr('authErr','Solo emails @'+AUTH_DOMAIN);
   authBtn('authSendBtn','Enviando...',true);
-  if(!cfg.apiUrl){
+  if(isDemoMode()){
     // Modo demo (sin backend) — permite probar el flujo localmente
     setTimeout(()=>{
       authBtn('authSendBtn','Enviar código →',false);
@@ -893,8 +900,8 @@ function authRequest(){
       $('authStep1').style.display='none';$('authStep2').style.display='';
       $('authCode').value='';$('authCode').focus();
       startResendCountdown();
-      toast('🧪 Modo demo: usa código 000000');
-    },400);
+      toast('🧪 Modo demo — código: 1234');
+    },300);
     return;
   }
   fetch(cfg.apiUrl+'?action=requestCode',{method:'POST',body:JSON.stringify({email:em}),headers:{'Content-Type':'text/plain'}})
@@ -913,16 +920,18 @@ function authVerify(){
   const em=($('authEmail').value||'').toLowerCase().trim();
   const code=($('authCode').value||'').trim();
   const keep=$('authKeep').checked;
-  if(!/^\d{6}$/.test(code))return authErr('authErr2','El código debe ser 6 dígitos');
+  // En demo aceptamos 4-6 dígitos, en producción 6
+  const minLen=isDemoMode()?4:6;
+  if(!new RegExp('^\\d{'+minLen+',6}$').test(code))return authErr('authErr2','El código debe tener '+minLen+(minLen===6?'':'-6')+' dígitos');
   authBtn('authVerifyBtn','Verificando...',true);
-  if(!cfg.apiUrl){
-    // Modo demo: acepta 000000
+  if(isDemoMode()){
+    // Modo demo: acepta 1234 (y 0000, 000000 como atajos)
     setTimeout(()=>{
       authBtn('authVerifyBtn','Verificar y entrar',false);
-      if(code==='000000'){
+      if(code==='1234'||code==='0000'||code==='000000'){
         const name=em.split('@')[0].split(/[.\-_]/).map(p=>p.charAt(0).toUpperCase()+p.slice(1)).join(' ');
         authSuccess({email:em,name:name,token:'demo-'+Date.now(),expiresAt:new Date(Date.now()+(keep?30*864e5:864e5)).toISOString()});
-      }else{authErr('authErr2','Código incorrecto (demo: 000000)');}
+      }else{authErr('authErr2','Código incorrecto (modo demo: 1234)');}
     },300);
     return;
   }
