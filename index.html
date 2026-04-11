@@ -709,33 +709,90 @@ input[type="file"]:not(#sdFile){display:none}
 .sync-b.off .sd{background:var(--t3);animation:none}
 .sync-b.err .sd{background:var(--red)}
 
-/* === Dashboard (iOS 17 widgets) === */
-.dash{padding:18px 16px 110px}
-.dash-h{font-size:32px;font-weight:800;letter-spacing:-0.8px;margin-bottom:2px;line-height:1.1}
-.dash-s{font-size:16px;color:var(--t3);margin-bottom:24px;letter-spacing:-0.3px}
-.kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:28px}
+/* === Dashboard HERO (iOS 17 big widgets) === */
+.dash{padding:0 0 110px;background:var(--bg)}
+.dash-hero{
+  background:linear-gradient(160deg,#9B2C3E 0%,#7A1F2F 50%,#5C1622 100%);
+  padding:28px 22px 80px;
+  margin:0 0 -56px;
+  position:relative;
+  overflow:hidden;
+  color:#fff;
+}
+.dash-hero::before{
+  content:'';
+  position:absolute;
+  top:-30%;right:-20%;
+  width:320px;height:320px;
+  border-radius:50%;
+  background:radial-gradient(circle,rgba(255,255,255,0.18),transparent 60%);
+  pointer-events:none;
+}
+.dash-hero::after{
+  content:'';
+  position:absolute;
+  bottom:-40%;left:-15%;
+  width:280px;height:280px;
+  border-radius:50%;
+  background:radial-gradient(circle,rgba(196,64,88,0.4),transparent 60%);
+  pointer-events:none;
+}
+.dash-greet{font-size:13px;font-weight:600;color:rgba(255,255,255,0.8);margin-bottom:4px;letter-spacing:-0.1px;position:relative;z-index:1}
+.dash-h{font-size:34px;font-weight:800;letter-spacing:-0.9px;margin-bottom:8px;line-height:1.08;color:#fff;position:relative;z-index:1}
+.dash-s{font-size:15px;color:rgba(255,255,255,0.85);margin-bottom:0;letter-spacing:-0.2px;position:relative;z-index:1;font-weight:500}
+
+.dash-content{padding:0 16px;position:relative;z-index:2}
+
+.kpi-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+  margin-bottom:28px;
+}
 .kpi{
   background:var(--card);
   border:none;
-  border-radius:18px;
-  padding:16px;
-  box-shadow:var(--shadow-card);
+  border-radius:22px;
+  padding:18px 18px 16px;
+  box-shadow:0 1px 2px rgba(0,0,0,0.04),0 12px 40px rgba(0,0,0,0.08),0 0 0 0.5px rgba(0,0,0,0.04);
   position:relative;overflow:hidden;
   cursor:pointer;
-  transition:transform .3s var(--spring);
-  animation:scaleIn .4s var(--ease-out) both;
+  transition:transform .35s var(--spring),box-shadow .25s;
+  animation:scaleIn .5s var(--ease-out) both;
+  min-height:120px;
+  display:flex;flex-direction:column;justify-content:space-between;
 }
-.kpi:active{transform:scale(.97)}
-.kpi::before{display:none}
-.kpi-ic{font-size:26px;margin-bottom:8px;line-height:1}
-.kpi-v{font-size:28px;font-weight:800;letter-spacing:-0.8px;line-height:1.05;color:var(--t1)}
-.kpi-l{font-size:12px;color:var(--t3);font-weight:600;margin-top:6px;letter-spacing:-0.1px}
-.kpi-d{font-size:11px;color:var(--green);font-weight:600;margin-top:4px}
+.kpi:active{transform:scale(.96);box-shadow:0 1px 2px rgba(0,0,0,0.04),0 4px 16px rgba(0,0,0,0.1)}
+.kpi::before{
+  content:'';
+  position:absolute;
+  top:0;left:0;right:0;height:3px;
+  display:block;
+  opacity:.9;
+}
+.kpi.k-wine::before{background:linear-gradient(90deg,#9B2C3E,#C44058)}
+.kpi.k-green::before{background:linear-gradient(90deg,#1E8E3E,#34C759)}
+.kpi.k-blue::before{background:linear-gradient(90deg,#0055CC,#007AFF)}
+.kpi.k-gold::before{background:linear-gradient(90deg,#C6730B,#FF9500)}
+.kpi-ic{
+  font-size:22px;line-height:1;
+  width:40px;height:40px;
+  border-radius:12px;
+  display:flex;align-items:center;justify-content:center;
+  margin-bottom:10px;
+}
+.kpi.k-wine .kpi-ic{background:linear-gradient(135deg,#F3E8EB,#F9D5DB)}
+.kpi.k-green .kpi-ic{background:linear-gradient(135deg,#E3F9E8,#C6F6D0)}
+.kpi.k-blue .kpi-ic{background:linear-gradient(135deg,#E3F0FF,#C6DFFF)}
+.kpi.k-gold .kpi-ic{background:linear-gradient(135deg,#FFF1DC,#FFE4B5)}
+.kpi-v{font-size:30px;font-weight:800;letter-spacing:-0.9px;line-height:1.05;color:var(--t1);font-variant-numeric:tabular-nums}
+.kpi-l{font-size:12px;color:var(--t3);font-weight:600;margin-top:8px;letter-spacing:-0.1px;text-transform:uppercase}
+.kpi-d{font-size:11px;color:var(--green);font-weight:700;margin-top:4px}
 .kpi-d.down{color:var(--red)}
-.kpi.k-wine .kpi-v{color:var(--accent)}
-.kpi.k-green .kpi-v{color:var(--green)}
-.kpi.k-blue .kpi-v{color:var(--blue)}
-.kpi.k-gold .kpi-v{color:var(--orange)}
+.kpi.k-wine .kpi-v{background:linear-gradient(135deg,#9B2C3E,#C44058);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.kpi.k-green .kpi-v{color:#1E8E3E}
+.kpi.k-blue .kpi-v{color:#007AFF}
+.kpi.k-gold .kpi-v{color:#D9791A}
 
 .dash-sec{margin-bottom:28px}
 .dash-st{display:flex;align-items:center;justify-content:space-between;margin:0 4px 10px}
@@ -1252,27 +1309,32 @@ input[type="file"]:not(#sdFile){display:none}
     </div>
   </div>
 </header>
-<div class="v-badge" id="vBadge">v16 · full ux</div>
+<div class="v-badge" id="vBadge">v17 · hero</div>
 
 <!-- Sync indicator -->
 <div class="sync-b" id="syncB"><span class="sd"></span><span id="syncT">Sincronizado</span></div>
 
-<!-- DASHBOARD -->
+<!-- DASHBOARD con hero wine-gradient -->
 <div id="v-dash" class="view active"><div class="dash">
-  <div class="dash-h">Hola, Bosco 👋</div>
-  <div class="dash-s" id="dashSub">Aquí tienes el resumen de hoy</div>
-  <div class="kpi-grid" id="kpiGrid"></div>
-  <div class="dash-sec">
-    <div class="dash-st"><div class="dash-tt">Próximos eventos</div><button class="dash-lnk" onclick="go('agenda')">Ver todo →</button></div>
-    <div id="upcomingL"></div>
+  <div class="dash-hero">
+    <div class="dash-greet" id="dashGreet">Buenas noches,</div>
+    <div class="dash-h" id="dashName">Hola 👋</div>
+    <div class="dash-s" id="dashSub">Aquí tienes el resumen de hoy</div>
   </div>
-  <div class="dash-sec">
-    <div class="dash-st"><div class="dash-tt">Pipeline activo</div><button class="dash-lnk" onclick="go('crm');setCrmTab('pipeline')">Ver pipeline →</button></div>
-    <div id="dashPipe"></div>
-  </div>
-  <div class="dash-sec">
-    <div class="dash-st"><div class="dash-tt">Actividad reciente</div><button class="dash-lnk" onclick="go('mas')">Ver todo →</button></div>
-    <div id="dashAct"></div>
+  <div class="dash-content">
+    <div class="kpi-grid" id="kpiGrid"></div>
+    <div class="dash-sec">
+      <div class="dash-st"><div class="dash-tt">Próximos eventos</div><button class="dash-lnk" onclick="go('agenda')">Ver todo →</button></div>
+      <div id="upcomingL"></div>
+    </div>
+    <div class="dash-sec">
+      <div class="dash-st"><div class="dash-tt">Pipeline activo</div><button class="dash-lnk" onclick="go('crm');setCrmTab('pipeline')">Ver pipeline →</button></div>
+      <div id="dashPipe"></div>
+    </div>
+    <div class="dash-sec">
+      <div class="dash-st"><div class="dash-tt">Actividad reciente</div><button class="dash-lnk" onclick="go('mas')">Ver todo →</button></div>
+      <div id="dashAct"></div>
+    </div>
   </div>
 </div></div>
 
@@ -1806,7 +1868,15 @@ function toast(msg){const t=document.createElement('div');t.className='toast';t.
 
 // ===== DASHBOARD =====
 function fmtEur(n){return (n||0).toLocaleString('es-ES',{style:'currency',currency:'EUR',maximumFractionDigits:0});}
+function greetByHour(){const h=new Date().getHours();if(h<6)return'Trasnochando,';if(h<12)return'Buenos días,';if(h<20)return'Buenas tardes,';return'Buenas noches,';}
 function rDash(){
+  // Hero saludo personalizado
+  const greetEl=$('dashGreet');if(greetEl)greetEl.textContent=greetByHour();
+  const nameEl=$('dashName');if(nameEl)nameEl.innerHTML=(user?user.name.split(' ')[0]:'Bosco')+' 👋';
+  const subEl=$('dashSub');if(subEl){
+    const openCount=tasks.filter(t=>t.col!=='completado').length;
+    subEl.textContent=openCount?openCount+' tareas activas · '+(contacts.length||0)+' contactos':'Aquí tienes el resumen de hoy';
+  }
   const openDeals=deals.filter(d=>!d.etapa||(d.etapa!=='cerrado-ganado'&&d.etapa!=='cerrado-perdido'));
   const pipeTot=openDeals.reduce((s,d)=>s+(+d.valor||0),0);
   const pipeWt=openDeals.reduce((s,d)=>s+(+d.valor||0)*((+d.probabilidad||0)/100),0);
@@ -3146,7 +3216,7 @@ function triggerRefresh(){
 
 restore();loadCfg();authBoot().then(()=>{R();initDragDrop();initPullToRefresh();initSwipe();});
 // Service worker con auto-reload al detectar nueva versión + purga agresiva
-const APP_VERSION='v16';
+const APP_VERSION='v17';
 const storedVer=localStorage.getItem('cosecha_app_version');
 if(storedVer&&storedVer!==APP_VERSION){
   // Versión cambió → purgar caches + reload una sola vez
