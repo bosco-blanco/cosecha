@@ -96,29 +96,85 @@ function markDocumentRead(body) {
 }
 
 /**
- * Firma electrónicamente un documento.
- * Según art. 10 Ley 6/2020, es firma electrónica simple con validez contractual.
+ * Firma electrónicamente un documento con evidencia legal completa.
+ * Cumple con el artículo 10 de la Ley 6/2020 sobre servicios electrónicos de
+ * confianza (firma electrónica simple):
+ *  - Identificación del firmante: email autenticado por magic link + token
+ *  - Manifestación del consentimiento: nombre completo escrito por el usuario
+ *  - Vinculación con el documento: ID del documento
+ *  - Evidencia técnica: IP pública, geolocalización, user agent, timestamp
+ *  - Registro inalterable: huella SHA-256 del conjunto
+ *
+ * @param {Object} body {
+ *   id, email, firmaNombre, firmaIp, firmaLat, firmaLng, firmaDireccion,
+ *   firmaUserAgent, leido, consentimiento
+ * }
  */
 function signDocument(body) {
   const id = body.id;
   const email = String(body.email || '').toLowerCase().trim();
-  if (!id) return { success: false, error: 'ID requerido' };
+  if (!id) return { success: false, error: 'ID del documento requerido' };
+
+  // Validación: el usuario debe confirmar explícitamente que ha leído y consiente
+  if (!body.leido)          return { success: false, error: 'Debes confirmar que has leído el documento' };
+  if (!body.consentimiento) return { success: false, error: 'Debes consentir electrónicamente la firma' };
+
+  // Validación: nombre completo obligatorio y debe parecerse al registrado
+  const firmaNombre = String(body.firmaNombre || '').trim();
+  if (firmaNombre.length < 4) {
+    return { success: false, error: 'Escribe tu nombre completo' };
+  }
+  let user = null;
+  try { user = getOrCreateUser_(email); } catch (e) {}
+  const expected = (user && user.nombre) ? String(user.nombre).trim().toLowerCase() : emailToName_(email).toLowerCase();
+  const typed = firmaNombre.toLowerCase();
+  // Coincidencia flexible: debe compartir al menos las primeras palabras
+  const expectedTokens = expected.split(/\s+/).filter(Boolean);
+  const typedTokens = typed.split(/\s+/).filter(Boolean);
+  const matchCount = expectedTokens.filter(t => typedTokens.includes(t)).length;
+  if (matchCount < Math.min(2, expectedTokens.length)) {
+    return { success: false, error: 'El nombre no coincide con tu perfil (' + (user && user.nombre) + ')' };
+  }
 
   const sheet = getTabSheet_('Documentos');
   const data = sheet.getDataRange().getValues();
   for (let i = 1; i < data.length; i++) {
     if (data[i][0] === id && String(data[i][1]).toLowerCase() === email) {
-      sheet.getRange(i + 1, 7).setValue('firmado');
-      sheet.getRange(i + 1, 10).setValue(new Date().toISOString());
+      const now = new Date();
+      const nowIso = now.toISOString();
+
+      // Generar huella SHA-256 para verificación posterior
+      const toHash = [id, email, firmaNombre, nowIso, body.firmaIp || '', body.firmaLat || '', body.firmaLng || ''].join('|');
+      const hashBytes = Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, toHash);
+      const hashHex = hashBytes.map(function(b) { return ('0' + (b & 0xff).toString(16)).slice(-2); }).join('');
+
+      // Guardar estado y evidencia
+      sheet.getRange(i + 1, 7 ).setValue('firmado');             // estado
+      sheet.getRange(i + 1, 10).setValue(nowIso);                 // firmadoEn
+      sheet.getRange(i + 1, 12).setValue(firmaNombre);            // firmaNombre
+      sheet.getRange(i + 1, 13).setValue(body.firmaIp || '');     // firmaIp
+      sheet.getRange(i + 1, 14).setValue(body.firmaLat || '');    // firmaLat
+      sheet.getRange(i + 1, 15).setValue(body.firmaLng || '');    // firmaLng
+      sheet.getRange(i + 1, 16).setValue(body.firmaDireccion || ''); // firmaDireccion
+      sheet.getRange(i + 1, 17).setValue(body.firmaUserAgent || ''); // firmaUserAgent
+      sheet.getRange(i + 1, 18).setValue(hashHex);                 // firmaHash
 
       try {
-        logActivity_('✍️', emailToName_(email), 'firmó documento', data[i][2], '');
+        logActivity_('✍️', firmaNombre, 'firmó (evidencia: ' + (body.firmaIp || '—') + ')', data[i][2], hashHex.slice(0, 12));
       } catch (e) {}
 
-      return { success: true, firmadoEn: new Date().toISOString() };
+      return {
+        success: true,
+        firmadoEn: nowIso,
+        firmaNombre: firmaNombre,
+        firmaIp: body.firmaIp || '',
+        firmaDireccion: body.firmaDireccion || '',
+        hash: hashHex,
+        titulo: data[i][2]
+      };
     }
   }
-  return { success: false, error: 'No encontrado' };
+  return { success: false, error: 'Documento no encontrado o no es tuyo' };
 }
 
 // ─── Helpers ────────────────────────────────────────────────

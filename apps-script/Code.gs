@@ -113,6 +113,28 @@ function doGet(e) {
         };
         break;
 
+      // --- Documentos: firma con evidencia legal (GET para evitar CORS POST) ---
+      case 'signDocument': {
+        const signBody = {
+          id: e.parameter.id,
+          email: auth.email,
+          firmaNombre: e.parameter.firmaNombre,
+          firmaIp: e.parameter.firmaIp,
+          firmaLat: e.parameter.firmaLat,
+          firmaLng: e.parameter.firmaLng,
+          firmaDireccion: e.parameter.firmaDireccion,
+          firmaUserAgent: e.parameter.firmaUserAgent,
+          leido: e.parameter.leido === 'true',
+          consentimiento: e.parameter.consentimiento === 'true'
+        };
+        result = signDocument(signBody);
+        break;
+      }
+
+      case 'markDocRead':
+        result = markDocumentRead({ id: e.parameter.id, email: auth.email });
+        break;
+
       case 'legalText':
         // Devuelve los textos legales actuales (pública, sin auth)
         result = getLegalText();

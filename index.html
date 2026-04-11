@@ -10,7 +10,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
 <title>Cosecha</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Caveat:wght@600;700&display=swap" rel="stylesheet">
 <style>
 :root {
   --bg: #FFFFFF;
@@ -655,7 +655,28 @@ input[type="file"]{display:none}
 .ci-breakbar .s{font-size:11px;color:var(--t2)}
 .ci-breakbar .tm{font-size:18px;font-weight:800;color:var(--gold);font-variant-numeric:tabular-nums}
 
-/* ===== DOCUMENTS ===== */
+/* ===== LEGAL SIGNATURE FLOW ===== */
+.sig-step{background:var(--bg2);border:1.5px solid var(--border);border-radius:var(--r);padding:14px 16px;margin-bottom:10px;display:flex;align-items:flex-start;gap:12px;cursor:pointer;transition:all .2s}
+.sig-step.on{background:var(--green-soft);border-color:var(--green)}
+.sig-step.disabled{opacity:.5;cursor:not-allowed;pointer-events:none}
+.sig-chk{width:22px;height:22px;border-radius:6px;border:2px solid var(--border2);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;color:#fff;margin-top:1px;transition:all .15s}
+.sig-step.on .sig-chk{background:var(--green);border-color:var(--green)}
+.sig-tx{flex:1;font-size:13px;line-height:1.5;color:var(--t2)}
+.sig-tx b{display:block;font-weight:700;color:var(--t1);margin-bottom:2px;font-size:14px}
+.sig-input{width:100%;padding:14px 16px;border:2px solid var(--border);border-radius:var(--r);font-family:'Caveat','Dancing Script',cursive;font-size:26px;text-align:center;color:var(--wine);background:#FEFCFB;margin-bottom:8px;letter-spacing:.5px}
+.sig-input:focus{outline:none;border-color:var(--wine);background:#fff;box-shadow:0 0 0 3px var(--wine-soft)}
+.sig-hint{font-size:11px;color:var(--t3);text-align:center;margin-bottom:14px;line-height:1.5}
+.sig-ev{background:var(--bg2);border-radius:var(--r-sm);padding:10px 14px;margin-bottom:10px;font-size:11px;color:var(--t2);line-height:1.6}
+.sig-ev b{color:var(--t1)}
+.sig-ev .lbl{display:inline-block;min-width:80px;color:var(--t3);font-weight:600}
+.sig-cert{background:linear-gradient(135deg,var(--green-soft) 0%,#F0F9F4 100%);border:2px solid var(--green);border-radius:var(--r-lg);padding:20px;margin:14px 0;text-align:center}
+.sig-cert .ic{font-size:46px;margin-bottom:8px}
+.sig-cert .t{font-size:17px;font-weight:800;color:var(--green);margin-bottom:2px}
+.sig-cert .s{font-size:12px;color:var(--t2);margin-bottom:14px}
+.sig-cert .ev{background:rgba(255,255,255,0.7);border-radius:var(--r-sm);padding:12px;text-align:left;font-size:11px;color:var(--t2);line-height:1.7}
+.sig-cert .ev b{color:var(--t1);font-weight:700}
+
+/* Documents list */
 .doc-row{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:8px;cursor:pointer;box-shadow:var(--shadow);display:flex;align-items:center;gap:12px}
 .doc-row:active{transform:scale(.99)}
 .doc-ic{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;background:var(--blue-soft);color:var(--blue)}
@@ -1869,17 +1890,156 @@ function renderMyDocs(){
     return`<div class="doc-row" onclick="openDocDet('${d.id}')"><div class="doc-ic">${ic}</div><div class="doc-inf"><div class="doc-t">${d.titulo}</div><div class="doc-s">${dt}</div></div><span class="doc-st ${d.estado}">${d.estado}</span></div>`;
   }).join(''):'<div class="empty"><div class="empty-ic">📄</div><div class="empty-t">Sin documentos</div><div class="empty-s">RRHH te enviará aquí nóminas, contratos y comunicados</div></div>';
 }
+// Estado de la firma en curso (step by step)
+let sigState={step1:false,step2:false,step3:false,ip:null,lat:null,lng:null,addr:'',nombre:''};
+
 function openDocDet(id){
   const d=myDocs.find(x=>x.id===id);if(!d)return;
-  if(d.estado==='pendiente'){d.estado='leido';renderMyDocs();if(cfg.apiUrl&&!user.token.startsWith('demo-'))fetch(cfg.apiUrl+'?action=markDocRead',{method:'POST',body:JSON.stringify({id,token:user.token}),headers:{'Content-Type':'text/plain'}}).catch(()=>{});}
-  $('docdetC').innerHTML=`<div class="sh-bar"></div><div style="display:flex;align-items:center;gap:12px;margin-bottom:16px"><div class="doc-ic" style="width:52px;height:52px;font-size:22px">${d.tipo==='nomina'?'💰':d.tipo==='contrato'?'📝':'📢'}</div><div><div style="font-size:18px;font-weight:800">${d.titulo}</div><div style="font-size:12px;color:var(--t3)">${new Date(d.enviadoEn).toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}</div></div></div><span class="doc-st ${d.estado}" style="margin-bottom:14px">${d.estado}</span>${d.nota?`<div class="det-sec"><div class="det-l">Nota de RRHH</div><div style="font-size:13px;line-height:1.5;color:var(--t2)">${d.nota}</div></div>`:''}${d.driveUrl&&d.driveUrl!=='#'?`<a class="btn btn-g" style="margin-top:14px;text-decoration:none;display:flex" href="${d.driveUrl}" target="_blank">📁 Abrir en Drive</a>`:''}${d.estado!=='firmado'?`<div class="comp-box" style="margin-top:14px"><div style="text-align:center;font-size:24px;margin-bottom:6px">✍️</div><div style="text-align:center;font-weight:700;margin-bottom:2px">Firma electrónica</div><div style="text-align:center;font-size:12px;color:var(--t2);margin-bottom:14px">Al firmar dejas constancia de haber leído y aceptado el contenido</div><button class="btn btn-s" onclick="signDoc('${d.id}')">✍️ Firmar documento</button></div>`:`<div style="margin-top:14px;padding:14px;background:var(--green-soft);border-radius:var(--r);text-align:center;font-size:13px;color:var(--green);font-weight:700">✅ Firmado el ${new Date(d.firmadoEn||d.enviadoEn).toLocaleDateString('es-ES')}</div>`}<button class="btn btn-g" style="margin-top:14px" onclick="closeSh('docdet-sh')">Cerrar</button>`;
+  // Marcar como leído al abrirlo
+  if(d.estado==='pendiente'){d.estado='leido';renderMyDocs();if(cfg.apiUrl&&!user.token.startsWith('demo-'))fetch(cfg.apiUrl+'?action=markDocRead&id='+encodeURIComponent(id)+'&token='+encodeURIComponent(user.token)).catch(()=>{});}
+  // Reset signature state
+  sigState={step1:false,step2:false,step3:false,ip:null,lat:null,lng:null,addr:'',nombre:''};
+
+  const ic=d.tipo==='nomina'?'💰':d.tipo==='contrato'?'📝':'📢';
+  const isFirmado=d.estado==='firmado';
+
+  if(isFirmado){
+    // Vista de documento ya firmado: mostrar certificado con evidencia
+    $('docdetC').innerHTML=`<div class="sh-bar"></div>
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px"><div class="doc-ic" style="width:52px;height:52px;font-size:22px">${ic}</div><div><div style="font-size:18px;font-weight:800">${d.titulo}</div><div style="font-size:12px;color:var(--t3)">${new Date(d.enviadoEn).toLocaleDateString('es-ES',{day:'numeric',month:'long',year:'numeric'})}</div></div></div>
+      <div class="sig-cert">
+        <div class="ic">✅</div>
+        <div class="t">Documento firmado</div>
+        <div class="s">Firma electrónica válida según art. 10 Ley 6/2020</div>
+        <div class="ev">
+          <div><b>Firmante:</b> ${d.firmaNombre||user.name}</div>
+          <div><b>Email:</b> ${user.email}</div>
+          <div><b>Fecha:</b> ${new Date(d.firmadoEn||d.enviadoEn).toLocaleString('es-ES',{dateStyle:'long',timeStyle:'short'})}</div>
+          ${d.firmaIp?`<div><b>IP:</b> ${d.firmaIp}</div>`:''}
+          ${d.firmaDireccion?`<div><b>Ubicación:</b> ${d.firmaDireccion}</div>`:d.firmaLat?`<div><b>Coordenadas:</b> ${d.firmaLat}, ${d.firmaLng}</div>`:''}
+          ${d.firmaHash?`<div style="margin-top:6px;font-family:monospace;font-size:10px;word-break:break-all"><b>Hash:</b> ${d.firmaHash}</div>`:''}
+        </div>
+      </div>
+      ${d.driveUrl&&d.driveUrl!=='#'?`<a class="btn btn-g" style="text-decoration:none;display:flex" href="${d.driveUrl}" target="_blank">📁 Ver documento en Drive</a>`:''}
+      <button class="btn btn-g" style="margin-top:8px" onclick="closeSh('docdet-sh')">Cerrar</button>`;
+    openSh('docdet-sh');return;
+  }
+
+  // Vista de firma: flujo paso a paso
+  $('docdetC').innerHTML=`<div class="sh-bar"></div>
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px"><div class="doc-ic" style="width:52px;height:52px;font-size:22px">${ic}</div><div style="flex:1;min-width:0"><div style="font-size:17px;font-weight:800;line-height:1.3">${d.titulo}</div><div style="font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:.4px;margin-top:2px">${d.tipo}</div></div></div>
+    ${d.nota?`<div style="background:var(--gold-soft);border-left:3px solid var(--gold);border-radius:var(--r-sm);padding:10px 12px;margin-bottom:14px;font-size:12px;line-height:1.5;color:var(--t2)"><b style="color:var(--t1)">Nota de RRHH:</b><br>${d.nota}</div>`:''}
+    ${d.driveUrl&&d.driveUrl!=='#'?`<a class="btn btn-p" style="text-decoration:none;display:flex;margin-bottom:16px" href="${d.driveUrl}" target="_blank" onclick="sigStep(1)">📁 Abrir y leer el documento</a>`:''}
+
+    <div class="det-l" style="margin-bottom:10px">Firma electrónica</div>
+
+    <div class="sig-step" id="sigStep1" onclick="sigStep(1)">
+      <div class="sig-chk" id="sigChk1"></div>
+      <div class="sig-tx"><b>He abierto y revisado el documento</b>Confirmo haber accedido al contenido completo en Drive.</div>
+    </div>
+    <div class="sig-step" id="sigStep2" onclick="sigStep(2)">
+      <div class="sig-chk" id="sigChk2"></div>
+      <div class="sig-tx"><b>He leído y entiendo su contenido</b>Confirmo haber comprendido todos los términos que me afectan.</div>
+    </div>
+    <div class="sig-step" id="sigStep3" onclick="sigStep(3)">
+      <div class="sig-chk" id="sigChk3"></div>
+      <div class="sig-tx"><b>Acepto y consiento electrónicamente</b>Declaro mi voluntad libre de aceptar este documento con valor contractual.</div>
+    </div>
+
+    <div class="fg" style="margin-top:16px"><label class="fl">Tu firma (nombre completo)</label>
+      <input class="sig-input" id="sigName" placeholder="${user.name}" oninput="sigUpdateBtn()">
+      <div class="sig-hint">Escribe tu nombre tal como aparece en tu perfil: <b>${user.name}</b></div>
+    </div>
+
+    <div class="sig-ev" id="sigEv">
+      <div><span class="lbl">📍 Ubicación:</span><b id="sigEvAddr">Capturando...</b></div>
+      <div><span class="lbl">🌐 IP pública:</span><b id="sigEvIp">Capturando...</b></div>
+      <div><span class="lbl">🕒 Fecha y hora:</span><b>${new Date().toLocaleString('es-ES',{dateStyle:'long',timeStyle:'short'})}</b></div>
+      <div style="margin-top:4px;font-size:10px;color:var(--t3);line-height:1.5">Estos datos se adjuntarán a tu firma como evidencia legal conforme al art. 10 Ley 6/2020.</div>
+    </div>
+
+    <button class="btn btn-s" id="sigBtn" disabled onclick="sigCommit('${d.id}')">✍️ Firmar documento</button>
+    <button class="btn btn-g" style="margin-top:8px" onclick="closeSh('docdet-sh')">Cancelar</button>`;
   openSh('docdet-sh');
+  // Capturar ubicación e IP en background
+  sigCaptureEvidence();
 }
-function signDoc(id){
-  const d=myDocs.find(x=>x.id===id);if(!d)return;
-  d.estado='firmado';d.firmadoEn=new Date().toISOString();
-  renderMyDocs();closeSh('docdet-sh');toast('✍️ Firmado');
-  if(cfg.apiUrl&&!user.token.startsWith('demo-'))fetch(cfg.apiUrl+'?action=signDocument',{method:'POST',body:JSON.stringify({id,token:user.token}),headers:{'Content-Type':'text/plain'}}).catch(()=>{});
+
+function sigStep(n){
+  sigState['step'+n]=!sigState['step'+n];
+  const el=$('sigStep'+n);if(el)el.classList.toggle('on',sigState['step'+n]);
+  const chk=$('sigChk'+n);if(chk)chk.textContent=sigState['step'+n]?'✓':'';
+  sigUpdateBtn();
+}
+function sigUpdateBtn(){
+  const name=($('sigName')?.value||'').trim();
+  sigState.nombre=name;
+  const allOk=sigState.step1&&sigState.step2&&sigState.step3&&name.length>=4;
+  const btn=$('sigBtn');if(btn)btn.disabled=!allOk;
+}
+function sigCaptureEvidence(){
+  // IP pública vía ipify (gratis, sin API key)
+  fetch('https://api.ipify.org?format=json').then(r=>r.json()).then(d=>{
+    sigState.ip=d.ip;const el=$('sigEvIp');if(el)el.textContent=d.ip;
+  }).catch(()=>{const el=$('sigEvIp');if(el)el.textContent='No disponible';});
+  // Geolocalización
+  if(navigator.geolocation){
+    navigator.geolocation.getCurrentPosition(pos=>{
+      sigState.lat=pos.coords.latitude;sigState.lng=pos.coords.longitude;
+      const el=$('sigEvAddr');if(el)el.textContent=sigState.lat.toFixed(5)+', '+sigState.lng.toFixed(5);
+      // Reverse geocoding
+      fetch('https://nominatim.openstreetmap.org/reverse?format=json&lat='+sigState.lat+'&lon='+sigState.lng,{headers:{'Accept':'application/json'}})
+        .then(r=>r.json()).then(d=>{if(d&&d.display_name){sigState.addr=d.display_name;if(el)el.textContent=d.display_name;}}).catch(()=>{});
+    },err=>{const el=$('sigEvAddr');if(el)el.textContent='No disponible (permiso denegado)';},{timeout:10000});
+  }else{
+    const el=$('sigEvAddr');if(el)el.textContent='GPS no soportado';
+  }
+}
+async function sigCommit(id){
+  const name=($('sigName').value||'').trim();
+  if(!sigState.step1||!sigState.step2||!sigState.step3)return toast('Debes marcar las 3 confirmaciones');
+  if(name.length<4)return toast('Escribe tu nombre completo');
+  // Verificación simple de nombre en el cliente (el backend lo verifica de nuevo)
+  const expected=(user.name||'').toLowerCase().split(/\s+/).filter(Boolean);
+  const typed=name.toLowerCase().split(/\s+/).filter(Boolean);
+  const match=expected.filter(t=>typed.includes(t)).length;
+  if(match<Math.min(2,expected.length))return toast('El nombre no coincide con tu perfil');
+
+  const btn=$('sigBtn');btn.disabled=true;btn.textContent='Firmando…';
+
+  const payload={
+    id:id,
+    token:user.token,
+    firmaNombre:name,
+    firmaIp:sigState.ip||'',
+    firmaLat:sigState.lat||'',
+    firmaLng:sigState.lng||'',
+    firmaDireccion:sigState.addr||'',
+    firmaUserAgent:navigator.userAgent,
+    leido:true,
+    consentimiento:true
+  };
+
+  const d=myDocs.find(x=>x.id===id);
+
+  if(cfg.apiUrl&&user&&!user.token.startsWith('demo-')){
+    try{
+      // Usamos GET con params porque los POST cross-origin a Apps Script son problemáticos
+      const qs=Object.keys(payload).map(k=>encodeURIComponent(k)+'='+encodeURIComponent(payload[k])).join('&');
+      const r=await fetch(cfg.apiUrl+'?action=signDocument&'+qs);
+      const resp=await r.json();
+      if(!resp.success){btn.disabled=false;btn.textContent='✍️ Firmar documento';return toast('⚠️ '+(resp.error||'Error al firmar'));}
+      // Éxito: actualizar doc local con datos del backend
+      if(d){Object.assign(d,{estado:'firmado',firmadoEn:resp.firmadoEn,firmaNombre:resp.firmaNombre,firmaIp:resp.firmaIp,firmaDireccion:resp.firmaDireccion,firmaLat:payload.firmaLat,firmaLng:payload.firmaLng,firmaHash:resp.hash});}
+    }catch(e){btn.disabled=false;btn.textContent='✍️ Firmar documento';return toast('⚠️ Error de red');}
+  }else{
+    // Modo demo
+    if(d){Object.assign(d,{estado:'firmado',firmadoEn:new Date().toISOString(),firmaNombre:name,firmaIp:sigState.ip,firmaDireccion:sigState.addr,firmaLat:sigState.lat,firmaLng:sigState.lng,firmaHash:'demo-'+Date.now().toString(36)});}
+  }
+
+  renderMyDocs();toast('✅ Documento firmado');
+  // Reabrir detalle mostrando el certificado
+  setTimeout(()=>openDocDet(id),400);
 }
 
 // Admin enviar documento

@@ -18,7 +18,7 @@ const TAB_SCHEMA = {
   'Fichajes':       ['id', 'email', 'tipo', 'timestamp', 'lat', 'lng', 'direccion', 'nota'],
   'Descansos':      ['id', 'email', 'fecha', 'inicio', 'fin', 'duracionMin', 'motivo'],
   'Consentimientos':['id', 'email', 'version', 'aceptadoEn', 'items', 'userAgent', 'ip'],
-  'Documentos':     ['id', 'email', 'titulo', 'tipo', 'driveFileId', 'driveUrl', 'estado', 'enviadoPor', 'enviadoEn', 'firmadoEn', 'nota'],
+  'Documentos':     ['id', 'email', 'titulo', 'tipo', 'driveFileId', 'driveUrl', 'estado', 'enviadoPor', 'enviadoEn', 'firmadoEn', 'nota', 'firmaNombre', 'firmaIp', 'firmaLat', 'firmaLng', 'firmaDireccion', 'firmaUserAgent', 'firmaHash'],
   'Contactos':      ['id', 'nombre', 'email', 'telefono', 'empresa', 'tipo', 'etiquetas', 'notas', 'ultimoContacto', 'creado', 'creadoPor'],
   'Deals':          ['id', 'titulo', 'contactoId', 'contactoNombre', 'valor', 'etapa', 'probabilidad', 'cierreEsperado', 'asignado', 'notas', 'creado'],
   'Tareas':         ['id', 'titulo', 'descripcion', 'columna', 'prioridad', 'etiqueta', 'fechaLimite', 'asignados', 'proyecto', 'creado', 'completado'],
