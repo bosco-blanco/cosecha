@@ -309,14 +309,83 @@ input[type="file"]{display:none}
 
 /* Placeholder badge */
 .soon{display:inline-block;font-size:9px;font-weight:700;padding:2px 7px;border-radius:var(--r-full);background:var(--gold-soft);color:var(--gold);text-transform:uppercase;letter-spacing:.3px;margin-left:6px;vertical-align:middle}
+
+/* ===== LOGIN / AUTH ===== */
+.auth-wrap{position:fixed;inset:0;background:linear-gradient(180deg,#FFFFFF 0%,#F7F1F2 100%);display:none;flex-direction:column;align-items:center;justify-content:center;padding:40px 28px calc(40px + var(--safe-b));z-index:400;overflow-y:auto}
+.auth-wrap.show{display:flex}
+.auth-box{width:100%;max-width:400px;text-align:center}
+.auth-logo{width:72px;height:72px;border-radius:22px;background:var(--wine);display:flex;align-items:center;justify-content:center;font-size:36px;margin:0 auto 18px;box-shadow:0 12px 40px rgba(155,44,62,0.25)}
+.auth-brand{font-size:28px;font-weight:800;letter-spacing:-0.6px;margin-bottom:2px}
+.auth-sub{font-size:10px;font-weight:700;letter-spacing:1.2px;color:var(--t3);text-transform:uppercase;margin-bottom:36px}
+.auth-step{animation:vIn .3s ease}
+.auth-title{font-size:22px;font-weight:800;letter-spacing:-0.4px;margin-bottom:6px}
+.auth-desc{font-size:14px;color:var(--t2);line-height:1.5;margin-bottom:24px}
+.auth-desc b{color:var(--t1);font-weight:700}
+.auth-field{margin-bottom:14px;text-align:left}
+.auth-input{width:100%;padding:15px 16px;border:1.5px solid var(--border);border-radius:var(--r);font-family:'Inter',sans-serif;font-size:16px;color:var(--t1);background:var(--bg);-webkit-appearance:none;transition:all .15s;text-align:center}
+.auth-input:focus{outline:none;border-color:var(--wine);box-shadow:0 0 0 4px var(--wine-soft)}
+.auth-code{letter-spacing:14px;font-size:28px;font-weight:800;font-family:ui-monospace,Menlo,monospace;padding:18px 16px}
+.auth-hint{font-size:12px;color:var(--t3);margin-top:8px;text-align:center}
+.auth-keep{display:flex;align-items:center;gap:10px;padding:14px;background:var(--bg2);border-radius:var(--r);margin-bottom:16px;cursor:pointer;font-size:13px;color:var(--t2)}
+.auth-keep input{width:18px;height:18px;accent-color:var(--wine);flex-shrink:0}
+.auth-btn{display:block;width:100%;padding:16px;border-radius:var(--r);font-family:'Inter',sans-serif;font-size:15px;font-weight:700;border:none;cursor:pointer;background:var(--wine);color:#fff;transition:all .15s;box-shadow:0 4px 16px rgba(155,44,62,0.2)}
+.auth-btn:active{transform:scale(.98)}
+.auth-btn:disabled{opacity:.5;cursor:not-allowed;background:var(--t3);box-shadow:none}
+.auth-link{display:inline-block;background:none;border:none;color:var(--wine);font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer;margin-top:16px;padding:8px}
+.auth-link:disabled{color:var(--t3);cursor:not-allowed}
+.auth-err{background:var(--red-soft);color:var(--red);padding:10px 14px;border-radius:var(--r-sm);font-size:13px;font-weight:600;margin-bottom:14px;display:none}
+.auth-err.show{display:block;animation:vIn .2s ease}
+.auth-footer{position:absolute;bottom:calc(20px + var(--safe-b));left:0;right:0;text-align:center;font-size:11px;color:var(--t3)}
+
+/* User chip in header */
+.user-chip{display:none;align-items:center;gap:8px;padding:5px 10px 5px 5px;border-radius:var(--r-full);background:var(--bg2);border:1px solid var(--border);cursor:pointer}
+.user-chip.show{display:flex}
+.user-chip .av{width:26px;height:26px;margin:0;border:none;font-size:10px}
+.user-chip-n{font-size:12px;font-weight:700;color:var(--t2)}
 </style>
 </head>
 <body>
+<!-- ============ LOGIN ============ -->
+<div class="auth-wrap" id="authWrap">
+  <div class="auth-box">
+    <div class="auth-logo">🍇</div>
+    <div class="auth-brand">Cosecha</div>
+    <div class="auth-sub">EN COPA DE BALÓN</div>
+
+    <!-- Paso 1: Email -->
+    <div class="auth-step" id="authStep1">
+      <div class="auth-title">Bienvenido</div>
+      <div class="auth-desc">Inicia sesión con tu email corporativo.<br>Te enviaremos un código de acceso.</div>
+      <div class="auth-err" id="authErr"></div>
+      <div class="auth-field"><input class="auth-input" id="authEmail" type="email" placeholder="tu@encopadebalon.com" autocomplete="email" inputmode="email" onkeydown="if(event.key==='Enter')authRequest()"></div>
+      <div class="auth-hint">Solo emails con dominio autorizado</div>
+      <button class="auth-btn" id="authSendBtn" onclick="authRequest()" style="margin-top:20px">Enviar código →</button>
+    </div>
+
+    <!-- Paso 2: Código -->
+    <div class="auth-step" id="authStep2" style="display:none">
+      <div class="auth-title">Revisa tu email 📧</div>
+      <div class="auth-desc">Hemos enviado un código de 6 dígitos a<br><b id="authEmailConfirm"></b></div>
+      <div class="auth-err" id="authErr2"></div>
+      <div class="auth-field"><input class="auth-input auth-code" id="authCode" type="text" placeholder="······" maxlength="6" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" onkeydown="if(event.key==='Enter')authVerify()"></div>
+      <label class="auth-keep"><input type="checkbox" id="authKeep" checked><span>Mantener sesión activa en este dispositivo (30 días)</span></label>
+      <button class="auth-btn" id="authVerifyBtn" onclick="authVerify()">Verificar y entrar</button>
+      <button class="auth-link" id="authResend" onclick="authResend()">Reenviar código</button>
+      <br><button class="auth-link" onclick="authBack()">← Usar otro email</button>
+    </div>
+  </div>
+  <div class="auth-footer">🍇 Cosecha · Passwordless login</div>
+</div>
+
 <div class="top-s"></div>
 <header class="hdr">
   <div class="hdr-row">
     <div class="brand"><div class="brand-ic">🍇</div><div><div class="brand-nm">Cosecha</div><div class="brand-sub">En Copa de Balón</div></div></div>
-    <div class="hb"><button class="hbtn" onclick="openSh('notif-sh')">🔔<span class="dot-b"></span></button><button class="hbtn" onclick="openSh('settings-sh')">⚙️</button></div>
+    <div class="hb">
+      <button class="user-chip" id="userChip" onclick="openSh('user-sh')"><div class="av" id="userAv">?</div><span class="user-chip-n" id="userNm">—</span></button>
+      <button class="hbtn" onclick="openSh('notif-sh')">🔔<span class="dot-b"></span></button>
+      <button class="hbtn" onclick="openSh('settings-sh')">⚙️</button>
+    </div>
   </div>
   <div class="pills" id="pills"></div>
 </header>
@@ -471,6 +540,19 @@ input[type="file"]{display:none}
 <div class="sh-bg" id="det-sh"><div class="sh" id="detC"></div></div>
 <div class="sh-bg" id="msum-sh"><div class="sh" id="msC"></div></div>
 <div class="sh-bg" id="notif-sh"><div class="sh"><div class="sh-bar"></div><div class="sh-tl">Notificaciones</div><div id="notL"></div><button class="btn btn-g" style="margin-top:14px" onclick="closeSh('notif-sh')">Cerrar</button></div></div>
+<!-- Perfil de usuario -->
+<div class="sh-bg" id="user-sh"><div class="sh"><div class="sh-bar"></div>
+  <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px">
+    <div class="ctc-av" style="background:var(--wine);width:56px;height:56px;font-size:18px" id="userShAv">?</div>
+    <div><div style="font-size:20px;font-weight:800" id="userShNm">—</div><div style="font-size:12px;color:var(--t3)" id="userShEm">—</div></div>
+  </div>
+  <div class="det-sec"><div class="det-l">Sesión</div>
+    <div style="font-size:13px;color:var(--t2);line-height:1.6">Sesión activa hasta:<br><b id="userShExp">—</b></div>
+  </div>
+  <button class="btn btn-d" style="margin-top:18px" onclick="authLogout()">🚪 Cerrar sesión</button>
+  <button class="btn btn-g" style="margin-top:8px" onclick="closeSh('user-sh')">Cerrar</button>
+</div></div>
+
 <div class="sh-bg" id="settings-sh"><div class="sh"><div class="sh-bar"></div><div class="sh-tl">Configuración</div><div class="sh-sb">Conecta tu backend y Slack</div>
   <div class="fg"><label class="fl">🔗 URL Backend (Apps Script)</label><input class="fi" id="cfgApi" placeholder="https://script.google.com/macros/s/.../exec"><div style="font-size:11px;color:var(--t3);margin-top:4px">Despliega apps-script/ en script.google.com</div></div>
   <div class="fg"><label class="fl">💬 Webhook Slack (opcional)</label><input class="fi" id="cfgSlack" placeholder="https://hooks.slack.com/services/..."></div>
@@ -671,8 +753,124 @@ function showSync(state,txt){const b=$('syncB');b.classList.remove('off','err');
 async function testSync(){if(!cfg.apiUrl){toast('Configura la URL del backend');return;}showSync('ok','Conectando...');try{const r=await fetch(cfg.apiUrl+'?action=dashboard',{method:'GET'});if(r.ok){const d=await r.json();showSync('ok','Conectado ✓');toast('✅ Backend OK');}else{throw new Error('bad');}}catch(e){showSync('err','Sin conexión');toast('⚠️ No se pudo conectar');}}
 async function pushApi(action,data){if(!cfg.apiUrl)return;try{await fetch(cfg.apiUrl+'?action='+action,{method:'POST',body:JSON.stringify(data),mode:'no-cors'});showSync('ok','Guardado ✓');}catch(e){showSync('err','Error sync');}}
 
-R();
-restore();loadCfg();R();
+// ===== AUTH =====
+const AUTH_KEY='cosecha_auth_v1';
+const AUTH_DOMAIN='encopadebalon.com';
+let user=null; // {email, name, token, expiresAt}
+let resendTimer=null;
+
+function authShow(){$('authWrap').classList.add('show');document.body.style.overflow='hidden';}
+function authHide(){$('authWrap').classList.remove('show');document.body.style.overflow='';}
+function authErr(id,msg){const e=$(id);e.textContent=msg;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),5000);}
+function authBtn(id,label,disabled){const b=$(id);b.disabled=!!disabled;b.textContent=label;}
+function userIni(n){return (n||'').split(' ').map(w=>w[0]).filter(Boolean).slice(0,2).join('').toUpperCase()||'?';}
+
+function authRequest(){
+  const em=($('authEmail').value||'').toLowerCase().trim();
+  if(!em||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em))return authErr('authErr','Introduce un email válido');
+  if(!em.endsWith('@'+AUTH_DOMAIN))return authErr('authErr','Solo emails @'+AUTH_DOMAIN);
+  authBtn('authSendBtn','Enviando...',true);
+  if(!cfg.apiUrl){
+    // Modo demo (sin backend) — permite probar el flujo localmente
+    setTimeout(()=>{
+      authBtn('authSendBtn','Enviar código →',false);
+      $('authEmailConfirm').textContent=em;
+      $('authStep1').style.display='none';$('authStep2').style.display='';
+      $('authCode').value='';$('authCode').focus();
+      startResendCountdown();
+      toast('🧪 Modo demo: usa código 000000');
+    },400);
+    return;
+  }
+  fetch(cfg.apiUrl+'?action=requestCode',{method:'POST',body:JSON.stringify({email:em}),headers:{'Content-Type':'text/plain'}})
+    .then(r=>r.json()).then(d=>{
+      authBtn('authSendBtn','Enviar código →',false);
+      if(d.success){
+        $('authEmailConfirm').textContent=em;
+        $('authStep1').style.display='none';$('authStep2').style.display='';
+        $('authCode').value='';$('authCode').focus();
+        startResendCountdown();
+      }else{authErr('authErr',d.error||'Error al enviar el código');}
+    })
+    .catch(err=>{authBtn('authSendBtn','Enviar código →',false);authErr('authErr','No se pudo contactar el backend. ¿URL configurada?');});
+}
+function authVerify(){
+  const em=($('authEmail').value||'').toLowerCase().trim();
+  const code=($('authCode').value||'').trim();
+  const keep=$('authKeep').checked;
+  if(!/^\d{6}$/.test(code))return authErr('authErr2','El código debe ser 6 dígitos');
+  authBtn('authVerifyBtn','Verificando...',true);
+  if(!cfg.apiUrl){
+    // Modo demo: acepta 000000
+    setTimeout(()=>{
+      authBtn('authVerifyBtn','Verificar y entrar',false);
+      if(code==='000000'){
+        const name=em.split('@')[0].split(/[.\-_]/).map(p=>p.charAt(0).toUpperCase()+p.slice(1)).join(' ');
+        authSuccess({email:em,name:name,token:'demo-'+Date.now(),expiresAt:new Date(Date.now()+(keep?30*864e5:864e5)).toISOString()});
+      }else{authErr('authErr2','Código incorrecto (demo: 000000)');}
+    },300);
+    return;
+  }
+  fetch(cfg.apiUrl+'?action=verifyCode',{method:'POST',body:JSON.stringify({email:em,code:code,keepActive:keep}),headers:{'Content-Type':'text/plain'}})
+    .then(r=>r.json()).then(d=>{
+      authBtn('authVerifyBtn','Verificar y entrar',false);
+      if(d.success){authSuccess(d);}
+      else{authErr('authErr2',d.error||'Código incorrecto');}
+    })
+    .catch(err=>{authBtn('authVerifyBtn','Verificar y entrar',false);authErr('authErr2','Error de red');});
+}
+function authSuccess(d){
+  user={email:d.email,name:d.name,token:d.token,expiresAt:d.expiresAt};
+  try{localStorage.setItem(AUTH_KEY,JSON.stringify(user));}catch(e){}
+  renderUser();authHide();
+  toast('🍇 Bienvenido, '+user.name);
+  R();
+}
+function authBack(){$('authStep2').style.display='none';$('authStep1').style.display='';$('authEmail').focus();if(resendTimer){clearInterval(resendTimer);resendTimer=null;}}
+function authResend(){if($('authResend').disabled)return;authRequest();}
+function startResendCountdown(){
+  let s=30;const b=$('authResend');b.disabled=true;b.textContent='Reenviar en '+s+'s';
+  if(resendTimer)clearInterval(resendTimer);
+  resendTimer=setInterval(()=>{s--;if(s<=0){clearInterval(resendTimer);b.disabled=false;b.textContent='Reenviar código';}else{b.textContent='Reenviar en '+s+'s';}},1000);
+}
+function authLogout(){
+  if(cfg.apiUrl&&user&&user.token&&!user.token.startsWith('demo-')){
+    fetch(cfg.apiUrl+'?action=logout',{method:'POST',body:JSON.stringify({token:user.token}),headers:{'Content-Type':'text/plain'}}).catch(()=>{});
+  }
+  user=null;try{localStorage.removeItem(AUTH_KEY);}catch(e){}
+  closeSh('user-sh');renderUser();authShow();
+  toast('Sesión cerrada');
+}
+function renderUser(){
+  const chip=$('userChip');
+  if(user){
+    chip.classList.add('show');
+    $('userNm').textContent=user.name.split(' ')[0];
+    $('userAv').textContent=userIni(user.name);
+    $('userShNm').textContent=user.name;
+    $('userShEm').textContent=user.email;
+    $('userShExp').textContent=new Date(user.expiresAt).toLocaleDateString('es-ES',{day:'numeric',month:'long',year:'numeric'});
+  }else{
+    chip.classList.remove('show');
+  }
+}
+async function authBoot(){
+  // Cargar sesión local
+  try{const s=JSON.parse(localStorage.getItem(AUTH_KEY)||'null');if(s&&s.token&&new Date(s.expiresAt)>new Date())user=s;}catch(e){}
+  if(!user){authShow();return false;}
+  // Validar con backend si está configurado
+  if(cfg.apiUrl&&!user.token.startsWith('demo-')){
+    try{
+      const r=await fetch(cfg.apiUrl+'?action=validateToken&token='+encodeURIComponent(user.token));
+      const d=await r.json();
+      if(!d.valid){user=null;localStorage.removeItem(AUTH_KEY);authShow();return false;}
+      user.expiresAt=d.expiresAt;localStorage.setItem(AUTH_KEY,JSON.stringify(user));
+    }catch(e){/* offline: usar sesión local */}
+  }
+  renderUser();authHide();return true;
+}
+
+restore();loadCfg();authBoot().then(()=>{R();});
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
 </script>
 </body>

@@ -12,6 +12,9 @@
 // ─── Constantes globales ────────────────────────────────────
 const ALLOWED_ORIGINS = '*'; // En producción, restringir al dominio de la PWA
 
+// Rutas que NO requieren autenticación
+const PUBLIC_ACTIONS = ['requestCode', 'verifyCode', 'validateToken', ''];
+
 // ─── Punto de entrada GET ───────────────────────────────────
 function doGet(e) {
   try {
@@ -19,6 +22,22 @@ function doGet(e) {
     initSheet();
 
     const action = (e.parameter && e.parameter.action) || '';
+
+    // --- Auth: rutas públicas ---
+    if (action === 'validateToken') {
+      const token = e.parameter.token || '';
+      return buildResponse_(validateAuthToken(token));
+    }
+
+    // --- Rutas protegidas: validar token ---
+    if (PUBLIC_ACTIONS.indexOf(action) === -1) {
+      const token = e.parameter.token || '';
+      const auth = validateAuthToken(token);
+      if (!auth.valid) {
+        return buildResponse_({ error: true, code: 'UNAUTHORIZED', message: 'Sesión inválida o expirada' });
+      }
+    }
+
     let result;
 
     switch (action) {
@@ -55,9 +74,9 @@ function doGet(e) {
       default:
         result = {
           app: 'Cosecha CRM',
-          version: '1.0.0',
+          version: '1.1.0',
           status: 'ok',
-          message: 'Backend activo. Usa ?action=contacts|deals|tasks|meetings|dashboard|calendar'
+          message: 'Backend activo. Endpoints GET: contacts|deals|tasks|meetings|dashboard|calendar|validateToken. Todos requieren ?token=... excepto validateToken.'
         };
     }
 
@@ -76,6 +95,26 @@ function doPost(e) {
     const action = (e.parameter && e.parameter.action) || '';
     const body   = e.postData ? JSON.parse(e.postData.contents) : {};
     let result;
+
+    // --- Auth: rutas públicas ---
+    if (action === 'requestCode') {
+      return buildResponse_(requestAuthCode(body.email));
+    }
+    if (action === 'verifyCode') {
+      return buildResponse_(verifyAuthCode(body.email, body.code, !!body.keepActive));
+    }
+    if (action === 'logout') {
+      return buildResponse_(logoutAuth(body.token));
+    }
+
+    // --- Rutas protegidas ---
+    const token = (body && body.token) || (e.parameter && e.parameter.token) || '';
+    const auth = validateAuthToken(token);
+    if (!auth.valid) {
+      return buildResponse_({ error: true, code: 'UNAUTHORIZED', message: 'Sesión inválida o expirada' });
+    }
+    // Inyectar el email del usuario autenticado como "quien" en actividades
+    const whoami = auth.name || auth.email || 'Sistema';
 
     switch (action) {
       // --- CRUD individual ---
