@@ -653,6 +653,7 @@ body,*{-webkit-overflow-scrolling:touch}
 .cal-dot{width:4px;height:4px;border-radius:50%;background:var(--accent)}
 .cal-dot.meet{background:var(--blue)}
 .cal-dot.task{background:var(--orange)}
+.cal-dot.gcal{background:var(--green)}
 .cal-nav{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;gap:10px}
 .cal-nav-t{font-size:20px;font-weight:800;letter-spacing:-0.5px;text-transform:capitalize}
 .cal-nav-b{width:36px;height:36px;border-radius:50%;background:var(--fill-3);border:none;font-size:16px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--t1)}
@@ -3207,6 +3208,34 @@ function onDragEnd(e){
 
 // ===== CALENDAR VIEW =====
 let calDate=new Date();
+let calGoogleEvents=[];
+let calGoogleLoaded=false;
+
+async function loadGoogleCalendar(){
+  if(!cfg.apiUrl||!user)return;
+  // Solo intentar para usuarios del dominio corporativo
+  const isWorkspace=user.email&&user.email.endsWith('@encopadebalon.com');
+  if(!isWorkspace){calGoogleLoaded=true;return;}
+
+  const y=calDate.getFullYear(),m=calDate.getMonth();
+  const start=new Date(y,m,1).toISOString();
+  const end=new Date(y,m+1,0).toISOString();
+
+  try{
+    const url=cfg.apiUrl+'?action=calendar&start='+encodeURIComponent(start)+'&end='+encodeURIComponent(end)+'&token='+encodeURIComponent(user.token);
+    const r=await fetch(url);
+    const data=await r.json();
+    if(Array.isArray(data)){
+      calGoogleEvents=data;
+      calGoogleLoaded=true;
+      rCal(); // re-renderizar con eventos reales
+    }
+  }catch(e){
+    // Sin conexión al backend o usuario no Workspace → solo eventos locales
+    calGoogleLoaded=true;
+  }
+}
+
 function rCal(){
   const el=$('calGrid');if(!el)return;
   const y=calDate.getFullYear(),m=calDate.getMonth();
@@ -3217,7 +3246,7 @@ function rCal(){
   const titleEl=$('calTitle');
   if(titleEl)titleEl.textContent=calDate.toLocaleDateString('es-ES',{month:'long',year:'numeric'});
 
-  // Eventos del mes (tareas con fecha + reuniones)
+  // Eventos del mes: tareas locales + reuniones + Google Calendar
   const monthEvents={};
   tasks.forEach(t=>{
     if(!t.due)return;
@@ -3234,6 +3263,15 @@ function rCal(){
       const k=d.getDate();
       if(!monthEvents[k])monthEvents[k]=[];
       monthEvents[k].push({type:'meet',title:mt.title,id:mt.id});
+    }
+  });
+  // Google Calendar events (si están cargados)
+  calGoogleEvents.forEach(ge=>{
+    const d=new Date(ge.start);
+    if(d.getFullYear()===y&&d.getMonth()===m){
+      const k=d.getDate();
+      if(!monthEvents[k])monthEvents[k]=[];
+      monthEvents[k].push({type:'gcal',title:ge.title,time:ge.start,location:ge.location||''});
     }
   });
 
@@ -3269,16 +3307,19 @@ function rCal(){
   });
   upcoming.sort((a,b)=>a.day-b.day);
   if(upcoming.length){
-    evsEl.innerHTML='<div class="cal-ev-t">Eventos de este mes</div><div class="stagger">'+upcoming.map(e=>{
-      const ic=e.type==='meet'?'🎙️':'📋';
-      return`<div class="up-ev"><div class="up-dt"><div class="up-day">${e.day}</div><div class="up-mon">${calDate.toLocaleDateString('es-ES',{month:'short'}).replace('.','').toUpperCase()}</div></div><div class="up-inf"><div class="up-t">${e.title}</div><div class="up-m">${ic} ${e.type==='meet'?'Reunión':'Tarea'}</div></div></div>`;
+    evsEl.innerHTML='<div class="cal-ev-t">Eventos de este mes</div>'+(!calGoogleLoaded&&cfg.apiUrl?'<div style="font-size:0.75rem;color:var(--t3);padding:0 0 8px">⏳ Cargando Google Calendar…</div>':'')+'<div class="stagger">'+upcoming.map(e=>{
+      const ic=e.type==='gcal'?'📅':e.type==='meet'?'🎙️':'📋';
+      const label=e.type==='gcal'?'Google Calendar':e.type==='meet'?'Reunión':'Tarea';
+      const timeStr=e.time?new Date(e.time).toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'})+' · ':'';
+      const loc=e.location?' · 📍 '+e.location:'';
+      return`<div class="up-ev"><div class="up-dt" style="${e.type==='gcal'?'background:var(--green-soft);color:var(--green)':''}"><div class="up-day">${e.day}</div><div class="up-mon">${calDate.toLocaleDateString('es-ES',{month:'short'}).replace('.','').toUpperCase()}</div></div><div class="up-inf"><div class="up-t">${e.title}</div><div class="up-m">${ic} ${timeStr}${label}${loc}</div></div></div>`;
     }).join('')+'</div>';
   }else{
     evsEl.innerHTML='<div class="ios-empty"><div class="ios-empty-ic">📅</div><div class="ios-empty-t">Sin eventos</div><div class="ios-empty-s">Crea tareas con fecha o graba reuniones para verlas aquí.</div></div>';
   }
 }
-function calPrev(){calDate=new Date(calDate.getFullYear(),calDate.getMonth()-1,1);rCal();}
-function calNext(){calDate=new Date(calDate.getFullYear(),calDate.getMonth()+1,1);rCal();}
+function calPrev(){calDate=new Date(calDate.getFullYear(),calDate.getMonth()-1,1);calGoogleLoaded=false;rCal();loadGoogleCalendar();}
+function calNext(){calDate=new Date(calDate.getFullYear(),calDate.getMonth()+1,1);calGoogleLoaded=false;rCal();loadGoogleCalendar();}
 function calShowDay(d){
   const date=new Date(calDate.getFullYear(),calDate.getMonth(),d);
   toast('📅 '+date.toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long'}));
@@ -3286,7 +3327,7 @@ function calShowDay(d){
 
 // Hook: al entrar en tab Calendar, renderizarlo
 const _origSetAgTab=setAgTab;
-setAgTab=function(t){_origSetAgTab(t);if(t==='cal')rCal();};
+setAgTab=function(t){_origSetAgTab(t);if(t==='cal'){rCal();if(!calGoogleLoaded)loadGoogleCalendar();}};
 
 // ===== SWIPE ACTIONS (en las "myc" de Mis tareas / reuniones) =====
 let swipeState=null;
@@ -3401,7 +3442,7 @@ function triggerRefresh(){
 
 restore();loadCfg();authBoot().then(()=>{R();initDragDrop();initPullToRefresh();initSwipe();});
 // Service worker con auto-reload al detectar nueva versión + purga agresiva
-const APP_VERSION='v21';
+const APP_VERSION='v22';
 const storedVer=localStorage.getItem('cosecha_app_version');
 if(storedVer&&storedVer!==APP_VERSION){
   // Versión cambió → purgar caches + reload una sola vez
