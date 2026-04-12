@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../../core/theme/ecdb_colors.dart';
 import '../../../core/providers/auth_provider.dart';
 import '../../../shared/widgets/ecdb_app_bar.dart';
@@ -67,8 +68,22 @@ class PortalScreen extends ConsumerWidget {
             icon: Icons.access_time,
             label: 'Mis Fichajes',
             subtitle: 'Historial y calendario',
-            onTap: () {},
+            onTap: () => context.push('/fichaje/historial'),
           ),
+          if (empleado?.canManage == true)
+            _MenuTile(
+              icon: Icons.supervisor_account,
+              label: 'Control Horario',
+              subtitle: 'Fichajes del equipo + exportar CSV',
+              onTap: () => context.push('/fichaje/control'),
+            ),
+          if (empleado?.isAdmin == true)
+            _MenuTile(
+              icon: Icons.admin_panel_settings,
+              label: 'Panel Admin',
+              subtitle: 'QR, empleados, informes',
+              onTap: () => context.push('/admin'),
+            ),
 
           const SizedBox(height: 8),
           _SectionHeader(title: 'CRM'),

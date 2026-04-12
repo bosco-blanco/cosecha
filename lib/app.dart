@@ -2,18 +2,24 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'core/theme/ecdb_theme.dart';
+import 'core/theme/ecdb_colors.dart';
 import 'core/providers/auth_provider.dart';
 import 'features/auth/screens/login_screen.dart';
+import 'features/auth/screens/qr_clock_screen.dart';
 import 'features/dashboard/screens/dashboard_screen.dart';
 import 'features/tareas/screens/kanban_screen.dart';
 import 'features/agenda/screens/agenda_screen.dart';
 import 'features/portal/screens/portal_screen.dart';
 import 'features/crm/screens/pipeline_screen.dart';
+import 'features/fichaje/screens/mis_fichajes_screen.dart';
+import 'features/fichaje/screens/control_horario_screen.dart';
+import 'features/fichaje/screens/fichaje_detalle_screen.dart';
+import 'features/admin/screens/admin_panel_screen.dart';
+import 'core/models/fichaje.dart';
 import 'shared/widgets/ecdb_bottom_nav.dart';
 import 'shared/widgets/ecdb_toast.dart';
-import 'core/theme/ecdb_colors.dart';
 
-/// Clave del navigator para el shell.
+/// Claves del navigator.
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorKey = GlobalKey<NavigatorState>();
 
@@ -37,6 +43,44 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/login',
         builder: (context, state) => const LoginScreen(),
+      ),
+
+      // Fichaje QR — fuera del shell (pantalla completa con cámara)
+      GoRoute(
+        path: '/fichaje/qr',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const QrClockScreen(),
+      ),
+
+      // Fichaje historial
+      GoRoute(
+        path: '/fichaje/historial',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const MisFichajesScreen(),
+      ),
+
+      // Control horario (manager)
+      GoRoute(
+        path: '/fichaje/control',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const ControlHorarioScreen(),
+      ),
+
+      // Detalle de fichaje
+      GoRoute(
+        path: '/fichaje/detalle',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final fichaje = state.extra as Fichaje;
+          return FichajeDetalleScreen(fichaje: fichaje);
+        },
+      ),
+
+      // Admin panel
+      GoRoute(
+        path: '/admin',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const AdminPanelScreen(),
       ),
 
       // Shell con bottom navigation
@@ -135,26 +179,31 @@ class _ScaffoldWithNavState extends ConsumerState<ScaffoldWithNav> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 _QuickActionTile(
-                  icon: Icons.access_time,
+                  icon: Icons.fingerprint,
                   label: 'Fichar',
                   color: ECDBColors.success,
                   onTap: () {
                     Navigator.pop(context);
-                    ECDBToast.show(
-                      context,
-                      message: 'Fichaje disponible en Sprint 2',
-                      type: ToastType.info,
-                    );
+                    // El fichaje se hace desde el dashboard (ClockWidget)
+                  },
+                ),
+                _QuickActionTile(
+                  icon: Icons.qr_code_scanner,
+                  label: 'Fichar con QR',
+                  color: ECDBColors.wine,
+                  onTap: () {
+                    Navigator.pop(context);
+                    this.context.push('/fichaje/qr');
                   },
                 ),
                 _QuickActionTile(
                   icon: Icons.add_task,
                   label: 'Nueva Tarea',
-                  color: ECDBColors.wine,
+                  color: ECDBColors.info,
                   onTap: () {
                     Navigator.pop(context);
                     ECDBToast.show(
-                      context,
+                      this.context,
                       message: 'Tareas disponibles en Sprint 3',
                       type: ToastType.info,
                     );
@@ -163,25 +212,12 @@ class _ScaffoldWithNavState extends ConsumerState<ScaffoldWithNav> {
                 _QuickActionTile(
                   icon: Icons.person_add,
                   label: 'Nuevo Contacto',
-                  color: ECDBColors.info,
-                  onTap: () {
-                    Navigator.pop(context);
-                    ECDBToast.show(
-                      context,
-                      message: 'CRM disponible en Sprint 4',
-                      type: ToastType.info,
-                    );
-                  },
-                ),
-                _QuickActionTile(
-                  icon: Icons.help_outline,
-                  label: 'Nueva Solicitud',
                   color: ECDBColors.gold,
                   onTap: () {
                     Navigator.pop(context);
                     ECDBToast.show(
-                      context,
-                      message: 'Portal disponible en Sprint 5',
+                      this.context,
+                      message: 'CRM disponible en Sprint 4',
                       type: ToastType.info,
                     );
                   },

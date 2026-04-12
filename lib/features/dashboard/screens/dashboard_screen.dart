@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../../core/theme/ecdb_colors.dart';
 import '../../../core/providers/auth_provider.dart';
 import '../../../shared/widgets/ecdb_app_bar.dart';
 import '../../../shared/widgets/ecdb_card.dart';
+import '../widgets/clock_widget.dart';
+import '../widgets/kpi_cards.dart';
+import '../widgets/empleados_activos.dart';
 
-/// Dashboard — pantalla principal con fichaje + resumen del día.
+/// Dashboard — pantalla principal con fichaje real + resumen del día.
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
 
@@ -26,6 +30,11 @@ class DashboardScreen extends ConsumerWidget {
         showLogo: true,
         actions: [
           IconButton(
+            icon: const Icon(Icons.qr_code_scanner),
+            tooltip: 'Fichar con QR',
+            onPressed: () => context.push('/fichaje/qr'),
+          ),
+          IconButton(
             icon: const Icon(Icons.notifications_outlined),
             onPressed: () {},
           ),
@@ -42,244 +51,119 @@ class DashboardScreen extends ConsumerWidget {
                 ),
               ),
             ),
-            onPressed: () {
-              ref.read(authProvider.notifier).signOut();
-            },
+            onPressed: () => context.push('/mas'),
           ),
         ],
       ),
-      body: ListView(
-        padding: const EdgeInsets.symmetric(vertical: 16),
-        children: [
-          // Saludo
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  '$saludo,',
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: ECDBColors.textSecondary,
-                      ),
-                ),
-                Text(
-                  nombre.split(' ').first,
-                  style: Theme.of(context).textTheme.displaySmall,
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 24),
-
-          // Card de fichaje (placeholder para Sprint 2)
-          ECDBCard(
-            child: Column(
-              children: [
-                Container(
-                  width: 80,
-                  height: 80,
-                  decoration: BoxDecoration(
-                    color: ECDBColors.success.withOpacity(0.1),
-                    shape: BoxShape.circle,
+      body: RefreshIndicator(
+        color: ECDBColors.wine,
+        onRefresh: () async {
+          // Refrescar fichajes
+        },
+        child: ListView(
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          children: [
+            // Saludo
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '$saludo,',
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          color: ECDBColors.textSecondary,
+                        ),
                   ),
-                  child: const Icon(
-                    Icons.fingerprint,
-                    size: 40,
-                    color: ECDBColors.success,
+                  Text(
+                    nombre.split(' ').first,
+                    style: Theme.of(context).textTheme.displaySmall,
                   ),
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  'Fichar Entrada',
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'No has fichado hoy',
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
-                const SizedBox(height: 16),
-                SizedBox(
-                  width: double.infinity,
-                  height: 56,
-                  child: ElevatedButton(
-                    onPressed: () {},
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: ECDBColors.success,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(28),
-                      ),
-                    ),
-                    child: const Text(
-                      'FICHAR ENTRADA',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 1,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 16),
-
-          // KPIs del día
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Row(
-              children: [
-                Expanded(
-                  child: _KpiCard(
-                    label: 'Horas hoy',
-                    value: '0h 0min',
-                    icon: Icons.schedule,
-                    color: ECDBColors.wine,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _KpiCard(
-                    label: 'Tareas',
-                    value: '0',
-                    icon: Icons.task_alt,
-                    color: ECDBColors.gold,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 24),
-
-          // Anuncios (placeholder)
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Text(
-              'Anuncios',
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-          ),
-          const SizedBox(height: 8),
-          ECDBCard(
-            child: Row(
-              children: [
-                Container(
-                  width: 4,
-                  height: 48,
-                  decoration: BoxDecoration(
-                    color: ECDBColors.wine,
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Bienvenido a Cosecha',
-                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                              color: ECDBColors.textPrimary,
-                            ),
-                      ),
-                      Text(
-                        'Tu nueva herramienta de gestión interna ECDB.',
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 24),
-
-          // Actividad reciente (placeholder)
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Text(
-              'Actividad reciente',
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-          ),
-          const SizedBox(height: 8),
-          ECDBCard(
-            child: Center(
-              child: Padding(
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  children: [
-                    Icon(
-                      Icons.history,
-                      size: 40,
-                      color: ECDBColors.textMuted,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Sin actividad reciente',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: ECDBColors.textMuted,
-                          ),
-                    ),
-                  ],
-                ),
+                ],
               ),
             ),
-          ),
-        ],
-      ),
-    );
-  }
-}
+            const SizedBox(height: 20),
 
-class _KpiCard extends StatelessWidget {
-  final String label;
-  final String value;
-  final IconData icon;
-  final Color color;
+            // Widget de fichaje REAL
+            const ClockWidget(),
+            const SizedBox(height: 16),
 
-  const _KpiCard({
-    required this.label,
-    required this.value,
-    required this.icon,
-    required this.color,
-  });
+            // KPIs del día (horas + fichajes)
+            const KpiCards(),
+            const SizedBox(height: 8),
 
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: ECDBColors.surface,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: ECDBColors.border, width: 0.5),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x0F000000),
-            blurRadius: 8,
-            offset: Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon, color: color, size: 24),
-          const SizedBox(height: 12),
-          Text(
-            value,
-            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.w700,
+            // Acceso rápido a historial
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: TextButton.icon(
+                onPressed: () => context.push('/fichaje/historial'),
+                icon: const Icon(Icons.history, size: 18),
+                label: const Text('Ver mis fichajes'),
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            // Empleados activos (realtime)
+            if (empleado?.canManage == true) ...[
+              const EmpleadosActivos(),
+              const SizedBox(height: 8),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: TextButton.icon(
+                  onPressed: () => context.push('/fichaje/control'),
+                  icon: const Icon(Icons.supervisor_account, size: 18),
+                  label: const Text('Control horario del equipo'),
                 ),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            label,
-            style: Theme.of(context).textTheme.bodySmall,
-          ),
-        ],
+              ),
+              const SizedBox(height: 16),
+            ],
+
+            // Anuncios
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Text(
+                'Anuncios',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+            ),
+            const SizedBox(height: 8),
+            ECDBCard(
+              child: Row(
+                children: [
+                  Container(
+                    width: 4,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: ECDBColors.wine,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Bienvenido a Cosecha',
+                          style:
+                              Theme.of(context).textTheme.titleSmall?.copyWith(
+                                    color: ECDBColors.textPrimary,
+                                  ),
+                        ),
+                        Text(
+                          'Fichaje digital activo. Usa tu PIN o QR para fichar.',
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 32),
+          ],
+        ),
       ),
     );
   }

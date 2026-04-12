@@ -4,6 +4,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'core/services/supabase_service.dart';
+import 'core/services/offline_sync_service.dart';
 import 'app.dart';
 
 Future<void> main() async {
@@ -29,6 +30,9 @@ Future<void> main() async {
 
   // Inicializar Supabase.
   await SupabaseService.initialize();
+
+  // Inicializar cola de sincronización offline.
+  OfflineSyncService.initialize();
 
   runApp(
     const ProviderScope(
