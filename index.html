@@ -652,6 +652,33 @@ body,*{-webkit-overflow-scrolling:touch}
 .cal-events{padding:14px 16px}
 .cal-ev-t{font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px}
 
+/* === Loading overlay (reloj de arena / spinner) === */
+.loading-ov{position:fixed;inset:0;z-index:350;background:rgba(0,0,0,0.55);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:none;flex-direction:column;align-items:center;justify-content:center;color:#fff;text-align:center;animation:fadeIn .25s}
+.loading-ov.show{display:flex}
+.loading-spin{width:48px;height:48px;border:3px solid rgba(255,255,255,0.25);border-top-color:#fff;border-radius:50%;animation:spin 0.8s linear infinite;margin-bottom:18px}
+.loading-txt{font-size:16px;font-weight:700;letter-spacing:-0.3px;margin-bottom:6px}
+.loading-sub{font-size:13px;color:rgba(255,255,255,0.7)}
+
+/* Share options post-meeting */
+.share-opt{display:flex;flex-direction:column;gap:10px;margin:18px 0}
+.share-btn{
+  display:flex;align-items:center;gap:14px;
+  padding:18px 20px;
+  background:var(--card);
+  border:1.5px solid var(--border);
+  border-radius:16px;
+  cursor:pointer;
+  font-family:inherit;
+  text-align:left;
+  transition:all .2s var(--spring);
+  box-shadow:var(--shadow-card);
+}
+.share-btn:active{transform:scale(.97);box-shadow:none}
+.share-btn .ic{font-size:28px;flex-shrink:0}
+.share-btn .inf{flex:1}
+.share-btn .t{font-size:15px;font-weight:700;color:var(--t1);letter-spacing:-0.2px;margin-bottom:2px}
+.share-btn .s{font-size:12px;color:var(--t3)}
+
 input[type="file"]:not(#sdFile){display:none}
 
 /* === ONBOARDING TOUR (tooltips con spotlight) === */
@@ -1309,7 +1336,7 @@ input[type="file"]:not(#sdFile){display:none}
     </div>
   </div>
 </header>
-<div class="v-badge" id="vBadge">v17 · hero</div>
+<div class="v-badge" id="vBadge">v18 · loading</div>
 
 <!-- Sync indicator -->
 <div class="sync-b" id="syncB"><span class="sd"></span><span id="syncT">Sincronizado</span></div>
@@ -1477,10 +1504,23 @@ input[type="file"]:not(#sdFile){display:none}
   <button class="btn btn-p" onclick="startMeet()">🎙️ Iniciar reunión</button><button class="btn btn-g" style="margin-top:8px" onclick="closeSh('newmeet-sh')">Cancelar</button>
 </div></div>
 
-<div class="sh-bg" id="end-sh"><div class="sh"><div class="sh-bar"></div><div class="sh-tl">Finalizar</div><div class="sh-sb">Se procesará la transcripción</div>
-  <div style="background:var(--bg2);border-radius:var(--r-sm);padding:12px;font-size:12px;margin-bottom:18px;display:flex;flex-direction:column;gap:6px;color:var(--t2)"><span>✉️ Gmail</span><span>📁 Drive</span><span>📅 Calendar</span><span>💬 Slack</span></div>
-  <button class="btn btn-d" onclick="endMeet()">⏹️ Finalizar y procesar</button><button class="btn btn-g" style="margin-top:8px" onclick="closeSh('end-sh')">Cancelar</button>
+<!-- Confirmar fin de reunión -->
+<div class="sh-bg" id="end-sh"><div class="sh"><div class="sh-bar"></div>
+  <div class="sh-tl">Finalizar reunión</div>
+  <div class="sh-sb">Se generará un resumen con los puntos clave y acciones</div>
+  <button class="btn btn-d" onclick="endMeet()">⏹️ Finalizar grabación</button>
+  <button class="btn btn-g" style="margin-top:8px" onclick="closeSh('end-sh')">Seguir grabando</button>
 </div></div>
+
+<!-- Resumen post-reunión con opciones de compartir -->
+<div class="sh-bg" id="share-sh"><div class="sh" id="shareC"></div></div>
+
+<!-- Loading overlay global -->
+<div class="loading-ov" id="loadingOv">
+  <div class="loading-spin"></div>
+  <div class="loading-txt" id="loadingTxt">Procesando…</div>
+  <div class="loading-sub" id="loadingSub">Un momento</div>
+</div>
 
 <div class="sh-bg" id="det-sh"><div class="sh" id="detC"></div></div>
 <div class="sh-bg" id="msum-sh"><div class="sh" id="msC"></div></div>
@@ -1754,6 +1794,7 @@ function prepareNewTaskSheet(){
 }
 function createTask(){
   const title=$('ntT').value.trim();if(!title)return toast('Título requerido');
+  showLoading('Creando tarea…','');
   const ctxVal=$('ntCtx').value;
   const task={
     id:tasks.length+1,
@@ -1776,7 +1817,8 @@ function createTask(){
   tasks.unshift(task);
   acts.unshift({ic:'🆕',bg:'var(--wine-soft)',w:user?user.name.split(' ')[0]:'Bosco',a:'creó',wh:title,dt:ntAddr?ntAddr.split(',').slice(0,2).join(','):(isComercial()?'Cliente':PJ.find(p=>p.id===cP)?.n||''),tm:'Ahora'});
   ['ntT','ntD','ntDue'].forEach(id=>$(id).value='');ntPri='medium';ntLbl='';ntTm=[];ntPh=[];ntLat=null;ntLng=null;ntAddr='';
-  closeSh('newtask-sh');persist();R();toast('🍇 Tarea creada');
+  closeSh('newtask-sh');persist();R();
+  setTimeout(()=>{hideLoading();toast('🍇 Tarea creada');},600);
 }
 function sPri(el,p){ntPri=p;document.querySelectorAll('#ntPri .po').forEach(e=>e.className='po');el.className=`po s-${p}`;}
 function sLbl(el){document.querySelectorAll('#ntLbl .lo').forEach(e=>e.classList.remove('sel'));el.classList.add('sel');ntLbl=el.dataset.l;}
@@ -1799,7 +1841,124 @@ function addBM(){const e=Date.now()-mS.start;const m=Math.floor(e/60000).toStrin
 function addAi(){const t=$('aiIn').value.trim();if(!t)return;mS.ais.push({t,d:false});rAis();$('aiIn').value='';}
 function togAi(i){mS.ais[i].d=!mS.ais[i].d;rAis();}
 function rAis(){$('aiL').innerHTML=mS.ais.map((a,i)=>`<div class="ai-item" style="${a.d?'opacity:.5;text-decoration:line-through':''}"><input type="checkbox" ${a.d?'checked':''} onchange="togAi(${i})"><span>${a.t}</span></div>`).join('');}
-function endMeet(){closeSh('end-sh');mS.isRec=false;if(mS.recognition){mS.recognition.stop();mS.recognition=null;}clearInterval(mS.timer);relWk();toast('Procesando...');setTimeout(()=>{const dur=$('recTimer').textContent;const wc=mS.transcript.reduce((s,t)=>s+t.text.split(' ').length,0);meetings.unshift({id:meetings.length+1,title:mS.cur.title,date:new Date(mS.start).toISOString(),dur,loc:mS.cur.loc||'—',ch:mS.cur.ch,atts:mS.cur.atts,words:wc||1240,summary:'Resumen automático de la transcripción.',kp:mS.ais.length?mS.ais.map(a=>a.t):['Puntos clave'],ais:mS.ais.map(a=>({t:a.t,a:'Por asignar'})),transcript:[...mS.transcript],notes:$('qN').value});acts.unshift({ic:'🎙️',bg:'var(--wine-soft)',w:'Bosco',a:'registró',wh:mS.cur.title,dt:`${dur} · ${(wc||1240).toLocaleString()} pal.`,tm:'Ahora'});mS.atts=[];toast('✉️ Gmail');setTimeout(()=>toast('📁 Drive'),600);setTimeout(()=>toast('📅 Calendar'),1200);setTimeout(()=>toast('💬 Slack '+mS.cur.ch),1800);setTimeout(()=>{R();openMS(meetings[0].id);},2200);},1200);}
+function showLoading(txt,sub){
+  $('loadingTxt').textContent=txt||'Procesando…';
+  $('loadingSub').textContent=sub||'Un momento';
+  $('loadingOv').classList.add('show');
+}
+function hideLoading(){$('loadingOv').classList.remove('show');}
+
+function endMeet(){
+  closeSh('end-sh');
+  // 1. PARAR todo
+  mS.isRec=false;
+  if(mS.recognition){try{mS.recognition.stop();}catch(e){}mS.recognition=null;}
+  if(mS.timer){clearInterval(mS.timer);mS.timer=null;}
+  relWk();
+
+  // 2. LOADING con spinner (la app está "pensando")
+  showLoading('Generando resumen…','Analizando la transcripción');
+
+  // 3. Generar el resumen (simulado con delay para dar sensación de IA trabajando)
+  setTimeout(()=>{
+    const dur=$('recTimer').textContent;
+    const wc=mS.transcript.reduce((s,t)=>s+t.text.split(' ').length,0);
+    const notes=$('qN')?.value||'';
+
+    // Generar puntos clave a partir de la transcripción
+    const autoKp=[];
+    if(mS.ais.length){
+      mS.ais.forEach(a=>autoKp.push(a.t));
+    }else if(mS.transcript.length){
+      // Usar las primeras 3-5 frases más largas como puntos clave
+      const sorted=[...mS.transcript].sort((a,b)=>b.text.length-a.text.length);
+      sorted.slice(0,5).forEach(t=>autoKp.push(t.text.slice(0,120)));
+    }
+    if(!autoKp.length)autoKp.push('Reunión registrada sin puntos clave automáticos');
+
+    // Generar resumen textual
+    const summary=mS.transcript.length?
+      mS.transcript.slice(0,3).map(t=>t.text).join('. ').slice(0,200)+'…':
+      'Reunión sin transcripción disponible.';
+
+    // Crear la reunión
+    const meeting={
+      id:meetings.length+1,
+      title:mS.cur.title,
+      date:new Date(mS.start).toISOString(),
+      dur,loc:mS.cur.loc||'—',ch:mS.cur.ch,
+      atts:mS.cur.atts,
+      words:wc||0,
+      summary:summary,
+      kp:autoKp,
+      ais:mS.ais.map(a=>({t:a.t,a:'Por asignar'})),
+      transcript:[...mS.transcript],
+      notes:notes
+    };
+    meetings.unshift(meeting);
+    acts.unshift({ic:'🎙️',bg:'var(--wine-soft)',w:user?.name?.split(' ')[0]||'Bosco',a:'registró',wh:mS.cur.title,dt:`${dur} · ${(wc||0).toLocaleString()} pal.`,tm:'Ahora'});
+    mS.atts=[];
+    persist();R();
+
+    // 4. OCULTAR loading
+    hideLoading();
+
+    // 5. MOSTRAR resumen con opciones de compartir
+    go('dash'); // volver al dashboard
+    showMeetingSummaryShare(meeting);
+  },2200); // delay de 2.2s → sensación de procesamiento
+}
+
+function showMeetingSummaryShare(m){
+  $('shareC').innerHTML=`<div class="sh-bar"></div>
+    <div style="text-align:center;margin-bottom:18px">
+      <div style="font-size:48px;margin-bottom:8px">✅</div>
+      <div class="sh-tl" style="margin-bottom:2px">Reunión finalizada</div>
+      <div class="sh-sb" style="margin-bottom:0">${m.title}</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;text-align:center;padding:14px;background:var(--fill-4);border-radius:14px;margin-bottom:18px">
+      <div><div style="font-size:22px;font-weight:800;color:var(--accent)">${m.dur}</div><div style="font-size:10px;color:var(--t3)">Duración</div></div>
+      <div><div style="font-size:22px;font-weight:800;color:var(--accent)">${(m.words||0).toLocaleString()}</div><div style="font-size:10px;color:var(--t3)">Palabras</div></div>
+      <div><div style="font-size:22px;font-weight:800;color:var(--accent)">${m.atts.length}</div><div style="font-size:10px;color:var(--t3)">Asistentes</div></div>
+    </div>
+    <div class="det-sec" style="border:none;padding:10px 0 0">
+      <div class="det-l">Resumen</div>
+      <div style="font-size:14px;line-height:1.6;color:var(--t2);padding:8px 0">${m.summary}</div>
+    </div>
+    ${m.kp.length?`<div class="det-sec" style="border:none;padding:10px 0 0">
+      <div class="det-l">Puntos clave</div>
+      ${m.kp.map(p=>`<div style="display:flex;gap:8px;padding:6px 0;font-size:13px;line-height:1.5;color:var(--t2)"><div style="width:5px;height:5px;border-radius:50%;background:var(--accent);margin-top:6px;flex-shrink:0"></div><div>${p}</div></div>`).join('')}
+    </div>`:''}
+    ${m.ais.length?`<div class="det-sec" style="border:none;padding:10px 0 0">
+      <div class="det-l">Acciones pendientes</div>
+      ${m.ais.map(a=>`<div style="font-size:13px;padding:4px 0;color:var(--t2)">☐ ${a.t}</div>`).join('')}
+    </div>`:''}
+    <div style="margin-top:24px"><div class="det-l" style="margin-bottom:10px">¿Cómo quieres compartir las notas?</div>
+      <div class="share-opt">
+        <button class="share-btn" onclick="shareMeeting(${m.id},'drive')"><span class="ic">📁</span><div class="inf"><div class="t">Guardar en Drive</div><div class="s">Solo para ti · Se guarda en tu carpeta personal</div></div></button>
+        <button class="share-btn" onclick="shareMeeting(${m.id},'email')"><span class="ic">✉️</span><div class="inf"><div class="t">Enviar por email</div><div class="s">Elige a quién del equipo (o externos)</div></div></button>
+        <button class="share-btn" onclick="shareMeeting(${m.id},'slack')"><span class="ic">💬</span><div class="inf"><div class="t">Enviar a Slack</div><div class="s">Solo miembros del equipo</div></div></button>
+      </div>
+    </div>
+    <button class="btn btn-g" style="margin-top:8px" onclick="closeSh('share-sh');toast('📋 Notas guardadas localmente')">Ahora no · lo manejo yo</button>`;
+  openSh('share-sh');
+}
+
+function shareMeeting(id,via){
+  showLoading(via==='drive'?'Guardando en Drive…':via==='email'?'Preparando email…':'Enviando a Slack…','');
+  setTimeout(()=>{
+    hideLoading();
+    closeSh('share-sh');
+    if(via==='drive'){toast('📁 Guardado en Google Drive');}
+    else if(via==='email'){toast('✉️ Listo para enviar por email');}
+    else{toast('💬 Enviado al canal '+(meetings.find(m=>m.id===id)?.ch||'#general'));}
+    // Backend push en background
+    if(cfg.apiUrl){
+      const m=meetings.find(x=>x.id===id);
+      fetch(cfg.apiUrl+'?action=meeting',{method:'POST',body:JSON.stringify({...m,shareVia:via,token:user?.token}),headers:{'Content-Type':'text/plain'}}).catch(()=>{});
+    }
+  },1500);
+}
 
 function openMS(id){const m=meetings.find(x=>x.id===id);if(!m)return;$('msC').innerHTML=`<div class="sh-bar"></div><div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px"><span class="sum-bdg sb-mail">✉️ Gmail</span><span class="sum-bdg sb-drive">📁 Drive</span><span class="sum-bdg sb-cal">📅 Calendar</span><span class="sum-bdg sb-slack">💬 ${m.ch}</span></div><div class="sh-tl">${m.title}</div><div class="sh-sb">${new Date(m.date).toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long'})} · ${m.dur} · ${m.loc}</div><div class="det-sec"><div class="det-l">Asistentes</div><div class="avs" style="gap:6px">${m.atts.map(a=>`<div style="display:flex;align-items:center;gap:6px"><div class="av" style="background:${a.c};margin:0;width:28px;height:28px;font-size:10px">${a.i}</div><span style="font-size:13px">${a.n}</span></div>`).join('')}</div></div><div class="det-sec"><div class="det-l">Resumen</div><div style="font-size:14px;line-height:1.6;color:var(--t2)">${m.summary}</div></div><div class="det-sec"><div class="det-l">Puntos clave</div>${m.kp.map(p=>`<div style="display:flex;gap:8px;padding:7px 0;font-size:13px;line-height:1.5;border-bottom:1px solid var(--border)"><div style="width:5px;height:5px;border-radius:50%;background:var(--wine);margin-top:6px;flex-shrink:0"></div><div>${p}</div></div>`).join('')}</div>${m.ais.length?`<div class="det-sec"><div class="det-l">Acciones</div>${m.ais.map(a=>`<div style="font-size:13px;padding:4px 0">• ${a.t} <em style="color:var(--t3)">→ ${a.a}</em></div>`).join('')}</div>`:''}<div class="det-sec"><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;text-align:center"><div><div style="font-size:22px;font-weight:800;color:var(--wine)">${m.dur}</div><div style="font-size:10px;color:var(--t3)">Duración</div></div><div><div style="font-size:22px;font-weight:800;color:var(--wine)">${m.words.toLocaleString()}</div><div style="font-size:10px;color:var(--t3)">Palabras</div></div><div><div style="font-size:22px;font-weight:800;color:var(--wine)">${m.atts.length}</div><div style="font-size:10px;color:var(--t3)">Asistentes</div></div></div></div><div style="display:flex;gap:6px;margin-top:8px"><button class="btn btn-p btn-sm" onclick="toast('📁 Exportado')">📁 Drive</button><button class="btn btn-g btn-sm" onclick="toast('✉️ Reenviado')">✉️ Mail</button><button class="btn btn-g btn-sm" onclick="toast('💬 Slack')">💬 Slack</button></div><button class="btn btn-g" style="margin-top:14px" onclick="closeSh('msum-sh')">Cerrar</button>`;openSh('msum-sh');}
 
@@ -1925,7 +2084,9 @@ function createContact(){
   contacts.unshift(c);
   acts.unshift({ic:'👤',bg:'var(--blue-soft)',w:'Bosco',a:'añadió contacto',wh:n,dt:c.empresa||'',tm:'Ahora'});
   ['ncN','ncE','ncP','ncCo','ncNo'].forEach(id=>$(id).value='');ncType='lead';
-  closeSh('newcontact-sh');persist();R();toast('👤 Contacto añadido');pushApi('contact',c);
+  showLoading('Añadiendo contacto…','');
+  closeSh('newcontact-sh');persist();R();
+  setTimeout(()=>{hideLoading();toast('👤 Contacto añadido');pushApi('contact',c);},600);
 }
 function openCtDet(id){
   const c=contacts.find(x=>x.id===id);if(!c)return;
@@ -1972,7 +2133,9 @@ function createDeal(){
   deals.unshift(d);
   acts.unshift({ic:'💰',bg:'var(--gold-soft)',w:'Bosco',a:'creó oportunidad',wh:t,dt:fmtEur(d.valor),tm:'Ahora'});
   ['ndT','ndV','ndP','ndD','ndNo'].forEach(id=>$(id).value='');
-  closeSh('newdeal-sh');persist();R();toast('💰 Oportunidad creada');pushApi('deal',d);
+  showLoading('Creando oportunidad…','');
+  closeSh('newdeal-sh');persist();R();
+  setTimeout(()=>{hideLoading();toast('💰 Oportunidad creada');pushApi('deal',d);},600);
 }
 function openDDet(id){
   const d=deals.find(x=>x.id===id);if(!d)return;
@@ -2077,6 +2240,7 @@ function authBackToEmail(){
 
 // Éxito común
 function doAuthSuccess(em,keep,code){
+  showLoading('Iniciando sesión…','Preparando tu espacio de trabajo');
   let rol='equipo',departamento='';
   if(em==='bosco@encopadebalon.com'){rol='admin';departamento='direccion';}
   else if(em==='saul@encopadebalon.com'){rol='admin';departamento='codeba';}
@@ -2113,8 +2277,9 @@ function authVerify(){
 function authRequest(){authStep1Submit&&authStep1Submit()||authVerify();}
 function isDemoMode(){return !cfg.apiUrl;}
 function authSuccess(d){
-  user={email:d.email,name:d.name,token:d.token,expiresAt:d.expiresAt};
+  user={email:d.email,name:d.name,token:d.token,expiresAt:d.expiresAt,rol:d.rol||'equipo',departamento:d.departamento||'',color:d.color||'#9B2C3E'};
   try{localStorage.setItem(AUTH_KEY,JSON.stringify(user));}catch(e){}
+  setTimeout(hideLoading,300);
   renderUser();authHide();
   toast('🍇 Bienvenido, '+user.name);
   R();
@@ -2260,8 +2425,8 @@ function requestGps(){
   },{enableHighAccuracy:true,timeout:8000,maximumAge:60000});
 }
 function doCheckin(tipo){
+  showLoading(tipo==='entrada'?'Fichando entrada…':'Fichando salida…','Registrando ubicación');
   const btn=tipo==='entrada'?$('ciEntryBtn'):null;
-  if(btn){btn.disabled=true;btn.textContent='Registrando...';}
   const fichaje={tipo,time:new Date().toISOString(),lat:ciLat,lng:ciLng,direccion:ciAddr};
   // Guardar local
   const st=getLocalCi()||{};
@@ -2272,10 +2437,12 @@ function doCheckin(tipo){
   }
   // Actividad local
   acts.unshift({ic:tipo==='entrada'?'🟢':'🔴',bg:tipo==='entrada'?'var(--green-soft)':'var(--red-soft)',w:user.name.split(' ')[0],a:'fichó',wh:tipo,dt:ciAddr?ciAddr.split(',').slice(0,2).join(','):'',tm:'Ahora'});
-  if(btn){btn.disabled=false;btn.textContent='🟢 Fichar entrada';}
-  renderCiState();renderUserCheckinPill();R();
-  toast(tipo==='entrada'?'🟢 Entrada registrada':'🔴 Salida registrada');
-  setTimeout(closeCheckin,1200);
+  setTimeout(()=>{
+    hideLoading();
+    renderCiState();renderUserCheckinPill();R();
+    toast(tipo==='entrada'?'🟢 Entrada registrada':'🔴 Salida registrada');
+    setTimeout(closeCheckin,800);
+  },1000);
 }
 function renderUserCheckinPill(){
   const st=getLocalCi();const pill=$('userShCi');if(!pill)return;
@@ -3216,7 +3383,7 @@ function triggerRefresh(){
 
 restore();loadCfg();authBoot().then(()=>{R();initDragDrop();initPullToRefresh();initSwipe();});
 // Service worker con auto-reload al detectar nueva versión + purga agresiva
-const APP_VERSION='v17';
+const APP_VERSION='v18';
 const storedVer=localStorage.getItem('cosecha_app_version');
 if(storedVer&&storedVer!==APP_VERSION){
   // Versión cambió → purgar caches + reload una sola vez
