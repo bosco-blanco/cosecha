@@ -4,7 +4,7 @@
  *             cache-first para assets estáticos,
  *             bypass total para backend y APIs externas.
  */
-const C = 'cosecha-v19';
+const C = 'cosecha-v20';
 const STATIC = ['./icon-192.png', './icon-512.png', './manifest.json'];
 
 self.addEventListener('install', e => {
