@@ -1,0 +1,78 @@
+name: cosecha
+description: Cosecha — App de gestión interna de En Copa de Balón (ECDB)
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.2.0 <4.0.0'
+  flutter: '>=3.16.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Backend
+  supabase_flutter: ^2.3.0
+
+  # State Management
+  flutter_riverpod: ^2.4.9
+  riverpod_annotation: ^2.3.3
+
+  # Routing
+  go_router: ^14.0.0
+
+  # Local DB (offline-first)
+  drift: ^2.15.0
+  sqlite3_flutter_libs: ^0.5.18
+  path_provider: ^2.1.2
+  path: ^1.8.3
+
+  # Geolocation
+  geolocator: ^11.0.0
+  geocoding: ^3.0.0
+
+  # QR
+  qr_flutter: ^4.1.0
+  mobile_scanner: ^5.1.1
+
+  # Charts
+  fl_chart: ^0.66.2
+
+  # UI
+  google_fonts: ^6.1.0
+  flutter_dotenv: ^5.1.0
+  shimmer: ^3.0.0
+  intl: ^0.19.0
+
+  # Push Notifications
+  firebase_core: ^2.27.0
+  firebase_messaging: ^14.7.15
+
+  # Utilities
+  share_plus: ^7.2.2
+  csv: ^6.0.0
+  uuid: ^4.3.3
+  freezed_annotation: ^2.4.1
+  json_annotation: ^4.8.1
+  equatable: ^2.0.5
+  cached_network_image: ^3.3.1
+  flutter_secure_storage: ^9.0.0
+  connectivity_plus: ^6.0.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.1
+  build_runner: ^2.4.8
+  freezed: ^2.4.6
+  json_serializable: ^6.7.1
+  drift_dev: ^2.15.0
+  riverpod_generator: ^2.3.9
+  mockito: ^5.4.4
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - .env
+    - assets/images/

@@ -1,0 +1,45 @@
+# Flutter
+.dart_tool/
+.packages
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# Environment
+.env
+*.env.local
+
+# Generated
+*.g.dart
+*.freezed.dart
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test
+coverage/
+
+# Android
+android/.gradle
+android/local.properties
+android/app/debug
+android/app/profile
+android/app/release
+**/android/key.properties
+**/*.jks
+
+# iOS
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+**/ios/Flutter/Generated.xcconfig
+
+# Web
+web/favicon.png
