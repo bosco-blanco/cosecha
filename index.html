@@ -688,6 +688,89 @@ body,*{-webkit-overflow-scrolling:touch}
 .share-btn .t{font-size:15px;font-weight:700;color:var(--t1);letter-spacing:-0.2px;margin-bottom:2px}
 .share-btn .s{font-size:12px;color:var(--t3)}
 
+/* === FICHAJE DIGITAL === */
+.fichaje-card{
+  background:var(--accent-grad);
+  border-radius:var(--r-lg);
+  padding:1.5rem;
+  margin-bottom:1.5rem;
+  color:#fff;
+  position:relative;overflow:hidden;
+  box-shadow:var(--shadow-lg);
+}
+.fichaje-card::before{
+  content:'';position:absolute;top:-30%;right:-15%;
+  width:200px;height:200px;border-radius:50%;
+  background:radial-gradient(circle,rgba(255,255,255,0.12),transparent 60%);
+  pointer-events:none;
+}
+.fichaje-status{font-size:0.75rem;font-weight:600;opacity:0.85;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.5rem}
+.fichaje-time{font-size:2.5rem;font-weight:800;letter-spacing:-1px;line-height:1;margin-bottom:0.25rem;font-variant-numeric:tabular-nums}
+.fichaje-detail{font-size:0.875rem;opacity:0.85;margin-bottom:1.25rem}
+.fichaje-btn{
+  display:block;width:100%;
+  padding:1rem;
+  border:none;border-radius:var(--r);
+  font-family:inherit;font-size:1rem;font-weight:700;
+  cursor:pointer;
+  transition:all 0.2s ease;
+  text-align:center;
+  letter-spacing:0.02em;
+}
+.fichaje-btn:active{transform:scale(0.97)}
+.fichaje-btn.entry{background:#fff;color:var(--green)}
+.fichaje-btn.exit{background:rgba(255,255,255,0.2);color:#fff;border:2px solid rgba(255,255,255,0.4)}
+.fichaje-btn.pause{background:rgba(255,255,255,0.15);color:#fff;border:2px solid rgba(255,255,255,0.3);margin-top:0.5rem;font-size:0.875rem;padding:0.75rem}
+.fichaje-loc{display:flex;align-items:center;gap:0.5rem;font-size:0.75rem;opacity:0.7;margin-top:0.75rem}
+
+/* PIN Pad Modal */
+.pin-wrap{
+  position:fixed;inset:0;z-index:500;
+  background:linear-gradient(160deg,#722F37 0%,#4A1C23 100%);
+  display:none;flex-direction:column;align-items:center;justify-content:center;
+  padding:2rem;color:#fff;
+}
+.pin-wrap.show{display:flex}
+.pin-logo{font-size:3rem;margin-bottom:1rem}
+.pin-title{font-size:1.5rem;font-weight:800;margin-bottom:0.25rem;letter-spacing:-0.5px}
+.pin-sub{font-size:0.875rem;opacity:0.7;margin-bottom:2rem}
+.pin-dots{display:flex;gap:0.75rem;margin-bottom:0.5rem}
+.pin-dot{width:16px;height:16px;border-radius:50%;border:2px solid rgba(255,255,255,0.4);transition:all 0.15s}
+.pin-dot.filled{background:#fff;border-color:#fff}
+.pin-dot.error{border-color:#ff6b6b;background:#ff6b6b}
+.pin-err{font-size:0.8rem;color:#ff9999;height:1.5rem;margin-bottom:1rem;text-align:center}
+.pin-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:0.75rem;width:100%;max-width:280px;
+}
+.pin-key{
+  width:100%;aspect-ratio:1.3;
+  border:none;border-radius:var(--r);
+  background:rgba(255,255,255,0.12);
+  color:#fff;font-size:1.5rem;font-weight:700;
+  font-family:inherit;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:all 0.15s;
+  min-height:56px;
+}
+.pin-key:active{background:rgba(255,255,255,0.25);transform:scale(0.95)}
+.pin-key.zero{grid-column:2}
+.pin-key.del{background:transparent;font-size:1.25rem;opacity:0.6}
+.pin-key.del:active{opacity:1}
+.pin-key.clear{background:transparent;font-size:0.75rem;font-weight:600;opacity:0.5}
+
+/* Fichaje history */
+.fich-item{
+  display:flex;align-items:center;gap:0.75rem;
+  padding:0.75rem 0;
+  border-bottom:1px solid var(--border);
+}
+.fich-item:last-child{border-bottom:none}
+.fich-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.fich-dot.in{background:var(--green)}
+.fich-dot.out{background:var(--red)}
+.fich-dot.pause{background:var(--orange)}
+
 input[type="file"]:not(#sdFile){display:none}
 
 /* === ONBOARDING TOUR (tooltips con spotlight) === */
@@ -1182,6 +1265,29 @@ input[type="file"]:not(#sdFile){display:none}
 </style>
 </head>
 <body>
+<!-- ============ PIN PAD (Fichaje rápido) ============ -->
+<div class="pin-wrap" id="pinWrap">
+  <div class="pin-logo">🍇</div>
+  <div class="pin-title">Cosecha</div>
+  <div class="pin-sub">Introduce tu PIN de 4 dígitos</div>
+  <div class="pin-dots"><div class="pin-dot" id="pd0"></div><div class="pin-dot" id="pd1"></div><div class="pin-dot" id="pd2"></div><div class="pin-dot" id="pd3"></div></div>
+  <div class="pin-err" id="pinErr"></div>
+  <div class="pin-grid">
+    <button class="pin-key" onclick="pinKey('1')">1</button>
+    <button class="pin-key" onclick="pinKey('2')">2</button>
+    <button class="pin-key" onclick="pinKey('3')">3</button>
+    <button class="pin-key" onclick="pinKey('4')">4</button>
+    <button class="pin-key" onclick="pinKey('5')">5</button>
+    <button class="pin-key" onclick="pinKey('6')">6</button>
+    <button class="pin-key" onclick="pinKey('7')">7</button>
+    <button class="pin-key" onclick="pinKey('8')">8</button>
+    <button class="pin-key" onclick="pinKey('9')">9</button>
+    <button class="pin-key clear" onclick="pinClear()">Borrar</button>
+    <button class="pin-key zero" onclick="pinKey('0')">0</button>
+    <button class="pin-key del" onclick="pinDel()">⌫</button>
+  </div>
+</div>
+
 <!-- ============ LOGIN ============ -->
 <div class="auth-wrap" id="authWrap">
   <div class="auth-box">
@@ -1359,6 +1465,15 @@ input[type="file"]:not(#sdFile){display:none}
     <div class="dash-s" id="dashSub">Aquí tienes el resumen de hoy</div>
   </div>
   <div class="dash-content">
+    <!-- Fichaje digital (lo más visible) -->
+    <div class="fichaje-card" id="fichajeCard">
+      <div class="fichaje-status" id="fichajeStatus">CARGANDO...</div>
+      <div class="fichaje-time" id="fichajeTime">--:--</div>
+      <div class="fichaje-detail" id="fichajeDetail">Comprobando estado...</div>
+      <button class="fichaje-btn entry" id="fichajeBtn" onclick="hacerFichaje()">⏱️ FICHAR ENTRADA</button>
+      <button class="fichaje-btn pause" id="fichajePauseBtn" style="display:none" onclick="hacerPausa()">☕ Pausa</button>
+      <div class="fichaje-loc" id="fichajeLoc">📍 Capturando ubicación...</div>
+    </div>
     <div class="kpi-grid" id="kpiGrid"></div>
     <div class="dash-sec">
       <div class="dash-st"><div class="dash-tt">Próximos eventos</div><button class="dash-lnk" onclick="go('agenda')">Ver todo →</button></div>
@@ -3440,9 +3555,227 @@ function triggerRefresh(){
   setTimeout(()=>{R();toast('✅ Actualizado');hidePtr();},700);
 }
 
-restore();loadCfg();authBoot().then(()=>{R();initDragDrop();initPullToRefresh();initSwipe();});
+// ===== FICHAJE DIGITAL — PIN + Clock + GPS =====
+const FICHAJE_SESSION='cosecha_fichaje_session';
+const FICHAJE_LOCAL='cosecha_fichajes_local_v1';
+let fichajeEmpleado=null; // {id, nombre, rol, ubicacionBaseId, ubicacionBaseNombre}
+let fichajeEstado=null; // {trabajando, enPausa, entrada, minutesTrabajados}
+let fichajeGpsLat=null,fichajeGpsLng=null,fichajeGpsPrec=null;
+let fichajeTimerInt=null;
+
+// --- PIN pad ---
+let pinValue='';
+function pinKey(n){
+  if(pinValue.length>=4)return;
+  pinValue+=n;
+  renderPinDots();
+  if(pinValue.length===4)setTimeout(pinSubmit,200);
+}
+function pinDel(){pinValue=pinValue.slice(0,-1);renderPinDots();$('pinErr').textContent='';}
+function pinClear(){pinValue='';renderPinDots();$('pinErr').textContent='';}
+function renderPinDots(){
+  for(var i=0;i<4;i++){
+    var d=$('pd'+i);
+    d.classList.toggle('filled',i<pinValue.length);
+    d.classList.remove('error');
+  }
+}
+function pinSubmit(){
+  // Intentar validar contra backend
+  if(cfg.apiUrl){
+    fetch(cfg.apiUrl+'?action=validarPIN&pin='+encodeURIComponent(pinValue))
+      .then(r=>r.json()).then(d=>{
+        if(d.success){pinSuccess(d.empleado);}
+        else{pinError(d.error||'PIN incorrecto');}
+      })
+      .catch(()=>{pinLocalFallback();});
+  }else{pinLocalFallback();}
+}
+function pinLocalFallback(){
+  // Fallback local con datos demo
+  const demos={'0000':{id:'emp_bosco',nombre:'Bosco Blanco',rol:'admin',ubicacionBaseId:'all',ubicacionBaseNombre:'Todas'},'1111':{id:'emp_carlos',nombre:'Carlos Ruiz',rol:'manager',ubicacionBaseId:'loc_zoco',ubicacionBaseNombre:'Zoco de Pozuelo'},'2222':{id:'emp_maria',nombre:'María López',rol:'empleado',ubicacionBaseId:'loc_arturo',ubicacionBaseNombre:'CC Arturo Soria'},'3333':{id:'emp_pablo',nombre:'Pablo Fernández',rol:'comercial',ubicacionBaseId:'loc_codeba',ubicacionBaseNombre:'CODEBA'},'4444':{id:'emp_laura',nombre:'Laura Martín',rol:'empleado',ubicacionBaseId:'loc_ancestral',ubicacionBaseNombre:'Ancestral'}};
+  if(demos[pinValue])pinSuccess(demos[pinValue]);
+  else pinError('PIN incorrecto');
+}
+function pinError(msg){
+  $('pinErr').textContent=msg;
+  for(var i=0;i<4;i++)$('pd'+i).classList.add('error');
+  if(navigator.vibrate)navigator.vibrate([50,30,50]);
+  setTimeout(()=>{pinClear();},800);
+}
+function pinSuccess(emp){
+  fichajeEmpleado=emp;
+  try{localStorage.setItem(FICHAJE_SESSION,JSON.stringify({...emp,loginAt:new Date().toISOString()}));}catch(e){}
+  $('pinWrap').classList.remove('show');
+  // Si no tiene sesión de app, crear una con los datos del PIN
+  if(!user){
+    user={email:emp.email||emp.id+'@encopadebalon.com',name:emp.nombre,token:'pin-'+Date.now(),rol:emp.rol,expiresAt:new Date(Date.now()+8*864e5).toISOString()};
+    try{localStorage.setItem(AUTH_KEY,JSON.stringify(user));}catch(e){}
+    renderUser();authHide();
+  }
+  toast('🍇 Bienvenido, '+emp.nombre);
+  R();renderFichaje();capturarGpsFichaje();
+}
+function showPinPad(){pinValue='';renderPinDots();$('pinErr').textContent='';$('pinWrap').classList.add('show');}
+function fichajeLogout(){
+  fichajeEmpleado=null;fichajeEstado=null;
+  try{localStorage.removeItem(FICHAJE_SESSION);}catch(e){}
+  if(fichajeTimerInt){clearInterval(fichajeTimerInt);fichajeTimerInt=null;}
+  showPinPad();
+}
+
+// --- Componente de fichaje en dashboard ---
+function renderFichaje(){
+  if(!fichajeEmpleado)return;
+  const card=$('fichajeCard');if(!card)return;
+  loadEstadoFichaje();
+}
+function loadEstadoFichaje(){
+  if(!fichajeEmpleado)return;
+  // Intentar backend
+  if(cfg.apiUrl){
+    fetch(cfg.apiUrl+'?action=estadoFichaje&empleadoId='+encodeURIComponent(fichajeEmpleado.id))
+      .then(r=>r.json()).then(d=>{fichajeEstado=d;renderFichajeUI();})
+      .catch(()=>{fichajeEstado={fichadoHoy:false,trabajando:false,enPausa:false};renderFichajeUI();});
+  }else{
+    // Local: leer de localStorage
+    const local=getLocalFichajes();
+    const today=new Date().toISOString().slice(0,10);
+    const hoy=local.filter(f=>f.empleadoId===fichajeEmpleado.id&&f.timestamp.slice(0,10)===today);
+    const entrada=hoy.find(f=>f.tipo==='entrada');
+    const salida=hoy.find(f=>f.tipo==='salida');
+    const enPausa=hoy.filter(f=>f.tipo==='pausa_inicio').length>hoy.filter(f=>f.tipo==='pausa_fin').length;
+    fichajeEstado={fichadoHoy:!!entrada,trabajando:!!entrada&&!salida,enPausa:enPausa,entrada:entrada,salida:salida,minutesTrabajados:0};
+    if(entrada){
+      const ms=(salida?new Date(salida.timestamp):new Date())-new Date(entrada.timestamp);
+      fichajeEstado.minutesTrabajados=Math.max(0,Math.round(ms/60000));
+    }
+    renderFichajeUI();
+  }
+}
+function renderFichajeUI(){
+  const st=$('fichajeStatus'),tm=$('fichajeTime'),dt=$('fichajeDetail'),btn=$('fichajeBtn'),pb=$('fichajePauseBtn');
+  if(!st||!fichajeEstado)return;
+  const now=new Date();
+  tm.textContent=String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+
+  if(!fichajeEstado.fichadoHoy||!fichajeEstado.trabajando&&!fichajeEstado.salida){
+    // No ha fichado
+    st.textContent='SIN FICHAR';
+    dt.textContent=fichajeEmpleado.nombre+' · '+fichajeEmpleado.ubicacionBaseNombre;
+    btn.className='fichaje-btn entry';btn.textContent='🟢 FICHAR ENTRADA';btn.onclick=()=>hacerFichaje('entrada');
+    btn.style.display='';pb.style.display='none';
+  }else if(fichajeEstado.trabajando&&!fichajeEstado.enPausa){
+    // Trabajando
+    const h=Math.floor(fichajeEstado.minutesTrabajados/60);
+    const m=fichajeEstado.minutesTrabajados%60;
+    st.textContent='TRABAJANDO';
+    const entryTime=fichajeEstado.entrada?new Date(fichajeEstado.entrada.timestamp).toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'}):'--:--';
+    dt.textContent='Desde las '+entryTime+' · '+h+'h '+m+'min';
+    btn.className='fichaje-btn exit';btn.textContent='🔴 FICHAR SALIDA';btn.onclick=()=>hacerFichaje('salida');
+    btn.style.display='';pb.style.display='';pb.textContent='☕ Iniciar pausa';pb.onclick=()=>hacerFichaje('pausa_inicio');
+  }else if(fichajeEstado.enPausa){
+    // En pausa
+    st.textContent='EN PAUSA';
+    dt.textContent='Pausa activa · toca para reanudar';
+    btn.className='fichaje-btn entry';btn.textContent='▶️ REANUDAR';btn.onclick=()=>hacerFichaje('pausa_fin');
+    btn.style.display='';pb.style.display='none';
+  }else{
+    // Jornada terminada
+    const h=Math.floor(fichajeEstado.minutesTrabajados/60);
+    const m=fichajeEstado.minutesTrabajados%60;
+    st.textContent='JORNADA COMPLETADA';
+    dt.textContent='Hoy: '+h+'h '+m+'min trabajadas';
+    btn.style.display='none';pb.style.display='none';
+  }
+  // Timer en vivo
+  if(fichajeEstado.trabajando&&!fichajeEstado.enPausa&&!fichajeTimerInt){
+    fichajeTimerInt=setInterval(()=>{
+      fichajeEstado.minutesTrabajados++;renderFichajeUI();
+    },60000);
+  }
+}
+
+// --- Fichar (entrada/salida/pausa) ---
+function hacerFichaje(tipo){
+  if(!fichajeEmpleado)return;
+  showLoading(tipo==='entrada'?'Fichando entrada…':tipo==='salida'?'Fichando salida…':'Registrando pausa…','Capturando ubicación');
+
+  const fichaje={
+    empleadoId:fichajeEmpleado.id,
+    empleadoNombre:fichajeEmpleado.nombre,
+    tipo:tipo,
+    timestamp:new Date().toISOString(),
+    latitud:fichajeGpsLat||'',
+    longitud:fichajeGpsLng||'',
+    precision:fichajeGpsPrec||'',
+    ubicacionId:fichajeEmpleado.ubicacionBaseId||'',
+    ubicacionNombre:fichajeEmpleado.ubicacionBaseNombre||'',
+    metodo:'app',
+    dispositivo:navigator.platform||'',
+    userAgent:navigator.userAgent
+  };
+
+  // Guardar local siempre
+  saveLocalFichaje(fichaje);
+
+  // Enviar al backend en background
+  if(cfg.apiUrl){
+    fetch(cfg.apiUrl+'?action=fichaje',{method:'POST',body:JSON.stringify(fichaje),headers:{'Content-Type':'text/plain'}}).catch(()=>{});
+  }
+
+  setTimeout(()=>{
+    hideLoading();
+    if(fichajeTimerInt){clearInterval(fichajeTimerInt);fichajeTimerInt=null;}
+    loadEstadoFichaje();
+    const msgs={entrada:'🟢 Entrada registrada',salida:'🔴 Salida registrada',pausa_inicio:'⏸️ Pausa iniciada',pausa_fin:'▶️ Pausa finalizada'};
+    toast(msgs[tipo]||'Fichaje registrado');
+    if(navigator.vibrate)navigator.vibrate(tipo==='entrada'?[50]:[30,20,30]);
+  },800);
+}
+
+// --- GPS para fichaje ---
+function capturarGpsFichaje(){
+  const locEl=$('fichajeLoc');
+  if(!navigator.geolocation){if(locEl)locEl.textContent='📍 GPS no disponible';return;}
+  if(locEl)locEl.textContent='📍 Capturando ubicación...';
+  navigator.geolocation.getCurrentPosition(pos=>{
+    fichajeGpsLat=pos.coords.latitude;fichajeGpsLng=pos.coords.longitude;fichajeGpsPrec=Math.round(pos.coords.accuracy);
+    if(locEl)locEl.textContent='📍 '+fichajeGpsLat.toFixed(4)+', '+fichajeGpsLng.toFixed(4)+' (±'+fichajeGpsPrec+'m)';
+  },err=>{
+    if(locEl)locEl.textContent='📍 Sin ubicación (permiso denegado)';
+  },{enableHighAccuracy:true,timeout:10000});
+}
+
+// --- localStorage para fichajes offline ---
+function getLocalFichajes(){try{return JSON.parse(localStorage.getItem(FICHAJE_LOCAL)||'[]');}catch(e){return[];}}
+function saveLocalFichaje(f){try{const all=getLocalFichajes();all.push(f);localStorage.setItem(FICHAJE_LOCAL,JSON.stringify(all));}catch(e){}}
+
+// --- Boot: cargar sesión de fichaje ---
+function fichajeBootCheck(){
+  try{
+    const s=JSON.parse(localStorage.getItem(FICHAJE_SESSION)||'null');
+    if(s&&s.id){fichajeEmpleado=s;renderFichaje();capturarGpsFichaje();return true;}
+  }catch(e){}
+  return false;
+}
+
+// --- QR detection (si la URL tiene ?qr=UBICACION_ID) ---
+function checkQRParam(){
+  const params=new URLSearchParams(window.location.search);
+  const qr=params.get('qr');
+  if(qr){
+    // Modo fichaje rápido por QR: solo PIN + fichar
+    showPinPad();
+    $('pin-sub')&&($('pin-sub').textContent='Fichaje rápido · '+qr);
+    return true;
+  }
+  return false;
+}
+
+restore();loadCfg();authBoot().then(()=>{R();fichajeBootCheck();initDragDrop();initPullToRefresh();initSwipe();if(!checkQRParam()&&!fichajeEmpleado&&!user)showPinPad();});
 // Service worker con auto-reload al detectar nueva versión + purga agresiva
-const APP_VERSION='v22';
+const APP_VERSION='v23';
 const storedVer=localStorage.getItem('cosecha_app_version');
 if(storedVer&&storedVer!==APP_VERSION){
   // Versión cambió → purgar caches + reload una sola vez
