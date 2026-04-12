@@ -13,7 +13,7 @@
 const ALLOWED_ORIGINS = '*'; // En producción, restringir al dominio de la PWA
 
 // Rutas que NO requieren autenticación
-const PUBLIC_ACTIONS = ['requestCode', 'verifyCode', 'validateToken', 'legalText', ''];
+const PUBLIC_ACTIONS = ['requestCode', 'verifyCode', 'validateToken', 'legalText', 'validarPIN', 'fichaje', 'estadoFichaje', 'fichajesEmpleado', 'resumenSemanal', 'resumenMensual', 'ubicaciones', 'empleadosFichaje', 'fichajesHoy', 'exportCSV', ''];
 
 // ─── Punto de entrada GET ───────────────────────────────────
 function doGet(e) {
@@ -103,14 +103,44 @@ function doGet(e) {
         break;
 
       case 'me':
-        // Perfil del usuario autenticado
-        result = {
-          email: auth.email,
-          name: auth.name,
-          rol: auth.rol,
-          color: auth.color,
-          avatar: auth.avatar
-        };
+        result = { email: auth.email, name: auth.name, rol: auth.rol, color: auth.color, avatar: auth.avatar };
+        break;
+
+      // --- Fichaje digital ---
+      case 'validarPIN':
+        result = validarPIN(e.parameter.pin);
+        break;
+
+      case 'estadoFichaje':
+        result = getEstadoFichaje(e.parameter.empleadoId);
+        break;
+
+      case 'fichajesEmpleado':
+        result = getFichajesEmpleado(e.parameter.empleadoId, e.parameter.desde, e.parameter.hasta);
+        break;
+
+      case 'resumenSemanal':
+        result = getResumenSemanal(e.parameter.empleadoId);
+        break;
+
+      case 'resumenMensual':
+        result = getResumenMensual(e.parameter.empleadoId, e.parameter.mes, e.parameter.anio);
+        break;
+
+      case 'ubicaciones':
+        result = getUbicaciones();
+        break;
+
+      case 'empleadosFichaje':
+        result = getEmpleadosFichaje();
+        break;
+
+      case 'fichajesHoy':
+        result = getFichajesHoy();
+        break;
+
+      case 'exportCSV':
+        result = exportCSVFichajes({ desde: e.parameter.desde, hasta: e.parameter.hasta, ubicacionId: e.parameter.ubicacionId, empleadoId: e.parameter.empleadoId });
         break;
 
       // --- Documentos: firma con evidencia legal (GET para evitar CORS POST) ---
@@ -237,9 +267,12 @@ function doPost(e) {
         break;
 
       case 'checkin':
-        // Forzar el email del usuario autenticado (no se puede fichar por otro)
         body.email = auth.email;
         result = registerCheckin(body);
+        break;
+
+      case 'fichaje':
+        result = registrarFichaje(body);
         break;
 
       case 'startBreak':

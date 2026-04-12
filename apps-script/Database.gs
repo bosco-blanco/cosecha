@@ -14,6 +14,9 @@ const SHEET_NAME = 'Cosecha CRM';
  * El orden de las columnas determina el orden en la hoja.
  */
 const TAB_SCHEMA = {
+  'Empleados':      ['id', 'nombre', 'email', 'pin', 'rol', 'ubicacionBaseId', 'ubicacionBaseNombre', 'activo', 'creado'],
+  'Ubicaciones':    ['id', 'nombre', 'direccion', 'latitud', 'longitud', 'radioPermitido', 'qrCode', 'activo'],
+  'FichajesDigital':['id', 'empleadoId', 'empleadoNombre', 'tipo', 'timestamp', 'latitud', 'longitud', 'precision', 'ubicacionId', 'ubicacionNombre', 'metodo', 'dispositivo', 'userAgent'],
   'Usuarios':       ['email', 'nombre', 'rol', 'departamento', 'avatar', 'color', 'creado', 'ultimaActividad', 'loginCode'],
   'Fichajes':       ['id', 'email', 'tipo', 'timestamp', 'lat', 'lng', 'direccion', 'nota'],
   'Descansos':      ['id', 'email', 'fecha', 'inicio', 'fin', 'duracionMin', 'motivo'],
