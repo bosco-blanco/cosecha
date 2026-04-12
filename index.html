@@ -1690,7 +1690,7 @@ const LS_KEY='cosecha_data_v1';
 // conectado automáticamente: el equipo solo tiene que hacer login.
 const DEFAULT_API_URL='https://script.google.com/macros/s/AKfycbwgkECbvdFVNGSzFhIBKtlY3lmvyDj5F2gmDR3AWNw6QCcCxBxSEfFhy23I61ZDebXe/exec';
 function $(id){return document.getElementById(id)}
-function R(){rPills();rBoard();rDots();rMy();rMeet();rAct();rNot();rTmP();rDash();rContacts();rDeals();}
+function R(){rPills();rBoard();rDots();rMy();rMeet();rAct();rNot();rTmP();rDash();rContacts();rDeals();renderUserCheckinPill();}
 function rPills(){$('pills').innerHTML=PJ.map(p=>`<button class="pill ${p.id===cP?'on':''}" onclick="cP='${p.id}';R()">${p.e} ${p.n}</button>`).join('');}
 let pplFilter='all'; // 'all' o el id del TM
 function rBoard(){
@@ -3401,7 +3401,7 @@ function triggerRefresh(){
 
 restore();loadCfg();authBoot().then(()=>{R();initDragDrop();initPullToRefresh();initSwipe();});
 // Service worker con auto-reload al detectar nueva versión + purga agresiva
-const APP_VERSION='v20';
+const APP_VERSION='v21';
 const storedVer=localStorage.getItem('cosecha_app_version');
 if(storedVer&&storedVer!==APP_VERSION){
   // Versión cambió → purgar caches + reload una sola vez
