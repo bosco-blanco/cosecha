@@ -630,7 +630,26 @@ body,*{-webkit-overflow-scrolling:touch}
 @keyframes spin{to{transform:rotate(360deg)}}
 
 /* Version badge */
-.v-badge{position:fixed;bottom:calc(4px + var(--safe-b));right:8px;font-size:9px;font-weight:700;color:rgba(255,255,255,0.6);z-index:99;pointer-events:none;letter-spacing:.5px;text-shadow:0 0 4px rgba(0,0,0,0.5)}
+.v-badge{position:fixed;bottom:calc(60px + var(--safe-b));right:8px;font-size:9px;font-weight:700;color:var(--t4);z-index:99;pointer-events:none;letter-spacing:.5px}
+
+/* Barra roja de fichaje pendiente */
+.ci-alert{
+  display:none;
+  background:linear-gradient(90deg,#D93B3B,#C42B2B);
+  color:#fff;
+  padding:10px 16px;
+  font-size:13px;
+  font-weight:600;
+  letter-spacing:-0.1px;
+  text-align:center;
+  cursor:pointer;
+  animation:slideUp .3s var(--ease-out);
+  position:relative;
+  z-index:90;
+}
+.ci-alert.show{display:block}
+.ci-alert:active{background:linear-gradient(90deg,#B82525,#A01E1E)}
+.ci-alert .pulse{display:inline-block;width:8px;height:8px;border-radius:50%;background:#fff;margin-right:8px;animation:bk 1.2s infinite}
 
 /* Calendar view */
 .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;background:var(--sep);border-radius:12px;overflow:hidden}
@@ -1321,7 +1340,7 @@ input[type="file"]:not(#sdFile){display:none}
   <div class="drawer-ftr">
     <button class="drawer-item" onclick="closeDrawer();openSh('user-sh')"><span class="ic">⚙️</span>Preferencias</button>
     <button class="drawer-item" onclick="authLogout()" style="color:var(--red)"><span class="ic">🚪</span>Cerrar sesión</button>
-    <div class="drawer-ver">Cosecha v0.7 · 🍇</div>
+    <div class="drawer-ver">Cosecha v18 · 🍇</div>
   </div>
 </aside>
 
@@ -1336,7 +1355,8 @@ input[type="file"]:not(#sdFile){display:none}
     </div>
   </div>
 </header>
-<div class="v-badge" id="vBadge">v18 · loading</div>
+<div class="ci-alert" id="ciAlert" onclick="openCheckin()"><span class="pulse"></span>No has fichado · Tu jornada no ha comenzado</div>
+<div class="v-badge" id="vBadge">v18</div>
 
 <!-- Sync indicator -->
 <div class="sync-b" id="syncB"><span class="sd"></span><span id="syncT">Sincronizado</span></div>
@@ -2338,7 +2358,7 @@ function openCheckin(){
   requestGps();
 }
 function closeCheckin(){$('ciWrap').classList.remove('show');document.body.style.overflow='';if(ciClockInt){clearInterval(ciClockInt);ciClockInt=null;}}
-function skipCheckin(){closeCheckin();}
+function skipCheckin(){closeCheckin();renderUserCheckinPill();}
 function updateCiClock(){
   const d=new Date();
   $('ciClock').textContent=String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
@@ -2446,9 +2466,18 @@ function doCheckin(tipo){
 }
 function renderUserCheckinPill(){
   const st=getLocalCi();const pill=$('userShCi');if(!pill)return;
-  if(st&&st.entrada&&!st.salida){pill.className='ci-pill in';pill.innerHTML='<span class="d"></span>En jornada';}
-  else if(st&&st.salida){pill.className='ci-pill out';pill.innerHTML='Jornada cerrada';}
-  else{pill.className='ci-pill out';pill.innerHTML='Sin fichar';}
+  const alert=$('ciAlert');
+  if(st&&st.entrada&&!st.salida){
+    pill.className='ci-pill in';pill.innerHTML='<span class="d"></span>En jornada';
+    if(alert)alert.classList.remove('show');
+  }else if(st&&st.salida){
+    pill.className='ci-pill out';pill.innerHTML='Jornada cerrada';
+    if(alert)alert.classList.remove('show');
+  }else{
+    pill.className='ci-pill out';pill.innerHTML='Sin fichar';
+    // Mostrar barra roja si está logueado pero no ha fichado
+    if(alert&&user)alert.classList.add('show');
+  }
 }
 
 // ===== ADMIN PANEL =====
@@ -3383,7 +3412,7 @@ function triggerRefresh(){
 
 restore();loadCfg();authBoot().then(()=>{R();initDragDrop();initPullToRefresh();initSwipe();});
 // Service worker con auto-reload al detectar nueva versión + purga agresiva
-const APP_VERSION='v18';
+const APP_VERSION='v19';
 const storedVer=localStorage.getItem('cosecha_app_version');
 if(storedVer&&storedVer!==APP_VERSION){
   // Versión cambió → purgar caches + reload una sola vez
