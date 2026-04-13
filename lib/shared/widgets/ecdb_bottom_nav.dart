@@ -48,9 +48,9 @@ class ECDBBottomNav extends StatelessWidget {
                     onTap: () => onTap(0),
                   ),
                   _NavItem(
-                    icon: Icons.track_changes_outlined,
-                    activeIcon: Icons.track_changes,
-                    label: 'Tracker',
+                    icon: Icons.task_alt_outlined,
+                    activeIcon: Icons.task_alt,
+                    label: 'Tareas',
                     isActive: currentIndex == 1,
                     onTap: () => onTap(1),
                   ),

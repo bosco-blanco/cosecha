@@ -19,7 +19,7 @@ class KanbanScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: ECDBAppBar(
-        title: 'Tracker',
+        title: 'Tareas',
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
