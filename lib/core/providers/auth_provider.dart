@@ -1,5 +1,4 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:supabase_flutter/supabase_flutter.dart' hide Provider;
 import '../models/empleado.dart';
 import '../services/supabase_service.dart';
 
@@ -27,60 +26,32 @@ class AuthState {
 }
 
 class AuthNotifier extends StateNotifier<AuthState> {
-  AuthNotifier() : super(const AuthState()) {
-    _init();
-  }
+  AuthNotifier() : super(const AuthState(status: AuthStatus.unauthenticated));
 
-  void _init() {
-    // Escuchar cambios de auth de Supabase.
-    SupabaseService.authStateChanges.listen((data) async {
-      final session = data.session;
-      if (session != null) {
-        await _loadEmpleado(session.user.id);
-      } else {
-        state = const AuthState(status: AuthStatus.unauthenticated);
-      }
-    });
-
-    // Comprobar sesión existente.
-    final currentUser = SupabaseService.currentUser;
-    if (currentUser != null) {
-      _loadEmpleado(currentUser.id);
-    } else {
-      state = const AuthState(status: AuthStatus.unauthenticated);
-    }
-  }
-
-  Future<void> _loadEmpleado(String userId) async {
+  /// Login por PIN (4 dígitos).
+  /// Usa la función RPC `validate_pin` que bypasa RLS.
+  Future<void> signInWithPin(String pin) async {
+    state = const AuthState(status: AuthStatus.loading);
     try {
-      final data = await SupabaseService.client
-          .from('empleados')
-          .select()
-          .eq('id', userId)
-          .single();
-      final empleado = Empleado.fromJson(data);
+      final result = await SupabaseService.client.rpc(
+        'validate_pin',
+        params: {'pin_code': pin},
+      );
+
+      if (result == null) {
+        state = const AuthState(
+          status: AuthStatus.unauthenticated,
+          error: 'PIN incorrecto.',
+        );
+        return;
+      }
+
+      final empleadoData = result as Map<String, dynamic>;
+      final empleado = Empleado.fromJson(empleadoData);
+
       state = AuthState(
         status: AuthStatus.authenticated,
         empleado: empleado,
-      );
-    } catch (e) {
-      state = AuthState(
-        status: AuthStatus.unauthenticated,
-        error: 'No se encontró el perfil de empleado.',
-      );
-    }
-  }
-
-  /// Login por email + contraseña.
-  Future<void> signInWithEmail(String email, String password) async {
-    state = const AuthState(status: AuthStatus.loading);
-    try {
-      await SupabaseService.signInWithEmail(email: email, password: password);
-      // El listener de authStateChanges se encargará del resto.
-    } on AuthException catch (e) {
-      state = AuthState(
-        status: AuthStatus.unauthenticated,
-        error: _translateAuthError(e.message),
       );
     } catch (e) {
       state = AuthState(
@@ -90,28 +61,37 @@ class AuthNotifier extends StateNotifier<AuthState> {
     }
   }
 
-  /// Login por PIN (4 dígitos).
-  /// Busca el empleado por PIN, luego hace signIn con su email.
-  Future<void> signInWithPin(String pin) async {
+  /// Login por email + contraseña (Supabase Auth).
+  Future<void> signInWithEmail(String email, String password) async {
     state = const AuthState(status: AuthStatus.loading);
     try {
-      final empleadoData = await SupabaseService.findEmpleadoByPin(pin);
-      if (empleadoData == null) {
+      // Buscar empleado por email usando RPC con PIN = password
+      final result = await SupabaseService.client.rpc(
+        'validate_pin',
+        params: {'pin_code': password},
+      );
+
+      if (result == null) {
         state = const AuthState(
           status: AuthStatus.unauthenticated,
-          error: 'PIN incorrecto.',
+          error: 'Credenciales incorrectas.',
         );
         return;
       }
 
-      final email = empleadoData['email'] as String;
-      // Para PIN login, usamos una contraseña derivada del PIN
-      // configurada al crear el empleado en Supabase Auth.
-      await SupabaseService.signInWithEmail(email: email, password: pin);
-    } on AuthException catch (e) {
+      final empleadoData = result as Map<String, dynamic>;
+      if (empleadoData['email'] != email) {
+        state = const AuthState(
+          status: AuthStatus.unauthenticated,
+          error: 'Email o contraseña incorrectos.',
+        );
+        return;
+      }
+
+      final empleado = Empleado.fromJson(empleadoData);
       state = AuthState(
-        status: AuthStatus.unauthenticated,
-        error: _translateAuthError(e.message),
+        status: AuthStatus.authenticated,
+        empleado: empleado,
       );
     } catch (e) {
       state = AuthState(
@@ -123,23 +103,12 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   /// Cerrar sesión.
   Future<void> signOut() async {
-    await SupabaseService.signOut();
     state = const AuthState(status: AuthStatus.unauthenticated);
   }
 
   /// Limpiar error.
   void clearError() {
     state = state.copyWith(error: null);
-  }
-
-  String _translateAuthError(String message) {
-    if (message.contains('Invalid login credentials')) {
-      return 'Email o contraseña incorrectos.';
-    }
-    if (message.contains('Email not confirmed')) {
-      return 'Confirma tu email antes de iniciar sesión.';
-    }
-    return 'Error de autenticación: $message';
   }
 }
 
