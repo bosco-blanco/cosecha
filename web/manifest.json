@@ -1,0 +1,11 @@
+{
+  "name": "Cosecha",
+  "short_name": "Cosecha",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#FAF8F5",
+  "theme_color": "#722F37",
+  "description": "App de gestión interna — En Copa de Balón",
+  "orientation": "portrait-primary",
+  "prefer_related_applications": false
+}

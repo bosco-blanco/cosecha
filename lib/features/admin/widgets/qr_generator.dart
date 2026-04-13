@@ -138,11 +138,11 @@ class _QrGeneratorSheetState extends State<QrGeneratorSheet> {
                       version: QrVersions.auto,
                       size: 220,
                       eyeStyle: const QrEyeStyle(
-                        eyeShape: QrEyeShape.roundedOuter,
+                        eyeShape: QrEyeShape.square,
                         color: ECDBColors.wine,
                       ),
                       dataModuleStyle: const QrDataModuleStyle(
-                        dataModuleShape: QrDataModuleShape.roundedOuter,
+                        dataModuleShape: QrDataModuleShape.square,
                         color: ECDBColors.textPrimary,
                       ),
                     ),

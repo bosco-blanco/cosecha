@@ -28,10 +28,8 @@ class LocationService {
     }
 
     return Geolocator.getCurrentPosition(
-      locationSettings: const LocationSettings(
-        accuracy: LocationAccuracy.high,
-        timeLimit: Duration(seconds: AppConstants.gpsTimeoutSeconds),
-      ),
+      desiredAccuracy: LocationAccuracy.high,
+      timeLimit: const Duration(seconds: 10),
     );
   }
 

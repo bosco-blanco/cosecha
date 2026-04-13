@@ -32,7 +32,7 @@ class ECDBTheme {
       ),
 
       // Cards — border radius 14px, sombras suaves
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         color: ECDBColors.surface,
         elevation: 0,
         shape: RoundedRectangleBorder(
@@ -131,7 +131,7 @@ class ECDBTheme {
       ),
 
       // Dialog
-      dialogTheme: DialogTheme(
+      dialogTheme: DialogThemeData(
         backgroundColor: ECDBColors.surface,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
