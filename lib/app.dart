@@ -22,6 +22,7 @@ import 'features/portal/screens/solicitudes_screen.dart';
 import 'features/portal/screens/ofertas_empleo_screen.dart';
 import 'features/portal/screens/referidos_screen.dart';
 import 'features/admin/screens/admin_panel_screen.dart';
+import 'features/admin/screens/empleados_admin_screen.dart';
 import 'core/models/fichaje.dart';
 import 'core/models/tarea.dart';
 import 'shared/widgets/ecdb_bottom_nav.dart';
@@ -141,6 +142,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/admin',
         parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) => const AdminPanelScreen(),
+      ),
+      GoRoute(
+        path: '/admin/empleados',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const EmpleadosAdminScreen(),
       ),
 
       // Shell con bottom navigation

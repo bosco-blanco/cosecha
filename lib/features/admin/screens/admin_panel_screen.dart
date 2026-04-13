@@ -41,8 +41,8 @@ class AdminPanelScreen extends ConsumerWidget {
           _AdminTile(
             icon: Icons.people,
             label: 'Gestionar empleados',
-            subtitle: 'Alta, baja, cambiar roles',
-            onTap: () {},
+            subtitle: 'Alta, baja, PINs, roles',
+            onTap: () => context.push('/admin/empleados'),
           ),
           _AdminTile(
             icon: Icons.location_on,
