@@ -17,6 +17,9 @@ import 'features/fichaje/screens/fichaje_detalle_screen.dart';
 import 'features/tareas/screens/crear_tarea_screen.dart';
 import 'features/tareas/screens/tarea_detalle_screen.dart';
 import 'features/crm/screens/contactos_screen.dart';
+import 'features/portal/screens/solicitudes_screen.dart';
+import 'features/portal/screens/ofertas_empleo_screen.dart';
+import 'features/portal/screens/referidos_screen.dart';
 import 'features/admin/screens/admin_panel_screen.dart';
 import 'core/models/fichaje.dart';
 import 'core/models/tarea.dart';
@@ -100,6 +103,23 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/crm/contactos',
         parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) => const ContactosScreen(),
+      ),
+
+      // Portal del Empleado
+      GoRoute(
+        path: '/portal/solicitudes',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const SolicitudesScreen(),
+      ),
+      GoRoute(
+        path: '/portal/ofertas',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const OfertasEmpleoScreen(),
+      ),
+      GoRoute(
+        path: '/portal/referidos',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const ReferidosScreen(),
       ),
 
       // Admin panel
