@@ -48,11 +48,9 @@ class _QrGeneratorSheetState extends State<QrGeneratorSheet> {
     setState(() => _generating = true);
 
     try {
-      final qrCode = await QrService.generateQrForUbicacion(_selectedId!);
-      final content = QrService.buildQrContent(
-        ubicacionId: _selectedId!,
-        qrCode: qrCode,
-      );
+      // URL del modo kiosco — funciona en cualquier navegador móvil
+      // En producción, cambiar por el dominio real (ej: cosecha.encopadebalon.com)
+      final content = 'https://cosecha.encopadebalon.com/#/kiosk/$_selectedId';
       setState(() {
         _qrContent = content;
         _generating = false;
@@ -164,7 +162,7 @@ class _QrGeneratorSheetState extends State<QrGeneratorSheet> {
                 const SizedBox(height: 8),
                 Center(
                   child: Text(
-                    'Imprime este QR y colócalo en la entrada del local.',
+                    'Imprime este QR y colócalo en la entrada del local.\nEl empleado lo escanea con su móvil, mete su PIN y ficha.',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: ECDBColors.textSecondary,
                         ),

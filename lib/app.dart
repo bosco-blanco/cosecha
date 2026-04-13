@@ -14,6 +14,7 @@ import 'features/crm/screens/pipeline_screen.dart';
 import 'features/fichaje/screens/mis_fichajes_screen.dart';
 import 'features/fichaje/screens/control_horario_screen.dart';
 import 'features/fichaje/screens/fichaje_detalle_screen.dart';
+import 'features/fichaje/screens/kiosk_screen.dart';
 import 'features/tareas/screens/crear_tarea_screen.dart';
 import 'features/tareas/screens/tarea_detalle_screen.dart';
 import 'features/crm/screens/contactos_screen.dart';
@@ -40,7 +41,10 @@ final routerProvider = Provider<GoRouter>((ref) {
     redirect: (context, state) {
       final isAuth = authState.status == AuthStatus.authenticated;
       final isLoginRoute = state.matchedLocation == '/login';
+      final isKiosk = state.matchedLocation.startsWith('/kiosk/');
 
+      // Kiosk mode no requiere login (es pantalla pública en el local)
+      if (isKiosk) return null;
       if (!isAuth && !isLoginRoute) return '/login';
       if (isAuth && isLoginRoute) return '/';
       return null;
@@ -50,6 +54,16 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/login',
         builder: (context, state) => const LoginScreen(),
+      ),
+
+      // Modo Kiosco — se abre al escanear QR del local
+      // URL: /kiosk/{ubicacionId}
+      GoRoute(
+        path: '/kiosk/:ubicacionId',
+        builder: (context, state) {
+          final ubicacionId = state.pathParameters['ubicacionId']!;
+          return KioskScreen(ubicacionId: ubicacionId);
+        },
       ),
 
       // Fichaje QR — fuera del shell (pantalla completa con cámara)
