@@ -14,8 +14,11 @@ import 'features/crm/screens/pipeline_screen.dart';
 import 'features/fichaje/screens/mis_fichajes_screen.dart';
 import 'features/fichaje/screens/control_horario_screen.dart';
 import 'features/fichaje/screens/fichaje_detalle_screen.dart';
+import 'features/tareas/screens/crear_tarea_screen.dart';
+import 'features/tareas/screens/tarea_detalle_screen.dart';
 import 'features/admin/screens/admin_panel_screen.dart';
 import 'core/models/fichaje.dart';
+import 'core/models/tarea.dart';
 import 'shared/widgets/ecdb_bottom_nav.dart';
 import 'shared/widgets/ecdb_toast.dart';
 
@@ -73,6 +76,21 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) {
           final fichaje = state.extra as Fichaje;
           return FichajeDetalleScreen(fichaje: fichaje);
+        },
+      ),
+
+      // Tareas
+      GoRoute(
+        path: '/tareas/crear',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const CrearTareaScreen(),
+      ),
+      GoRoute(
+        path: '/tareas/detalle',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final tarea = state.extra as Tarea;
+          return TareaDetalleScreen(tarea: tarea);
         },
       ),
 
@@ -202,11 +220,7 @@ class _ScaffoldWithNavState extends ConsumerState<ScaffoldWithNav> {
                   color: ECDBColors.info,
                   onTap: () {
                     Navigator.pop(context);
-                    ECDBToast.show(
-                      this.context,
-                      message: 'Tareas disponibles en Sprint 3',
-                      type: ToastType.info,
-                    );
+                    this.context.push('/tareas/crear');
                   },
                 ),
                 _QuickActionTile(
