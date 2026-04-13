@@ -16,6 +16,7 @@ import 'features/fichaje/screens/control_horario_screen.dart';
 import 'features/fichaje/screens/fichaje_detalle_screen.dart';
 import 'features/tareas/screens/crear_tarea_screen.dart';
 import 'features/tareas/screens/tarea_detalle_screen.dart';
+import 'features/crm/screens/contactos_screen.dart';
 import 'features/admin/screens/admin_panel_screen.dart';
 import 'core/models/fichaje.dart';
 import 'core/models/tarea.dart';
@@ -92,6 +93,13 @@ final routerProvider = Provider<GoRouter>((ref) {
           final tarea = state.extra as Tarea;
           return TareaDetalleScreen(tarea: tarea);
         },
+      ),
+
+      // CRM
+      GoRoute(
+        path: '/crm/contactos',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const ContactosScreen(),
       ),
 
       // Admin panel
@@ -229,11 +237,7 @@ class _ScaffoldWithNavState extends ConsumerState<ScaffoldWithNav> {
                   color: ECDBColors.gold,
                   onTap: () {
                     Navigator.pop(context);
-                    ECDBToast.show(
-                      this.context,
-                      message: 'CRM disponible en Sprint 4',
-                      type: ToastType.info,
-                    );
+                    this.context.push('/crm/contactos');
                   },
                 ),
               ],
