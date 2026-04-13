@@ -223,11 +223,11 @@ class _TimerDisplay extends StatelessWidget {
 
     return Text(
       '$hours:$minutes:$seconds',
-      style: Theme.of(context).textTheme.displayLarge?.copyWith(
+      style: const TextStyle(
             fontSize: 48,
             fontWeight: FontWeight.w300,
             letterSpacing: 2,
-            fontFamily: 'monospace',
+            fontFamily: 'Inter',
             color: ECDBColors.textPrimary,
           ),
     );
