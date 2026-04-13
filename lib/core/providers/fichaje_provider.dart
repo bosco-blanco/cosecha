@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/fichaje.dart';
 import '../models/empleado.dart';
@@ -15,7 +16,6 @@ class FichajeState {
   final Fichaje? ultimoFichaje;
   final DateTime? horaEntrada;
   final Duration tiempoTrabajado;
-  final Duration tiempoPausa;
   final List<Fichaje> fichajesHoy;
   final List<Fichaje> fichajesHistorial;
   final bool isLoading;
@@ -26,7 +26,6 @@ class FichajeState {
     this.ultimoFichaje,
     this.horaEntrada,
     this.tiempoTrabajado = Duration.zero,
-    this.tiempoPausa = Duration.zero,
     this.fichajesHoy = const [],
     this.fichajesHistorial = const [],
     this.isLoading = false,
@@ -38,7 +37,6 @@ class FichajeState {
     Fichaje? ultimoFichaje,
     DateTime? horaEntrada,
     Duration? tiempoTrabajado,
-    Duration? tiempoPausa,
     List<Fichaje>? fichajesHoy,
     List<Fichaje>? fichajesHistorial,
     bool? isLoading,
@@ -49,7 +47,6 @@ class FichajeState {
       ultimoFichaje: ultimoFichaje ?? this.ultimoFichaje,
       horaEntrada: horaEntrada ?? this.horaEntrada,
       tiempoTrabajado: tiempoTrabajado ?? this.tiempoTrabajado,
-      tiempoPausa: tiempoPausa ?? this.tiempoPausa,
       fichajesHoy: fichajesHoy ?? this.fichajesHoy,
       fichajesHistorial: fichajesHistorial ?? this.fichajesHistorial,
       isLoading: isLoading ?? this.isLoading,
@@ -68,7 +65,6 @@ class FichajeNotifier extends StateNotifier<FichajeState> {
 
   Empleado? get _empleado => _ref.read(currentEmpleadoProvider);
 
-  /// Cargar fichajes del día actual.
   Future<void> _loadFichajesHoy() async {
     final empleado = _empleado;
     if (empleado == null) return;
@@ -87,10 +83,8 @@ class FichajeNotifier extends StateNotifier<FichajeState> {
           .lt('timestamp', finHoy.toIso8601String())
           .order('timestamp', ascending: true);
 
-      final fichajes =
-          (data as List).map((j) => Fichaje.fromJson(j)).toList();
+      final fichajes = (data as List).map((j) => Fichaje.fromJson(j)).toList();
 
-      // Determinar estado actual
       EstadoFichaje estadoActual = EstadoFichaje.sinFichar;
       DateTime? horaEntrada;
       Duration tiempoTrabajado = Duration.zero;
@@ -102,7 +96,6 @@ class FichajeNotifier extends StateNotifier<FichajeState> {
           horaEntrada = ultimo.timestamp;
         }
 
-        // Calcular tiempo trabajado hoy
         for (int i = 0; i < fichajes.length - 1; i += 2) {
           if (i + 1 < fichajes.length &&
               fichajes[i].isEntrada &&
@@ -112,7 +105,6 @@ class FichajeNotifier extends StateNotifier<FichajeState> {
           }
         }
 
-        // Si está trabajando, sumar el tiempo desde la última entrada
         if (estadoActual == EstadoFichaje.trabajando && horaEntrada != null) {
           tiempoTrabajado += DateTime.now().difference(horaEntrada);
         }
@@ -127,15 +119,12 @@ class FichajeNotifier extends StateNotifier<FichajeState> {
         isLoading: false,
       );
 
-      // Iniciar timer si está trabajando
       if (estadoActual == EstadoFichaje.trabajando) {
         _startTimer();
       }
     } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        error: 'Error al cargar fichajes: $e',
-      );
+      debugPrint('[Fichaje] Error cargando fichajes: $e');
+      state = state.copyWith(isLoading: false, error: 'Error: $e');
     }
   }
 
@@ -152,7 +141,6 @@ class FichajeNotifier extends StateNotifier<FichajeState> {
     state = state.copyWith(isLoading: true);
 
     try {
-      // Obtener geolocalización
       double? lat, lon;
       double? distancia;
       bool valido = true;
@@ -162,7 +150,6 @@ class FichajeNotifier extends StateNotifier<FichajeState> {
         lat = position.latitude;
         lon = position.longitude;
 
-        // Si tiene ubicación base, calcular distancia
         if (empleado.ubicacionBaseId != null) {
           final ubData = await SupabaseService.client
               .from('ubicaciones')
@@ -175,16 +162,12 @@ class FichajeNotifier extends StateNotifier<FichajeState> {
           final radio = ubData['radio_permitido'] as int? ?? 100;
 
           distancia = GeoUtils.haversineDistance(
-            lat1: lat,
-            lon1: lon,
-            lat2: ubLat,
-            lon2: ubLon,
+            lat1: lat, lon1: lon, lat2: ubLat, lon2: ubLon,
           );
-
           valido = distancia <= radio;
         }
       } catch (e) {
-        // Geolocalización falló — permitir fichar sin GPS
+        debugPrint('[Fichaje] GPS no disponible: $e');
       }
 
       final ahora = DateTime.now();
@@ -219,12 +202,11 @@ class FichajeNotifier extends StateNotifier<FichajeState> {
       _startTimer();
 
       return FichajeResult.success(
-        fichaje: fichaje,
-        distancia: distancia,
-        dentroDeRango: valido,
+        fichaje: fichaje, distancia: distancia, dentroDeRango: valido,
       );
     } catch (e) {
-      state = state.copyWith(isLoading: false, error: 'Error al fichar: $e');
+      debugPrint('[Fichaje] Error al fichar entrada: $e');
+      state = state.copyWith(isLoading: false, error: '$e');
       return FichajeResult.error('Error al fichar entrada: $e');
     }
   }
@@ -261,10 +243,7 @@ class FichajeNotifier extends StateNotifier<FichajeState> {
           final radio = ubData['radio_permitido'] as int? ?? 100;
 
           distancia = GeoUtils.haversineDistance(
-            lat1: lat,
-            lon1: lon,
-            lat2: ubLat,
-            lon2: ubLon,
+            lat1: lat, lon1: lon, lat2: ubLat, lon2: ubLon,
           );
           valido = distancia <= radio;
         }
@@ -290,7 +269,6 @@ class FichajeNotifier extends StateNotifier<FichajeState> {
 
       final fichaje = Fichaje.fromJson(result);
 
-      // Recalcular tiempo trabajado
       final entradas = state.fichajesHoy.where((f) => f.isEntrada).toList();
       final salidas = [...state.fichajesHoy.where((f) => f.isSalida), fichaje];
       Duration total = Duration.zero;
@@ -308,17 +286,15 @@ class FichajeNotifier extends StateNotifier<FichajeState> {
       );
 
       return FichajeResult.success(
-        fichaje: fichaje,
-        distancia: distancia,
-        dentroDeRango: valido,
+        fichaje: fichaje, distancia: distancia, dentroDeRango: valido,
       );
     } catch (e) {
-      state = state.copyWith(isLoading: false, error: 'Error al fichar: $e');
+      debugPrint('[Fichaje] Error al fichar salida: $e');
+      state = state.copyWith(isLoading: false, error: '$e');
       return FichajeResult.error('Error al fichar salida: $e');
     }
   }
 
-  /// Cargar historial de fichajes por rango de fechas.
   Future<void> loadHistorial({
     required DateTime desde,
     required DateTime hasta,
@@ -335,23 +311,20 @@ class FichajeNotifier extends StateNotifier<FichajeState> {
           .lte('timestamp', hasta.toIso8601String())
           .order('timestamp', ascending: false);
 
-      final fichajes =
-          (data as List).map((j) => Fichaje.fromJson(j)).toList();
-
-      state = state.copyWith(fichajesHistorial: fichajes);
+      state = state.copyWith(
+        fichajesHistorial: (data as List).map((j) => Fichaje.fromJson(j)).toList(),
+      );
     } catch (e) {
-      state = state.copyWith(error: 'Error al cargar historial: $e');
+      debugPrint('[Fichaje] Error historial: $e');
     }
   }
 
-  /// Recargar datos.
   Future<void> refresh() => _loadFichajesHoy();
 
   void _startTimer() {
     _timer?.cancel();
     _timer = Timer.periodic(const Duration(seconds: 1), (_) {
       if (state.horaEntrada != null) {
-        // Recalcular tiempo: tiempo de periodos cerrados + periodo actual
         Duration base = Duration.zero;
         final fichajes = state.fichajesHoy;
         for (int i = 0; i < fichajes.length - 1; i += 2) {
@@ -377,7 +350,6 @@ class FichajeNotifier extends StateNotifier<FichajeState> {
   }
 }
 
-/// Resultado de una operación de fichaje.
 class FichajeResult {
   final bool ok;
   final Fichaje? fichaje;
@@ -386,36 +358,22 @@ class FichajeResult {
   final String? errorMessage;
 
   const FichajeResult._({
-    required this.ok,
-    this.fichaje,
-    this.distancia,
-    this.dentroDeRango,
-    this.errorMessage,
+    required this.ok, this.fichaje, this.distancia, this.dentroDeRango, this.errorMessage,
   });
 
   factory FichajeResult.success({
-    required Fichaje fichaje,
-    double? distancia,
-    bool? dentroDeRango,
-  }) =>
-      FichajeResult._(
-        ok: true,
-        fichaje: fichaje,
-        distancia: distancia,
-        dentroDeRango: dentroDeRango,
-      );
+    required Fichaje fichaje, double? distancia, bool? dentroDeRango,
+  }) => FichajeResult._(ok: true, fichaje: fichaje, distancia: distancia, dentroDeRango: dentroDeRango);
 
   factory FichajeResult.error(String message) =>
       FichajeResult._(ok: false, errorMessage: message);
 }
 
-/// Provider de fichaje.
 final fichajeProvider =
     StateNotifierProvider<FichajeNotifier, FichajeState>((ref) {
   return FichajeNotifier(ref);
 });
 
-/// Provider: fichajes de todos los empleados para managers.
 final fichajesEquipoProvider =
     FutureProvider.family<List<Fichaje>, ({DateTime desde, DateTime hasta})>(
         (ref, params) async {
@@ -429,20 +387,16 @@ final fichajesEquipoProvider =
   return (data as List).map((j) => Fichaje.fromJson(j)).toList();
 });
 
-/// Provider: empleados fichados ahora mismo.
 final empleadosActivosProvider =
-    StreamProvider<List<Map<String, dynamic>>>((ref) {
-  return SupabaseService.client
+    FutureProvider<List<Map<String, dynamic>>>((ref) async {
+  final hoy = DateTime.now();
+  final inicioHoy = DateTime(hoy.year, hoy.month, hoy.day);
+
+  final data = await SupabaseService.client
       .from('fichajes')
-      .stream(primaryKey: ['id'])
-      .order('timestamp', ascending: false)
-      .map((data) {
-        // Filtrar solo fichajes de hoy
-        final hoy = DateTime.now();
-        final inicioHoy = DateTime(hoy.year, hoy.month, hoy.day);
-        return data
-            .where((f) =>
-                DateTime.parse(f['timestamp'] as String).isAfter(inicioHoy))
-            .toList();
-      });
+      .select()
+      .gte('timestamp', inicioHoy.toIso8601String())
+      .order('timestamp', ascending: false);
+
+  return (data as List).cast<Map<String, dynamic>>();
 });
